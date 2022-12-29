@@ -10,6 +10,17 @@ uniform float band_strength_4;
 uniform float band_strength_5;
 uniform float band_strength_6;
 
+uniform float darkpoint;
+uniform float midpoint;
+uniform float midpoint_offset;
+uniform float lightpoint;
+
+uniform float depth_offset;
+
+uniform vec3 channel;
+
+uniform float generate_normal;
+
 void vertex() {
     UV = UV;
 }
@@ -88,21 +99,54 @@ vec4 sample_bicubic_blurry(sampler2D tex, vec2 uv, int mip_level) {
 
 vec4 get_mip_level(sampler2D tex, vec2 uv, int mip_level) {
     float stride = 0.5;
-    vec2 off = stride/vec2(textureSize(albedo, mip_level));
-    float x1 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(-1, 0), mip_level).rgb, vec3(1));
-    float x2 = dot(sample_bicubic_blurry(albedo, uv + off * vec2( 1, 0), mip_level).rgb, vec3(1));
-    float y1 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(0, -1), mip_level).rgb, vec3(1));
-    float y2 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(0,  1), mip_level).rgb, vec3(1));
-    
-    return vec4(x1, x2, y1, y2)/stride*0.5;
+    if (generate_normal > 0.5)
+    {
+        vec2 off = stride/vec2(textureSize(albedo, mip_level));
+        float x1 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(-1, 0), mip_level).rgb, channel)*3.0;
+        float x2 = dot(sample_bicubic_blurry(albedo, uv + off * vec2( 1, 0), mip_level).rgb, channel)*3.0;
+        float y1 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(0, -1), mip_level).rgb, channel)*3.0;
+        float y2 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(0,  1), mip_level).rgb, channel)*3.0;
+        
+        return vec4(x1, x2, y1, y2)/stride*0.5;
+    }
+    else
+    {
+        return vec4(dot(sample_bicubic_blurry(albedo, uv, mip_level).rgb, channel)*3.0, 0, 0, 0);
+    }
+}
+
+// TODO integrate
+vec4 get_mip_level_fast(sampler2D tex, vec2 uv, int mip_level) {
+    float stride = 0.5;
+    if (generate_normal > 0.5)
+    {
+        vec2 off = stride/vec2(textureSize(albedo, mip_level));
+        float x1 = dot(texture(albedo, uv + off * vec2(-1, 0), float(mip_level)).rgb, channel);
+        float x2 = dot(texture(albedo, uv + off * vec2( 1, 0), float(mip_level)).rgb, channel);
+        float y1 = dot(texture(albedo, uv + off * vec2(0, -1), float(mip_level)).rgb, channel);
+        float y2 = dot(texture(albedo, uv + off * vec2(0,  1), float(mip_level)).rgb, channel);
+        
+        return vec4(x1, x2, y1, y2)/stride*0.5;
+    }
+    else
+    {
+        return vec4(dot(texture(albedo, uv, float(mip_level)).rgb, channel)*3.0, 0, 0, 0);
+    }
 }
 
 vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
     vec2 base_size = vec2(textureSize(albedo, 0));
     int max_level = int(floor(log2(max(base_size.x, base_size.y))));
-    float octave_adjusted = mix(2.22, 6.0, float(octave)/6.0);
-    float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);
-    float mip_level = float(max_level) - octave_level;
+    //float octave_adjusted = mix(2.22, 6.0, float(octave)/6.0);
+    //float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);
+    //float mip_level = float(max_level) - octave_level;
+    float mip_level = float(max_level) - float(octave+2);
+    if (octave == 6 && generate_normal > 0.5)
+        mip_level = 0.0;
+    else if (octave == 5 && generate_normal > 0.5)
+        mip_level = mix(float(max_level) - 6.0, 0.0, 0.5);
+    mip_level = max(0.0, mip_level);
+    
     float lower = floor(mip_level);
     float higher = ceil(mip_level);
     float between = mip_level-lower;
@@ -110,10 +154,29 @@ vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
     vec4 a = get_mip_level(tex, uv, int(lower));
     vec4 b = get_mip_level(tex, uv, int(higher));
     
-    return mix(a, b, between);
+    vec4 c = mix(a, b, between);
+    
+    return c;
+}
+
+float map_to_points(float x) {
+    float offset = midpoint_offset;
+    if (offset < 0.001)
+        offset = 0.001;
+    if (offset > 0.999)
+        offset = 0.999;
+    if (x > offset)
+        return mix(midpoint, lightpoint, (x - offset) / (1.0 - offset));
+    else
+        return mix(darkpoint, midpoint, x / offset);
 }
 
 void fragment() {
+    vec2 base_size = vec2(textureSize(albedo, 0));
+    int max_level = int(floor(log2(max(base_size.x, base_size.y))));
+    
+    float image_midpoint = dot(texture(albedo, vec2(0), float(max_level)).rgb, channel)*3.0;
+    
     float band_strength[] = {
         band_strength_0,
         band_strength_1,
@@ -129,32 +192,59 @@ void fragment() {
     float x2 = 0.0;
     float y1 = 0.0;
     float y2 = 0.0;
+    float mapped_midpoint = 0.0;
     for(int i = 0; i < 7; i++)
     {
         float amp = band_strength[i];
+        if (i == 0)
+            amp *= 2.0;
+        else if (i == 1)
+            amp *= 1.5;
         vec4 data = get_octave(albedo, UV, i)*amp;
-        x1 += data.x;
-        x2 += data.y;
-        y1 += data.z;
-        y2 += data.w;
+        mapped_midpoint += map_to_points(image_midpoint*amp);
+        x1 += map_to_points(data.x);
+        x2 += map_to_points(data.y);
+        y1 += map_to_points(data.z);
+        y2 += map_to_points(data.w);
         energy += amp;
     }
     
-    x1 *= strength/energy;
-    x2 *= strength/energy;
-    y1 *= strength/energy;
-    y2 *= strength/energy;
+    mapped_midpoint /= energy;
     
-    vec3 x_n = cross(vec3(0, -1, 0), normalize(vec3(1, 0, x2-x1)));
-    vec3 y_n = cross(vec3(1,  0, 0), normalize(vec3(0, 1, y2-y1)));
+    x1 /= energy;
+    x2 /= energy;
+    y1 /= energy;
+    y2 /= energy;
     
-    vec3 n = normalize(x_n + y_n + vec3(0, 0, 1));
-    n = n*vec3(0.5, -0.5, 0.5) + vec3(0.5);
-    //n = vec3(x1, x1, x1);
-    
-    //int level = 4;
-    //vec2 size = vec2(textureSize(albedo, level));
-    //ALBEDO = texelFetchSafe(albedo, ivec2(UV * size), level).rgb;
-    ALBEDO = n;
-    //ALBEDO = sample_bicubic(albedo, UV, 1).rgb;
+    if (generate_normal > 0.5)
+    {
+        x1 *= strength;
+        x2 *= strength;
+        y1 *= strength;
+        y2 *= strength;
+        
+        vec3 x_n = cross(vec3(0, -1, 0), normalize(vec3(1, 0, x2-x1)));
+        vec3 y_n = cross(vec3(1,  0, 0), normalize(vec3(0, 1, y2-y1)));
+        
+        vec3 n = normalize(x_n + y_n + vec3(0, 0, 1));
+        n = n*vec3(0.5, -0.5, 0.5) + vec3(0.5);
+        //n = vec3(x1, x1, x1);
+        
+        //int level = 4;
+        //vec2 size = vec2(textureSize(albedo, level));
+        //ALBEDO = texelFetchSafe(albedo, ivec2(UV * size), level).rgb;
+        if (isnan(n).x)
+            ALBEDO = vec3(0.5, 1.0, 0.5);
+        else
+            ALBEDO = n;
+        //ALBEDO = sample_bicubic(albedo, UV, 1).rgb;
+    }
+    else
+    {
+        x1 += (midpoint - mapped_midpoint);
+        x1 = 1.0 - x1;
+        x1 *= strength;
+        x1 += (depth_offset - 0.5)*2.0;
+        ALBEDO = vec3(x1);
+    }
 }

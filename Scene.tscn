@@ -19,6 +19,13 @@ shader_param/band_strength_3 = null
 shader_param/band_strength_4 = null
 shader_param/band_strength_5 = null
 shader_param/band_strength_6 = null
+shader_param/darkpoint = null
+shader_param/midpoint = null
+shader_param/midpoint_offset = null
+shader_param/lightpoint = null
+shader_param/depth_offset = null
+shader_param/channel = null
+shader_param/generate_normal = null
 shader_param/albedo = Color( 1, 1, 1, 1 )
 
 [sub_resource type="QuadMesh" id=17]
@@ -113,7 +120,7 @@ transparent_bg = true
 handle_input_locally = false
 keep_3d_linear = true
 render_target_v_flip = true
-render_target_update_mode = 3
+render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
 
@@ -127,9 +134,11 @@ material_override = SubResource( 16 )
 mesh = SubResource( 17 )
 
 [node name="TextureRect" type="TextureRect" parent="."]
+visible = false
 margin_right = 512.0
 margin_bottom = 512.0
 texture = SubResource( 19 )
+expand = true
 
 [node name="3D" type="Spatial" parent="."]
 
@@ -137,6 +146,7 @@ texture = SubResource( 19 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="3D/LightHolder"]
 transform = Transform( 0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, -0.5, 0.5, 0, 2.92074, 3 )
+light_energy = 1.4
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="3D"]
 environment = SubResource( 5 )
@@ -184,66 +194,362 @@ margin_bottom = 34.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
-[node name="Freqs" type="HBoxContainer" parent="Tabs/Normal Map"]
+[node name="Label2" type="Label" parent="Tabs/Normal Map"]
 margin_top = 38.0
 margin_right = 275.0
-margin_bottom = 138.0
+margin_bottom = 52.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Frequency Distribution"
+
+[node name="Freqs" type="HBoxContainer" parent="Tabs/Normal Map"]
+margin_top = 56.0
+margin_right = 275.0
+margin_bottom = 172.0
 rect_min_size = Vector2( 0, 100 )
 custom_constants/separation = 9
 
 [node name="VSlider1" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_right = 16.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
 [node name="VSlider2" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_left = 25.0
 margin_right = 41.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
 [node name="VSlider3" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_left = 50.0
 margin_right = 66.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
 [node name="VSlider4" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_left = 75.0
 margin_right = 91.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
 [node name="VSlider5" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_left = 100.0
 margin_right = 116.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
 [node name="VSlider6" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_left = 125.0
 margin_right = 141.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
 [node name="VSlider7" type="VSlider" parent="Tabs/Normal Map/Freqs"]
 margin_left = 150.0
 margin_right = 166.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 value = 100.0
 
-[node name="Label" type="Label" parent="Tabs/Normal Map/Freqs"]
+[node name="Presets" type="VBoxContainer" parent="Tabs/Normal Map/Freqs"]
 margin_left = 175.0
 margin_right = 275.0
-margin_bottom = 100.0
+margin_bottom = 116.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-text = "Frequency
-Balance"
-align = 1
-valign = 1
 
-[node name="Environment" type="HFlowContainer" parent="Tabs"]
+[node name="Flat" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
+margin_right = 100.0
+margin_bottom = 20.0
+text = "Flat"
+
+[node name="Smooth" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
+margin_top = 24.0
+margin_right = 100.0
+margin_bottom = 44.0
+text = "Smooth"
+
+[node name="Rough" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
+margin_top = 48.0
+margin_right = 100.0
+margin_bottom = 68.0
+text = "Rough"
+
+[node name="Fuzzy" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
+margin_top = 72.0
+margin_right = 100.0
+margin_bottom = 92.0
+text = "Fuzzy"
+
+[node name="Mids" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
+margin_top = 96.0
+margin_right = 100.0
+margin_bottom = 116.0
+text = "Mids"
+
+[node name="Label3" type="Label" parent="Tabs/Normal Map"]
+margin_top = 176.0
+margin_right = 275.0
+margin_bottom = 190.0
+text = "Darkpoint Value"
+
+[node name="Slider2" type="HSlider" parent="Tabs/Normal Map"]
+margin_top = 194.0
+margin_right = 275.0
+margin_bottom = 210.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="Label4" type="Label" parent="Tabs/Normal Map"]
+margin_top = 214.0
+margin_right = 275.0
+margin_bottom = 228.0
+text = "Midpoint Value"
+
+[node name="Slider3" type="HSlider" parent="Tabs/Normal Map"]
+margin_top = 232.0
+margin_right = 275.0
+margin_bottom = 248.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label5" type="Label" parent="Tabs/Normal Map"]
+margin_top = 252.0
+margin_right = 275.0
+margin_bottom = 266.0
+text = "Lightpoint Value"
+
+[node name="Slider4" type="HSlider" parent="Tabs/Normal Map"]
+margin_top = 270.0
+margin_right = 275.0
+margin_bottom = 286.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 100.0
+
+[node name="Label6" type="Label" parent="Tabs/Normal Map"]
+margin_top = 290.0
+margin_right = 275.0
+margin_bottom = 304.0
+text = "Midpoint Offset"
+
+[node name="Slider5" type="HSlider" parent="Tabs/Normal Map"]
+margin_top = 308.0
+margin_right = 275.0
+margin_bottom = 324.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label7" type="Label" parent="Tabs/Normal Map"]
+margin_top = 328.0
+margin_right = 275.0
+margin_bottom = 342.0
+text = "Channel"
+
+[node name="OptionButton" type="OptionButton" parent="Tabs/Normal Map"]
+margin_top = 346.0
+margin_right = 275.0
+margin_bottom = 366.0
+text = "Grey"
+flat = true
+
+[node name="Depth Map" type="VBoxContainer" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 40.0
+margin_right = -8.0
+margin_bottom = -8.0
+
+[node name="Label" type="Label" parent="Tabs/Depth Map"]
+margin_right = 275.0
+margin_bottom = 14.0
+size_flags_horizontal = 5
+text = "Depth Map Strength"
+
+[node name="Slider" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 18.0
+margin_right = 275.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="Label2" type="Label" parent="Tabs/Depth Map"]
+margin_top = 38.0
+margin_right = 275.0
+margin_bottom = 52.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+text = "Frequency Distribution"
+
+[node name="Freqs" type="HBoxContainer" parent="Tabs/Depth Map"]
+margin_top = 56.0
+margin_right = 275.0
+margin_bottom = 172.0
+rect_min_size = Vector2( 0, 100 )
+custom_constants/separation = 9
+
+[node name="VSlider1" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_right = 16.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="VSlider2" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_left = 25.0
+margin_right = 41.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="VSlider3" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_left = 50.0
+margin_right = 66.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="VSlider4" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_left = 75.0
+margin_right = 91.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="VSlider5" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_left = 100.0
+margin_right = 116.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="VSlider6" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_left = 125.0
+margin_right = 141.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="VSlider7" type="VSlider" parent="Tabs/Depth Map/Freqs"]
+margin_left = 150.0
+margin_right = 166.0
+margin_bottom = 116.0
+value = 100.0
+
+[node name="Presets" type="VBoxContainer" parent="Tabs/Depth Map/Freqs"]
+margin_left = 175.0
+margin_right = 275.0
+margin_bottom = 116.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Flat" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
+margin_right = 100.0
+margin_bottom = 20.0
+text = "Flat"
+
+[node name="Smooth" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
+margin_top = 24.0
+margin_right = 100.0
+margin_bottom = 44.0
+text = "Smooth"
+
+[node name="Rough" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
+margin_top = 48.0
+margin_right = 100.0
+margin_bottom = 68.0
+text = "Rough"
+
+[node name="Fuzzy" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
+margin_top = 72.0
+margin_right = 100.0
+margin_bottom = 92.0
+text = "Fuzzy"
+
+[node name="Mids" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
+margin_top = 96.0
+margin_right = 100.0
+margin_bottom = 116.0
+text = "Mids"
+
+[node name="Label3" type="Label" parent="Tabs/Depth Map"]
+margin_top = 176.0
+margin_right = 275.0
+margin_bottom = 190.0
+text = "Darkpoint Value"
+
+[node name="Slider2" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 194.0
+margin_right = 275.0
+margin_bottom = 210.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="Label4" type="Label" parent="Tabs/Depth Map"]
+margin_top = 214.0
+margin_right = 275.0
+margin_bottom = 228.0
+text = "Midpoint Value"
+
+[node name="Slider3" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 232.0
+margin_right = 275.0
+margin_bottom = 248.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label5" type="Label" parent="Tabs/Depth Map"]
+margin_top = 252.0
+margin_right = 275.0
+margin_bottom = 266.0
+text = "Lightpoint Value"
+
+[node name="Slider4" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 270.0
+margin_right = 275.0
+margin_bottom = 286.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 100.0
+
+[node name="Label6" type="Label" parent="Tabs/Depth Map"]
+margin_top = 290.0
+margin_right = 275.0
+margin_bottom = 304.0
+text = "Midpoint Offset"
+
+[node name="Slider5" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 308.0
+margin_right = 275.0
+margin_bottom = 324.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label7" type="Label" parent="Tabs/Depth Map"]
+margin_top = 328.0
+margin_right = 275.0
+margin_bottom = 342.0
+text = "Channel"
+
+[node name="OptionButton" type="OptionButton" parent="Tabs/Depth Map"]
+margin_top = 346.0
+margin_right = 275.0
+margin_bottom = 366.0
+flat = true
+
+[node name="Label8" type="Label" parent="Tabs/Depth Map"]
+margin_right = 275.0
+margin_bottom = 14.0
+size_flags_horizontal = 5
+text = "Depth Map Offset"
+
+[node name="Slider6" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 18.0
+margin_right = 275.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Ambient Color" type="HFlowContainer" parent="Tabs"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -252,13 +558,7 @@ margin_top = 24.0
 margin_right = -4.0
 margin_bottom = -4.0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Tabs/Environment"]
-margin_right = 283.0
-margin_bottom = 12.0
-size_flags_horizontal = 15
-size_flags_vertical = 15
-
-[node name="ColorPicker" type="ColorPicker" parent="Tabs/Environment/ScrollContainer"]
+[node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambient Color"]
 margin_right = 308.0
 margin_bottom = 412.0
 size_flags_horizontal = 3
