@@ -196,7 +196,7 @@ func normal_slider_changed(_unused : float):
     var image = albedo_image.duplicate(true)
     
     normal_image = create_normal_texture(image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 1.0)
-    normal_image.convert(Image.FORMAT_RGBA8)
+    #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
     normal.create_from_image(normal_image)
@@ -228,7 +228,7 @@ func depth_slider_changed(_unused : float):
     var image = albedo_image.duplicate(true)
     
     depth_image = create_normal_texture(image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 0.0)
-    depth_image.convert(Image.FORMAT_RGBA8)
+    #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
     depth.create_from_image(depth_image)
