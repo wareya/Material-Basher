@@ -6,6 +6,9 @@ var normal : ImageTexture
 var depth_image : Image
 var depth : ImageTexture
 
+var metal_image : Image
+var metal : ImageTexture
+
 var albedo_image : Image
 var albedo : ImageTexture
 
@@ -46,7 +49,11 @@ func _ready():
             if child is Button:
                 child.connect("pressed", self, "%s_freq_preset" % [type], [child.name.to_lower()])
     
+    $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
+    $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
+    
     $ToggleMat.connect("pressed", self, "toggle_mat")
+    $ToggleAlbedo.connect("pressed", self, "show_albedo")
     get_tree().connect("files_dropped", self, "files_dropped")
     
     $"Tabs/Ambience/ColorPicker".connect("color_changed", self, "color_changed", ["ambient"])
@@ -73,6 +80,16 @@ func toggle_mat():
         $"3D/SphereHolder/Sphere".material_override = mat_texture
     else:
         $"3D/SphereHolder/Sphere".material_override = mat_3d
+
+func show_albedo():
+    if albedo_image:
+        if !$TextureRect.visible:
+            var texture = ImageTexture.new()
+            texture.create_from_image(albedo_image)
+            $TextureRect.texture = texture
+            $TextureRect.visible = true
+        else:
+            $TextureRect.visible = false
 
 func files_dropped(files : PoolStringArray, _screen : int):
     var fname : String = files[0]
@@ -136,6 +153,7 @@ func depth_freq_preset(mode : String):
         "rough"  : [0.0, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
         "fuzzy"  : [1.0, 0.67, 0.33, 0.0, 0.33, 0.67, 1.0],
         "mids"   : [0.0, 0.33, 0.67, 1.0, 0.67, 0.33, 0.0],
+        "zero"   : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }[mode]
     
     var list = $"Tabs/Depth Map/Freqs".get_children()
@@ -201,7 +219,6 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
     
     return $Helper.get_texture().get_data()
-    
 
 func normal_option_picked(_unused : int):
     normal_slider_changed(0.0)
@@ -263,6 +280,71 @@ func depth_slider_changed(_unused : float):
     
     mat_3d.uv1_scale = Vector3(2, 1, 1)
 
+func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float):
+    if ref_image != image or ref_tex == null:
+        ref_image = image
+        ref_tex = ImageTexture.new()
+        ref_tex.create_from_image(image)
+    
+    if colors.size() == 0:
+        colors = [Color.white]
+    
+    var img = Image.new()
+    img.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
+    img.lock()
+    for i in colors.size():
+        img.set_pixel(i, 0, colors[i])
+    img.unlock()
+    var color_tex = ImageTexture.new()
+    color_tex.create_from_image(img)
+    
+    var mat = $Helper/Quad.material_override as ShaderMaterial
+    mat.shader = preload("res://MetallicityGenerator.gdshader")
+    mat.set_shader_param("albedo", ref_tex)
+    mat.set_shader_param("colors", color_tex)
+    mat.set_shader_param("mixing_bias", mixing_bias)
+    mat.set_shader_param("contrast", contrast)
+    
+    var size = image.get_size()
+    $Helper.size = size
+    $Helper/Quad.scale.x = size.x / size.y
+    
+    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+    VisualServer.force_draw(false, 0.0)
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    
+    return $Helper.get_texture().get_data()
+
+func metal_slider_changed(_unused : float):
+    if albedo_image == null:
+        return
+    if setting_sliders:
+        return
+    
+    var mixing_bias = read_range($"Tabs/Metal Map/HBoxContainer/HSlider")
+    var contrast = read_range($"Tabs/Metal Map/HBoxContainer2/HSlider")
+    
+    var colors = []
+    for c in $"Tabs/Metal Map".get_children():
+        if c.get_child_count() >= 3:
+            var color = (c.get_child(0) as ColorRect).color
+            var slider : Range = c.get_child(2)
+            colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
+    
+    metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast)
+    
+    metal = ImageTexture.new()
+    metal.create_from_image(metal_image)
+    
+    mat_3d.metallic = 1.0
+    mat_3d.metallic_texture = metal
+    mat_3d.metallic_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_RED
+    mat_3d.uv1_scale = Vector3(2, 1, 1)
+    
+    var n2 = metal.duplicate(true)
+    mat_texture.set_shader_param("image", n2)
 
 var zoom = 0
 func _input(_event):
@@ -294,9 +376,10 @@ var processing = false
 func _process(delta : float):
     processing = true
     
-    mat_3d.metallic = 0.0
-    mat_3d.metallic_specular = 0.5
-    mat_3d.roughness = 0.75
+    mat_3d.metallic_specular = read_range($"Tabs/Shader Config/HSlider")
+    mat_3d.roughness = read_range($"Tabs/Shader Config/HSlider4")
+    mat_3d.normal_scale = read_range($"Tabs/Shader Config/HSlider2")
+    mat_3d.depth_scale = read_range($"Tabs/Shader Config/HSlider3") * 0.05 * 4.0
     
     if $Tabs/Light/CheckBox.pressed:
         $"3D/SphereHolder/Sphere".global_rotation.y += delta*0.1
@@ -351,14 +434,17 @@ func end_picking_color():
         box.add_child(slider)
         box.add_child(button)
         $"Tabs/Metal Map".add_child(box)
+        metal_slider_changed(0.0)
     
     cancel_picking_color()
 
-func metallicity_update():
-    pass
+func metallicity_update(_unused):
+    metal_slider_changed(0.0)
 
 func delete_color(which):
     which.queue_free()
+    $"Tabs/Metal Map".remove_child(which)
+    metal_slider_changed(0.0)
 
 func cancel_picking_color():
     color_picking = ""
@@ -382,8 +468,8 @@ func _draw():
         if gray > 0.5:
             contrasted = Color.black
         
-        draw_arc(mouse_pos + Vector2(-16, 16), 13.3, 0.0, PI*2.0, 32, contrasted, 1.0, true)
-        draw_arc(mouse_pos + Vector2(-16, 16), 6.2, 0.0, PI*2.0, 32, color, 12.5, true)
+        draw_arc(mouse_pos + Vector2(0, -32), 13.3, 0.0, PI*2.0, 32, contrasted, 1.0, true)
+        draw_arc(mouse_pos + Vector2(0, -32), 6.2, 0.0, PI*2.0, 32, color, 12.5, true)
         
 func light_angle_update(_unused):
     $"3D/LightHolder/DirectionalLight".rotation_degrees.x = -90+180*read_range($Tabs/Light/HBoxContainer/HSlider)

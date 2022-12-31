@@ -1,8 +1,7 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://NormalGenerator.gdshader" type="Shader" id=2]
-[ext_resource path="res://UnshadedPlain.material" type="Material" id=3]
 [ext_resource path="res://AllTabContainer.gd" type="Script" id=4]
 [ext_resource path="res://Bricks076A_2K_Color 256.jpg" type="Texture" id=5]
 
@@ -32,9 +31,6 @@ shader_param/albedo = Color( 1, 1, 1, 1 )
 
 [sub_resource type="QuadMesh" id=17]
 
-[sub_resource type="ViewportTexture" id=19]
-viewport_path = NodePath("Helper")
-
 [sub_resource type="ProceduralSky" id=6]
 sun_latitude = -180.0
 
@@ -46,6 +42,8 @@ ambient_light_sky_contribution = 0.0
 ss_reflections_enabled = true
 
 [sub_resource type="SpatialMaterial" id=18]
+metallic = 1.0
+metallic_specular = 1.0
 
 [sub_resource type="SphereMesh" id=4]
 radial_segments = 128
@@ -143,11 +141,12 @@ material_override = SubResource( 16 )
 mesh = SubResource( 17 )
 
 [node name="TextureRect" type="TextureRect" parent="."]
-visible = false
-margin_right = 512.0
-margin_bottom = 512.0
-texture = SubResource( 19 )
+show_behind_parent = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 640.0
 expand = true
+stretch_mode = 6
 
 [node name="3D" type="Spatial" parent="."]
 
@@ -173,10 +172,11 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3 )
 current = true
 
 [node name="Tabs" type="Container" parent="."]
-margin_left = 19.0
-margin_top = 56.0
-margin_right = 310.0
-margin_bottom = 421.0
+show_behind_parent = true
+margin_left = 16.0
+margin_top = 83.0
+margin_right = 307.0
+margin_bottom = 448.0
 script = ExtResource( 4 )
 panel_bg = SubResource( 3 )
 tab_bg = SubResource( 22 )
@@ -586,6 +586,42 @@ margin_top = 40.0
 margin_right = -8.0
 margin_bottom = -8.0
 
+[node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Metal Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 87.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Mixing Bias"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+value = 25.0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Metal Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 87.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer2"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Contrast"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer2"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+value = 50.0
+
 [node name="Button" type="Button" parent="Tabs/Metal Map"]
 margin_right = 12.0
 margin_bottom = 20.0
@@ -671,8 +707,65 @@ edit_alpha = false
 presets_enabled = false
 presets_visible = false
 
+[node name="Shader Config" type="VBoxContainer" parent="Tabs"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Label" type="Label" parent="Tabs/Shader Config"]
+margin_right = 104.0
+margin_bottom = 14.0
+text = "Specular"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Shader Config"]
+margin_top = 18.0
+margin_right = 104.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
+value = 50.0
+
+[node name="Label4" type="Label" parent="Tabs/Shader Config"]
+margin_top = 38.0
+margin_right = 104.0
+margin_bottom = 52.0
+text = "Roughness"
+
+[node name="HSlider4" type="HSlider" parent="Tabs/Shader Config"]
+margin_top = 56.0
+margin_right = 104.0
+margin_bottom = 72.0
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="Label2" type="Label" parent="Tabs/Shader Config"]
+margin_top = 76.0
+margin_right = 104.0
+margin_bottom = 90.0
+text = "Normal Strength"
+
+[node name="HSlider2" type="HSlider" parent="Tabs/Shader Config"]
+margin_top = 94.0
+margin_right = 104.0
+margin_bottom = 110.0
+size_flags_horizontal = 3
+value = 100.0
+
+[node name="Label3" type="Label" parent="Tabs/Shader Config"]
+margin_top = 114.0
+margin_right = 104.0
+margin_bottom = 128.0
+text = "Depth Strength"
+
+[node name="HSlider3" type="HSlider" parent="Tabs/Shader Config"]
+margin_top = 132.0
+margin_right = 104.0
+margin_bottom = 148.0
+size_flags_horizontal = 3
+value = 25.0
+
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
+show_behind_parent = true
 margin_left = 22.0
 margin_top = 161.0
 margin_right = 329.0
@@ -688,16 +781,23 @@ texture = ExtResource( 5 )
 expand = true
 
 [node name="ToggleMat" type="Button" parent="."]
+show_behind_parent = true
 margin_left = 30.0
 margin_top = 20.0
 margin_right = 139.0
 margin_bottom = 40.0
 text = "Toggle Material"
 
-[node name="MeshInstance" type="MeshInstance" parent="ToggleMat"]
-material_override = ExtResource( 3 )
+[node name="ToggleAlbedo" type="Button" parent="."]
+show_behind_parent = true
+margin_left = 30.0
+margin_top = 51.0
+margin_right = 139.0
+margin_bottom = 71.0
+text = "Show Albedo"
 
 [node name="Warnings" type="Label" parent="."]
+show_behind_parent = true
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0

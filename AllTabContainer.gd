@@ -20,6 +20,9 @@ func _ready():
         move_child(button, i)
         i += 1
     
+    if i > 0:
+        active_button = button_tabs.keys()[0]
+    
     panel = Panel.new()
     panel.add_stylebox_override("panel", panel_bg)
     add_child(panel)
