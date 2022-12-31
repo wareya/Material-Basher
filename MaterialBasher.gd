@@ -49,10 +49,24 @@ func _ready():
     $ToggleMat.connect("pressed", self, "toggle_mat")
     get_tree().connect("files_dropped", self, "files_dropped")
     
+    $"Tabs/Ambience/ColorPicker".connect("color_changed", self, "color_changed", ["ambient"])
+    $"Tabs/Light/ColorPicker".connect("color_changed", self, "color_changed", ["light"])
+    
+    $Tabs/Light/HBoxContainer/HSlider.connect("value_changed", self, "light_angle_update")
+    $Tabs/Light/HBoxContainer2/HSlider.connect("value_changed", self, "light_rotation_update")
+    
     mat_3d.uv1_scale = Vector3(2, 1, 1)
     mat_texture.set_shader_param("uv1_scale", Vector3(2, 1, 1))
     
     $"3D/SphereHolder/Sphere".material_override = mat_3d
+    
+    $"Tabs/Metal Map/Button".connect("pressed", self, "start_picking_color", ["metal", -1])
+
+func color_changed(new_color : Color, which : String):
+    if which == "ambient":
+        $"3D/WorldEnvironment".environment.ambient_light_color = new_color
+    elif which == "light":
+        $"3D/LightHolder/DirectionalLight".light_color = new_color
 
 func toggle_mat():
     if $"3D/SphereHolder/Sphere".material_override == mat_3d:
@@ -94,12 +108,16 @@ func files_dropped(files : PoolStringArray, _screen : int):
 
 var setting_sliders = false
 func normal_freq_preset(mode : String):
+    for enemy in get_tree().get_nodes_in_group("Enemy"):
+        enemy.connect("enemy_dead", self, "notify_enemy_dead")
+    get_local_mouse_position()
     var array = {
         "flat"   : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         "smooth" : [1.0, 0.8, 0.6, 0.4, 0.2, 0.0, 0.0],
         "rough"  : [0.0, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
         "fuzzy"  : [1.0, 0.67, 0.33, 0.0, 0.33, 0.67, 1.0],
         "mids"   : [0.0, 0.33, 0.67, 1.0, 0.67, 0.33, 0.0],
+        "zero"   : [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     }[mode]
     
     var list = $"Tabs/Normal Map/Freqs".get_children()
@@ -131,13 +149,21 @@ func depth_freq_preset(mode : String):
 
 func read_range(_range : Range) -> float:
     return _range.value / _range.max_value
+    
+func write_range(_range : Range, val : float):
+    _range.value = _range.max_value*val
 
+var ref_image = null
+var ref_tex = null
 func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, generate_normal):
-    var temp_tex = ImageTexture.new()
-    temp_tex.create_from_image(image)
+    if ref_image != image or ref_tex == null:
+        ref_image = image
+        ref_tex = ImageTexture.new()
+        ref_tex.create_from_image(image)
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
-    mat.set_shader_param("albedo", temp_tex)
+    mat.shader = preload("res://NormalGenerator.gdshader")
+    mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("darkpoint", darkpoint)
     mat.set_shader_param("midpoint", midpoint)
@@ -193,9 +219,7 @@ func normal_slider_changed(_unused : float):
     
     var depth_offset = 0.0;
     
-    var image = albedo_image.duplicate(true)
-    
-    normal_image = create_normal_texture(image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 1.0)
+    normal_image = create_normal_texture(albedo_image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 1.0)
     #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
@@ -225,9 +249,7 @@ func depth_slider_changed(_unused : float):
     
     var depth_offset = read_range($"Tabs/Depth Map/Slider6")
     
-    var image = albedo_image.duplicate(true)
-    
-    depth_image = create_normal_texture(image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 0.0)
+    depth_image = create_normal_texture(albedo_image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 0.0)
     #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
@@ -246,16 +268,129 @@ var zoom = 0
 func _input(_event):
     if _event is InputEventMouseButton:
         var event : InputEventMouseButton = _event
+        var zoom_changed = false
         if event.button_index == BUTTON_WHEEL_UP:
             zoom += 1
+            zoom_changed = true
         elif event.button_index == BUTTON_WHEEL_DOWN:
             zoom -= 1
-        zoom = clamp(zoom, -16, 16)
-        $"3D/CameraHolder/Camera".translation.z = 3 * pow(2, -zoom/16.0 * 1.3)
-    pass
+            zoom_changed = true
+        if zoom_changed:
+            zoom = clamp(zoom, -16, 16)
+            $"3D/CameraHolder/Camera".translation.z = 3 * pow(2, -zoom/16.0 * 1.3)
+        
+        if color_picking:
+            if event.button_index == BUTTON_RIGHT:
+                cancel_picking_color()
+            elif event.button_index == BUTTON_LEFT:
+                end_picking_color()
+    if _event is InputEventKey:
+        var event : InputEventKey = _event
+        if color_picking:
+            if event.scancode == KEY_ESCAPE:
+                cancel_picking_color()
 
-
+var processing = false
 func _process(delta : float):
-    $"3D/SphereHolder/Sphere".global_rotation.y += delta*0.1
-    $"3D/LightHolder".global_rotation.y -= delta
+    processing = true
+    
+    mat_3d.metallic = 0.0
+    mat_3d.metallic_specular = 0.5
+    mat_3d.roughness = 0.75
+    
+    if $Tabs/Light/CheckBox.pressed:
+        $"3D/SphereHolder/Sphere".global_rotation.y += delta*0.1
+        $"3D/LightHolder".global_rotation.y -= delta
+        var v = fmod($"3D/LightHolder".global_rotation.y + PI*2.0, PI*2.0)
+        
+        write_range($Tabs/Light/HBoxContainer2/HSlider, v/PI/2.0)
+    
+    if color_picking != "":
+        update()
+    
+    processing = false
+
+var color_picking = ""
+var color_which = -1
+
+func start_picking_color(type : String, which : int):
+    if type == "metal":
+        Input.set_custom_mouse_cursor(preload("res://spoit.png"), Input.CURSOR_ARROW, Vector2(1, 20))
+        color_picking = type
+        color_which = which
+
+func end_picking_color():
+    var vp = get_viewport()
+    var mouse_pos = vp.get_mouse_position()
+    var screen = vp.get_texture().get_data()
+    screen.lock()
+    mouse_pos.y = screen.get_size().y - mouse_pos.y
+    var color = screen.get_pixelv(mouse_pos)
+    screen.unlock()
+    
+    if color_picking == "metal":
+        var box = HBoxContainer.new()
+        var icon = ColorRect.new()
+        var label = Label.new()
+        var slider = HSlider.new()
+        var button = TextureButton.new()
+        icon.color = color
+        icon.rect_min_size = Vector2(16, 16)
+        label.text = "Metallicity:"
+        slider.max_value = 100
+        slider.size_flags_horizontal |= SIZE_EXPAND
+        slider.connect("value_changed", self, "metallicity_update")
+        button.texture_hover = preload("res://x.png")
+        button.texture_normal = preload("res://x.png")
+        button.texture_disabled = preload("res://x.png")
+        button.texture_focused = preload("res://x.png")
+        button.texture_pressed = preload("res://x.png")
+        button.connect("pressed", self, "delete_color", [box])
+        box.add_child(icon)
+        box.add_child(label)
+        box.add_child(slider)
+        box.add_child(button)
+        $"Tabs/Metal Map".add_child(box)
+    
+    cancel_picking_color()
+
+func metallicity_update():
     pass
+
+func delete_color(which):
+    which.queue_free()
+
+func cancel_picking_color():
+    color_picking = ""
+    color_which = -1
+    update()
+    Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
+
+func _draw():
+    if color_picking != "":
+        var vp = get_viewport()
+        var mouse_pos = vp.get_mouse_position()
+        var screen = vp.get_texture().get_data()
+        screen.lock()
+        mouse_pos.y = screen.get_size().y - mouse_pos.y
+        var color = screen.get_pixelv(mouse_pos)
+        screen.unlock()
+        mouse_pos.y = screen.get_size().y - mouse_pos.y
+        
+        var gray = color.gray()
+        var contrasted = Color.white
+        if gray > 0.5:
+            contrasted = Color.black
+        
+        draw_arc(mouse_pos + Vector2(-16, 16), 13.3, 0.0, PI*2.0, 32, contrasted, 1.0, true)
+        draw_arc(mouse_pos + Vector2(-16, 16), 6.2, 0.0, PI*2.0, 32, color, 12.5, true)
+        
+func light_angle_update(_unused):
+    $"3D/LightHolder/DirectionalLight".rotation_degrees.x = -90+180*read_range($Tabs/Light/HBoxContainer/HSlider)
+
+func light_rotation_update(_unused):
+    if processing:
+        return
+    print("asdioroiwge")
+    $"3D/LightHolder".rotation_degrees.y = 360*read_range($Tabs/Light/HBoxContainer2/HSlider)
+    
