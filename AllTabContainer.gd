@@ -56,7 +56,7 @@ func _process(delta):
             button.add_stylebox_override("focus", tab_inactive_bg)
             button.add_stylebox_override("pressed", tab_inactive_bg)
             button.add_stylebox_override("disabled", tab_inactive_bg)
-
+    
 func _notification(what):
     var margin_left = panel_bg.get_margin(MARGIN_LEFT)
     var margin_right = panel_bg.get_margin(MARGIN_RIGHT)

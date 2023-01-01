@@ -1,9 +1,12 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://NormalGenerator.gdshader" type="Shader" id=2]
+[ext_resource path="res://DiamondPlate006C_2K_Roughness.jpg" type="Texture" id=3]
 [ext_resource path="res://AllTabContainer.gd" type="Script" id=4]
 [ext_resource path="res://Bricks076A_2K_Color 256.jpg" type="Texture" id=5]
+[ext_resource path="res://DiamondPlate006C_2K_Color.jpg" type="Texture" id=6]
+[ext_resource path="res://DiamondPlate006C_2K_Metalness.jpg" type="Texture" id=7]
 
 [sub_resource type="Environment" id=13]
 
@@ -41,11 +44,17 @@ background_sky = SubResource( 6 )
 ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
 ambient_light_sky_contribution = 0.0
 
-[sub_resource type="SpatialMaterial" id=18]
+[sub_resource type="SpatialMaterial" id=27]
+albedo_texture = ExtResource( 6 )
 metallic = 1.0
-metallic_specular = 1.0
+metallic_specular = 0.0
+metallic_texture = ExtResource( 7 )
+roughness = 0.63
+roughness_texture = ExtResource( 3 )
+uv1_scale = Vector3( 2, 1, 1 )
 
 [sub_resource type="SphereMesh" id=26]
+material = SubResource( 27 )
 radial_segments = 256
 rings = 128
 
@@ -164,7 +173,6 @@ environment = SubResource( 5 )
 [node name="MeshHolder" type="Spatial" parent="3D"]
 
 [node name="Mesh" type="MeshInstance" parent="3D/MeshHolder"]
-material_override = SubResource( 18 )
 mesh = SubResource( 26 )
 
 [node name="CameraHolder" type="Spatial" parent="3D"]
@@ -624,7 +632,113 @@ margin_bottom = 16.0
 size_flags_horizontal = 3
 value = 50.0
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Metal Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 87.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer3"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Shrink/Expand"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer3"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+min_value = -4.0
+max_value = 4.0
+
 [node name="Button" type="Button" parent="Tabs/Metal Map"]
+margin_right = 12.0
+margin_bottom = 20.0
+text = "Add Color Mapping"
+
+[node name="Roughness Map" type="VBoxContainer" parent="Tabs"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 40.0
+margin_right = -8.0
+margin_bottom = -8.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Roughness Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 87.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Mixing Bias"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+value = 25.0
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Roughness Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 87.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer2"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Contrast"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer2"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+value = 50.0
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Roughness Map"]
+margin_left = -8.0
+margin_top = -32.0
+margin_right = 97.0
+margin_bottom = 8.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer3"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Shrink/Expand"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer3"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+min_value = -4.0
+max_value = 4.0
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="Tabs/Roughness Map"]
+margin_left = -8.0
+margin_top = -32.0
+margin_right = 97.0
+margin_bottom = 8.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer4"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Blur"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer4"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+max_value = 4.0
+
+[node name="Button" type="Button" parent="Tabs/Roughness Map"]
 margin_right = 12.0
 margin_bottom = 20.0
 text = "Add Color Mapping"
@@ -770,11 +884,43 @@ visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 
+[node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Shape"]
+margin_left = 4.0
+margin_top = 24.0
+margin_right = 112.0
+margin_bottom = 64.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Light Rotation"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+step = 0.1
+
+[node name="CheckBox" type="CheckBox" parent="Tabs/Shape"]
+margin_left = 4.0
+margin_top = 24.0
+margin_right = 165.0
+margin_bottom = 48.0
+pressed = true
+text = "Automatically Rotate"
+
 [node name="Button" type="Button" parent="Tabs/Shape"]
 margin_right = 126.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
 text = "Sphere"
+
+[node name="Button6" type="Button" parent="Tabs/Shape"]
+margin_right = 126.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+text = "Sphere (Triplanar)"
 
 [node name="Button2" type="Button" parent="Tabs/Shape"]
 margin_top = 24.0
@@ -795,7 +941,7 @@ margin_top = 96.0
 margin_right = 126.0
 margin_bottom = 116.0
 size_flags_horizontal = 3
-text = "Sideways Cylinder"
+text = "Cylinder (Sideways)"
 
 [node name="Button5" type="Button" parent="Tabs/Shape"]
 margin_top = 72.0
@@ -803,6 +949,13 @@ margin_right = 126.0
 margin_bottom = 92.0
 size_flags_horizontal = 3
 text = "Plane"
+
+[node name="Button7" type="Button" parent="Tabs/Shape"]
+margin_top = 72.0
+margin_right = 126.0
+margin_bottom = 92.0
+size_flags_horizontal = 3
+text = "Plane (Slanted)"
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
@@ -840,8 +993,15 @@ text = "Show Albedo"
 [node name="Warnings" type="Label" parent="."]
 show_behind_parent = true
 anchor_top = 1.0
+anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = -23.0
-margin_right = 48.0
-margin_bottom = -9.0
+margin_left = 16.0
+margin_top = -42.0
+margin_right = -12.0
+margin_bottom = -28.0
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 1
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 1
+autowrap = true

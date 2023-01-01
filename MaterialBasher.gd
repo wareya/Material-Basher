@@ -9,6 +9,9 @@ var depth : ImageTexture
 var metal_image : Image
 var metal : ImageTexture
 
+var roughness_image : Image
+var roughness : ImageTexture
+
 var albedo_image : Image
 var albedo : ImageTexture
 
@@ -55,6 +58,12 @@ func _ready():
     
     $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
+    $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self, "metal_slider_changed")
+    
+    $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self, "roughness_slider_changed")
     
     $ToggleMat.connect("pressed", self, "toggle_mat")
     $ToggleAlbedo.connect("pressed", self, "show_albedo")
@@ -66,17 +75,22 @@ func _ready():
     $Tabs/Light/HBoxContainer/HSlider.connect("value_changed", self, "light_angle_update")
     $Tabs/Light/HBoxContainer2/HSlider.connect("value_changed", self, "light_rotation_update")
     
+    $Tabs/Shape/HBoxContainer/HSlider.connect("value_changed", self, "shape_rotation_update")
+    
     set_uv_scale(Vector3(2, 1, 1))
     
     $"3D/MeshHolder/Mesh".material_override = mat_3d
     
     $"Tabs/Metal Map/Button".connect("pressed", self, "start_picking_color", ["metal", -1])
+    $"Tabs/Roughness Map/Button".connect("pressed", self, "start_picking_color", ["roughness", -1])
     
     $Tabs/Shape/Button.connect("pressed", self, "set_mesh", ["sphere"])
+    $Tabs/Shape/Button6.connect("pressed", self, "set_mesh", ["sphere triplanar"])
     $Tabs/Shape/Button2.connect("pressed", self, "set_mesh", ["cube"])
     $Tabs/Shape/Button3.connect("pressed", self, "set_mesh", ["cylinder"])
     $Tabs/Shape/Button4.connect("pressed", self, "set_mesh", ["sideways cylinder"])
     $Tabs/Shape/Button5.connect("pressed", self, "set_mesh", ["plane"])
+    $Tabs/Shape/Button7.connect("pressed", self, "set_mesh", ["plane slanted"])
 
 func color_changed(new_color : Color, which : String):
     if which == "ambient":
@@ -131,6 +145,9 @@ func files_dropped(files : PoolStringArray, _screen : int):
     #$"3D/MeshHolder/Mesh".material_override = mat_3d
     
     normal_slider_changed(0.0)
+    depth_slider_changed(0.0)
+    metal_slider_changed(0.0)
+
 
 var setting_sliders = false
 func normal_freq_preset(mode : String):
@@ -179,6 +196,7 @@ func read_range(_range : Range) -> float:
     
 func write_range(_range : Range, val : float):
     _range.value = _range.max_value*val
+
 
 var ref_image = null
 var ref_tex = null
@@ -281,15 +299,15 @@ func depth_slider_changed(_unused : float):
     depth = ImageTexture.new()
     depth.create_from_image(depth_image)
     depth.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    depth.flags |= ImageTexture.FLAG_FILTER
     
     mat_3d.depth_enabled = true
     mat_3d.depth_deep_parallax = true
     mat_3d.depth_texture = depth
     var n2 = depth.duplicate(true)
     mat_texture.set_shader_param("image", n2)
-    
 
-func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float):
+func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius):
     if ref_image != image or ref_tex == null:
         ref_image = image
         ref_tex = ImageTexture.new()
@@ -313,6 +331,8 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     mat.set_shader_param("colors", color_tex)
     mat.set_shader_param("mixing_bias", mixing_bias)
     mat.set_shader_param("contrast", contrast)
+    mat.set_shader_param("shrink_radius", shrink_radius)
+    mat.set_shader_param("blur_radius", blur_radius)
     
     var size = image.get_size()
     $Helper.size = size
@@ -334,6 +354,8 @@ func metal_slider_changed(_unused : float):
     
     var mixing_bias = read_range($"Tabs/Metal Map/HBoxContainer/HSlider")
     var contrast = read_range($"Tabs/Metal Map/HBoxContainer2/HSlider")
+    var shrink_radius = $"Tabs/Metal Map/HBoxContainer3/HSlider".value
+    var blur_radius = 0
     
     var colors = []
     for c in $"Tabs/Metal Map".get_children():
@@ -342,7 +364,7 @@ func metal_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast)
+    metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius)
     
     metal = ImageTexture.new()
     metal.create_from_image(metal_image)
@@ -352,6 +374,36 @@ func metal_slider_changed(_unused : float):
     mat_3d.metallic_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_RED
     
     var n2 = metal.duplicate(true)
+    mat_texture.set_shader_param("image", n2)
+
+func roughness_slider_changed(_unused : float):
+    if albedo_image == null:
+        return
+    if setting_sliders:
+        return
+    
+    var mixing_bias = read_range($"Tabs/Roughness Map/HBoxContainer/HSlider")
+    var contrast = read_range($"Tabs/Roughness Map/HBoxContainer2/HSlider")
+    var shrink_radius = $"Tabs/Roughness Map/HBoxContainer3/HSlider".value
+    var blur_radius = $"Tabs/Roughness Map/HBoxContainer4/HSlider".value
+    
+    var colors = []
+    for c in $"Tabs/Roughness Map".get_children():
+        if c.get_child_count() >= 3:
+            var color = (c.get_child(0) as ColorRect).color
+            var slider : Range = c.get_child(2)
+            colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
+    
+    roughness_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius)
+    
+    roughness = ImageTexture.new()
+    roughness.create_from_image(roughness_image)
+    
+    mat_3d.roughness = 1.0
+    mat_3d.roughness_texture = roughness
+    mat_3d.roughness_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_GREEN
+    
+    var n2 = roughness.duplicate(true)
     mat_texture.set_shader_param("image", n2)
 
 var zoom = 0
@@ -379,6 +431,15 @@ func _input(_event):
         if color_picking:
             if event.scancode == KEY_ESCAPE:
                 cancel_picking_color()
+    if _event is InputEventMouseMotion:
+        var event : InputEventMouseMotion = _event
+        var sensitivity = 0.22 * 0.75
+        var x = $"3D/CameraHolder".rotation_degrees.x
+        if (event.button_mask & BUTTON_MASK_MIDDLE):
+            x -= event.relative.y * sensitivity
+            $"3D/CameraHolder".rotation_degrees.y -= event.relative.x * sensitivity
+        x = clamp(x, -90, 90)
+        $"3D/CameraHolder".rotation_degrees.x = x
 
 var processing = false
 func _process(delta : float):
@@ -389,26 +450,39 @@ func _process(delta : float):
     mat_3d.normal_scale = read_range($"Tabs/Shader Config/HSlider2")
     mat_3d.depth_scale = read_range($"Tabs/Shader Config/HSlider3") * 0.05 * 4.0
     
-    if $Tabs/Light/CheckBox.pressed:
+    if $Tabs/Shape/CheckBox.pressed:
         $"3D/MeshHolder/Mesh".rotation.y += delta*0.1
+        
+        var v = fmod($"3D/MeshHolder/Mesh".rotation.y + PI*2.0, PI*2.0)
+        v = fmod(v + PI*2.0, PI*2.0)
+        $"3D/MeshHolder/Mesh".rotation.y = v
+        
+        write_range($Tabs/Shape/HBoxContainer/HSlider, v/PI/2.0)
+        
+    if $Tabs/Light/CheckBox.pressed:
         $"3D/LightHolder".rotation.y -= delta
         var v = fmod($"3D/LightHolder".rotation.y + PI*2.0, PI*2.0)
+        v = fmod(v + PI*2.0, PI*2.0)
+        $"3D/LightHolder".rotation.y = v
         
         write_range($Tabs/Light/HBoxContainer2/HSlider, v/PI/2.0)
     
     if color_picking != "":
         update()
     
+    $"Warnings".text = ""
+    if mat_3d.uv1_triplanar:
+        $"Warnings".text = "Warning: Depth maps don't display with triplanar-mapped objects (triplanar sphere and cylinders)"
+
     processing = false
 
 var color_picking = ""
 var color_which = -1
 
 func start_picking_color(type : String, which : int):
-    if type == "metal":
-        Input.set_custom_mouse_cursor(preload("res://spoit.png"), Input.CURSOR_ARROW, Vector2(1, 20))
-        color_picking = type
-        color_which = which
+    Input.set_custom_mouse_cursor(preload("res://spoit.png"), Input.CURSOR_ARROW, Vector2(1, 20))
+    color_picking = type
+    color_which = which
 
 func end_picking_color():
     var vp = get_viewport()
@@ -419,39 +493,61 @@ func end_picking_color():
     var color = screen.get_pixelv(mouse_pos)
     screen.unlock()
     
+    var box = HBoxContainer.new()
+    var icon = ColorRect.new()
+    var label = Label.new()
+    var slider = HSlider.new()
+    var button = TextureButton.new()
+    icon.color = color
+    icon.rect_min_size = Vector2(16, 16)
+    
     if color_picking == "metal":
-        var box = HBoxContainer.new()
-        var icon = ColorRect.new()
-        var label = Label.new()
-        var slider = HSlider.new()
-        var button = TextureButton.new()
-        icon.color = color
-        icon.rect_min_size = Vector2(16, 16)
         label.text = "Metallicity:"
-        slider.max_value = 100
-        slider.size_flags_horizontal |= SIZE_EXPAND
+    elif color_picking == "roughness":
+        label.text = "Roughness:"
+    
+    slider.max_value = 100
+    slider.size_flags_horizontal |= SIZE_EXPAND
+    
+    button.texture_hover = preload("res://x.png")
+    button.texture_normal = preload("res://x.png")
+    button.texture_disabled = preload("res://x.png")
+    button.texture_focused = preload("res://x.png")
+    button.texture_pressed = preload("res://x.png")
+    
+    if color_picking == "metal":
         slider.connect("value_changed", self, "metallicity_update")
-        button.texture_hover = preload("res://x.png")
-        button.texture_normal = preload("res://x.png")
-        button.texture_disabled = preload("res://x.png")
-        button.texture_focused = preload("res://x.png")
-        button.texture_pressed = preload("res://x.png")
-        button.connect("pressed", self, "delete_color", [box])
-        box.add_child(icon)
-        box.add_child(label)
-        box.add_child(slider)
-        box.add_child(button)
+        button.connect("pressed", self, "delete_color", [box, "metallicity_update"])
+    elif color_picking == "roughness":
+        slider.connect("value_changed", self, "roughness_update")
+        button.connect("pressed", self, "delete_color", [box, "roughness_update"])
+    
+    box.add_child(icon)
+    box.add_child(label)
+    box.add_child(slider)
+    box.add_child(button)
+    
+    if color_picking == "metal":
         $"Tabs/Metal Map".add_child(box)
         metal_slider_changed(0.0)
+    elif color_picking == "roughness":
+        $"Tabs/Roughness Map".add_child(box)
+        roughness_slider_changed(0.0)
     
     cancel_picking_color()
 
 func metallicity_update(_unused):
     metal_slider_changed(0.0)
 
-func delete_color(which):
+func roughness_update(_unused):
+    roughness_slider_changed(0.0)
+
+func delete_color(which, type):
     which.queue_free()
-    $"Tabs/Metal Map".remove_child(which)
+    if type == "metallicity":
+        $"Tabs/Metal Map".remove_child(which)
+    elif type == "roughness":
+        $"Tabs/Roughness Map".remove_child(which)
     metal_slider_changed(0.0)
 
 func cancel_picking_color():
@@ -485,20 +581,34 @@ func light_angle_update(_unused):
 func light_rotation_update(_unused):
     if processing:
         return
-    print("asdioroiwge")
     $"3D/LightHolder".rotation_degrees.y = 360*read_range($Tabs/Light/HBoxContainer2/HSlider)
+
+func shape_rotation_update(_unused):
+    if processing:
+        return
+    $"3D/MeshHolder/Mesh".rotation_degrees.y = 360*read_range($Tabs/Shape/HBoxContainer/HSlider)
 
 func set_mesh(which : String):
     $"3D/MeshHolder/Mesh".translation.y = 0
     $"3D/MeshHolder/Mesh".rotation.x = 0
     $"3D/MeshHolder/Mesh".scale = Vector3(1, 1, 1)
     set_uv_scale(Vector3(3, 2, 2))
+    mat_3d.uv1_triplanar = false
+    mat_3d.uv1_triplanar_sharpness = 16.0
+    mat_3d.uv1_offset = Vector3(0.0, 0.0, 0.0)
     var mesh = null
     if which == "sphere":
         mesh = SphereMesh.new()
         mesh.radial_segments = 256
         mesh.rings = 128
         set_uv_scale(Vector3(2, 1, 1))
+    elif which == "sphere triplanar":
+        mesh = SphereMesh.new()
+        mesh.radial_segments = 256
+        mesh.rings = 128
+        mat_3d.uv1_triplanar = true
+        set_uv_scale(Vector3(0.5, 0.5, 0.5))
+        mat_3d.uv1_offset = Vector3(0.5, 0.5, 0.5)
     elif which == "cube":
         mesh = CubeMesh.new()
         $"3D/MeshHolder/Mesh".scale *= 0.7
@@ -506,15 +616,26 @@ func set_mesh(which : String):
         mesh = CylinderMesh.new()
         mesh.radial_segments = 256
         mesh.rings = 0
+        $"3D/MeshHolder/Mesh".scale *= 0.7
+        mat_3d.uv1_triplanar = true
+        set_uv_scale(Vector3(0.5, 0.5, 0.5))
+        mat_3d.uv1_offset = Vector3(0.5, 0.5, 0.5)
     elif which == "sideways cylinder":
         mesh = CylinderMesh.new()
         mesh.radial_segments = 256
         mesh.rings = 0
         $"3D/MeshHolder/Mesh".scale *= 0.7
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
+        mat_3d.uv1_triplanar = true
+        set_uv_scale(Vector3(0.5, 0.5, 0.5))
+        mat_3d.uv1_offset = Vector3(0.5, 0.5, 0.5)
     elif which == "plane":
         mesh = CubeMesh.new()
         mesh.size.z = 0
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
-        $"3D/MeshHolder/Mesh".translation.y = -0.5
+        $"3D/MeshHolder/Mesh".translation.y = -0.1
+    elif which == "plane slanted":
+        mesh = CubeMesh.new()
+        mesh.size.z = 0
+        $"3D/MeshHolder/Mesh".rotation_degrees.x = 45
     $"3D/MeshHolder/Mesh".mesh = mesh
