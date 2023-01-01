@@ -15,9 +15,13 @@ var albedo : ImageTexture
 var mat_3d = SpatialMaterial.new()
 var mat_texture = preload("res://UnshadedPlain.material")
 
+func set_uv_scale(scale : Vector3):
+    mat_3d.uv1_scale = scale
+    mat_texture.set_shader_param("uv1_scale", scale)
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-    $"3D/SphereHolder/Sphere".global_rotation.y += 1.5
+    $"3D/MeshHolder/Mesh".global_rotation.y += 1.5
     
     $"Tabs/Normal Map/OptionButton".add_item("Grey")
     $"Tabs/Normal Map/OptionButton".add_item("Red")
@@ -62,12 +66,17 @@ func _ready():
     $Tabs/Light/HBoxContainer/HSlider.connect("value_changed", self, "light_angle_update")
     $Tabs/Light/HBoxContainer2/HSlider.connect("value_changed", self, "light_rotation_update")
     
-    mat_3d.uv1_scale = Vector3(2, 1, 1)
-    mat_texture.set_shader_param("uv1_scale", Vector3(2, 1, 1))
+    set_uv_scale(Vector3(2, 1, 1))
     
-    $"3D/SphereHolder/Sphere".material_override = mat_3d
+    $"3D/MeshHolder/Mesh".material_override = mat_3d
     
     $"Tabs/Metal Map/Button".connect("pressed", self, "start_picking_color", ["metal", -1])
+    
+    $Tabs/Shape/Button.connect("pressed", self, "set_mesh", ["sphere"])
+    $Tabs/Shape/Button2.connect("pressed", self, "set_mesh", ["cube"])
+    $Tabs/Shape/Button3.connect("pressed", self, "set_mesh", ["cylinder"])
+    $Tabs/Shape/Button4.connect("pressed", self, "set_mesh", ["sideways cylinder"])
+    $Tabs/Shape/Button5.connect("pressed", self, "set_mesh", ["plane"])
 
 func color_changed(new_color : Color, which : String):
     if which == "ambient":
@@ -76,10 +85,10 @@ func color_changed(new_color : Color, which : String):
         $"3D/LightHolder/DirectionalLight".light_color = new_color
 
 func toggle_mat():
-    if $"3D/SphereHolder/Sphere".material_override == mat_3d:
-        $"3D/SphereHolder/Sphere".material_override = mat_texture
+    if $"3D/MeshHolder/Mesh".material_override == mat_3d:
+        $"3D/MeshHolder/Mesh".material_override = mat_texture
     else:
-        $"3D/SphereHolder/Sphere".material_override = mat_3d
+        $"3D/MeshHolder/Mesh".material_override = mat_3d
 
 func show_albedo():
     if albedo_image:
@@ -119,7 +128,7 @@ func files_dropped(files : PoolStringArray, _screen : int):
     
     mat_3d.albedo_texture = albedo
     
-    #$"3D/SphereHolder/Sphere".material_override = mat_3d
+    #$"3D/MeshHolder/Mesh".material_override = mat_3d
     
     normal_slider_changed(0.0)
 
@@ -241,13 +250,13 @@ func normal_slider_changed(_unused : float):
     
     normal = ImageTexture.new()
     normal.create_from_image(normal_image)
+    normal.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
     
     mat_3d.normal_enabled = true
     mat_3d.normal_texture = normal
     var n2 = normal.duplicate(true)
     mat_texture.set_shader_param("image", n2)
     
-    mat_3d.uv1_scale = Vector3(2, 1, 1)
 
 
 func depth_option_picked(_unused : int):
@@ -271,6 +280,7 @@ func depth_slider_changed(_unused : float):
     
     depth = ImageTexture.new()
     depth.create_from_image(depth_image)
+    depth.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
     
     mat_3d.depth_enabled = true
     mat_3d.depth_deep_parallax = true
@@ -278,7 +288,6 @@ func depth_slider_changed(_unused : float):
     var n2 = depth.duplicate(true)
     mat_texture.set_shader_param("image", n2)
     
-    mat_3d.uv1_scale = Vector3(2, 1, 1)
 
 func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float):
     if ref_image != image or ref_tex == null:
@@ -287,7 +296,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
         ref_tex.create_from_image(image)
     
     if colors.size() == 0:
-        colors = [Color.white]
+        colors = [Color(0, 0, 0, 0)]
     
     var img = Image.new()
     img.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
@@ -341,7 +350,6 @@ func metal_slider_changed(_unused : float):
     mat_3d.metallic = 1.0
     mat_3d.metallic_texture = metal
     mat_3d.metallic_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_RED
-    mat_3d.uv1_scale = Vector3(2, 1, 1)
     
     var n2 = metal.duplicate(true)
     mat_texture.set_shader_param("image", n2)
@@ -382,9 +390,9 @@ func _process(delta : float):
     mat_3d.depth_scale = read_range($"Tabs/Shader Config/HSlider3") * 0.05 * 4.0
     
     if $Tabs/Light/CheckBox.pressed:
-        $"3D/SphereHolder/Sphere".global_rotation.y += delta*0.1
-        $"3D/LightHolder".global_rotation.y -= delta
-        var v = fmod($"3D/LightHolder".global_rotation.y + PI*2.0, PI*2.0)
+        $"3D/MeshHolder/Mesh".rotation.y += delta*0.1
+        $"3D/LightHolder".rotation.y -= delta
+        var v = fmod($"3D/LightHolder".rotation.y + PI*2.0, PI*2.0)
         
         write_range($Tabs/Light/HBoxContainer2/HSlider, v/PI/2.0)
     
@@ -479,4 +487,34 @@ func light_rotation_update(_unused):
         return
     print("asdioroiwge")
     $"3D/LightHolder".rotation_degrees.y = 360*read_range($Tabs/Light/HBoxContainer2/HSlider)
-    
+
+func set_mesh(which : String):
+    $"3D/MeshHolder/Mesh".translation.y = 0
+    $"3D/MeshHolder/Mesh".rotation.x = 0
+    $"3D/MeshHolder/Mesh".scale = Vector3(1, 1, 1)
+    set_uv_scale(Vector3(3, 2, 2))
+    var mesh = null
+    if which == "sphere":
+        mesh = SphereMesh.new()
+        mesh.radial_segments = 256
+        mesh.rings = 128
+        set_uv_scale(Vector3(2, 1, 1))
+    elif which == "cube":
+        mesh = CubeMesh.new()
+        $"3D/MeshHolder/Mesh".scale *= 0.7
+    elif which == "cylinder":
+        mesh = CylinderMesh.new()
+        mesh.radial_segments = 256
+        mesh.rings = 0
+    elif which == "sideways cylinder":
+        mesh = CylinderMesh.new()
+        mesh.radial_segments = 256
+        mesh.rings = 0
+        $"3D/MeshHolder/Mesh".scale *= 0.7
+        $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
+    elif which == "plane":
+        mesh = CubeMesh.new()
+        mesh.size.z = 0
+        $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
+        $"3D/MeshHolder/Mesh".translation.y = -0.5
+    $"3D/MeshHolder/Mesh".mesh = mesh

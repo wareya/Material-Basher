@@ -33,21 +33,21 @@ shader_param/albedo = Color( 1, 1, 1, 1 )
 
 [sub_resource type="ProceduralSky" id=6]
 sun_latitude = -180.0
+texture_size = 3
 
 [sub_resource type="Environment" id=5]
 background_mode = 2
 background_sky = SubResource( 6 )
 ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
 ambient_light_sky_contribution = 0.0
-ss_reflections_enabled = true
 
 [sub_resource type="SpatialMaterial" id=18]
 metallic = 1.0
 metallic_specular = 1.0
 
-[sub_resource type="SphereMesh" id=4]
-radial_segments = 128
-rings = 64
+[sub_resource type="SphereMesh" id=26]
+radial_segments = 256
+rings = 128
 
 [sub_resource type="Gradient" id=1]
 interpolation_mode = 2
@@ -141,6 +141,7 @@ material_override = SubResource( 16 )
 mesh = SubResource( 17 )
 
 [node name="TextureRect" type="TextureRect" parent="."]
+visible = false
 show_behind_parent = true
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -155,15 +156,16 @@ stretch_mode = 6
 [node name="DirectionalLight" type="DirectionalLight" parent="3D/LightHolder"]
 transform = Transform( 1, 0, 0, 0, 0.5, 0.866026, 0, -0.866026, 0.5, 0, 2.92074, 3 )
 light_energy = 1.4
+shadow_bias = 1.396
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="3D"]
 environment = SubResource( 5 )
 
-[node name="SphereHolder" type="Spatial" parent="3D"]
+[node name="MeshHolder" type="Spatial" parent="3D"]
 
-[node name="Sphere" type="MeshInstance" parent="3D/SphereHolder"]
+[node name="Mesh" type="MeshInstance" parent="3D/MeshHolder"]
 material_override = SubResource( 18 )
-mesh = SubResource( 4 )
+mesh = SubResource( 26 )
 
 [node name="CameraHolder" type="Spatial" parent="3D"]
 
@@ -762,6 +764,45 @@ margin_right = 104.0
 margin_bottom = 148.0
 size_flags_horizontal = 3
 value = 25.0
+
+[node name="Shape" type="VBoxContainer" parent="Tabs"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Button" type="Button" parent="Tabs/Shape"]
+margin_right = 126.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+text = "Sphere"
+
+[node name="Button2" type="Button" parent="Tabs/Shape"]
+margin_top = 24.0
+margin_right = 126.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+text = "Cube"
+
+[node name="Button3" type="Button" parent="Tabs/Shape"]
+margin_top = 48.0
+margin_right = 126.0
+margin_bottom = 68.0
+size_flags_horizontal = 3
+text = "Cylinder"
+
+[node name="Button4" type="Button" parent="Tabs/Shape"]
+margin_top = 96.0
+margin_right = 126.0
+margin_bottom = 116.0
+size_flags_horizontal = 3
+text = "Sideways Cylinder"
+
+[node name="Button5" type="Button" parent="Tabs/Shape"]
+margin_top = 72.0
+margin_right = 126.0
+margin_bottom = 92.0
+size_flags_horizontal = 3
+text = "Plane"
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false

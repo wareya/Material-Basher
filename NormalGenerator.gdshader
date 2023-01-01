@@ -140,11 +140,11 @@ vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
     //float octave_adjusted = mix(2.22, 6.0, float(octave)/6.0);
     //float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);
     //float mip_level = float(max_level) - octave_level;
-    float mip_level = float(max_level) - float(octave+2);
+    float mip_level = float(max_level) - float(octave+3);
     if (octave == 6 && generate_normal > 0.5)
         mip_level = 0.0;
     else if (octave == 5 && generate_normal > 0.5)
-        mip_level = mix(float(max_level) - 6.0, 0.0, 0.5);
+        mip_level = mix(float(max_level) - 7.0, 0.0, 0.5);
     mip_level = max(0.0, mip_level);
     
     float lower = floor(mip_level);
