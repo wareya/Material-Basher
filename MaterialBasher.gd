@@ -81,6 +81,11 @@ func _ready():
     $"Tabs/AO Map/Slider9".connect("value_changed", self, "ao_slider_changed")
     $"Tabs/AO Map/Slider10".connect("value_changed", self, "ao_slider_changed")
     
+    $"Tabs/Shading Remover/Slider".connect("value_changed", self, "light_remover_slider_changed")
+    $"Tabs/Shading Remover/Slider2".connect("value_changed", self, "light_remover_slider_changed")
+    $"Tabs/Shading Remover/Slider3".connect("value_changed", self, "light_remover_slider_changed")
+    $"Tabs/Shading Remover/Slider4".connect("value_changed", self, "light_remover_slider_changed")
+    
     $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
@@ -250,6 +255,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         ref_tex.create_from_image(image)
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
+    $Helper.keep_3d_linear = true
     mat.shader = preload("res://NormalGenerator.gdshader")
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("strength", strength)
@@ -328,10 +334,11 @@ func normal_slider_changed(_unused : float):
     
     mat_3d.normal_enabled = true
     mat_3d.normal_texture = normal
-    var n2 = normal.duplicate(true)
-    mat_texture.set_shader_param("image", n2)
+    if !indirect_update:
+        var n2 = normal.duplicate(true)
+        mat_texture.set_shader_param("image", n2)
     
-
+var indirect_update = false
 
 func depth_option_picked(_unused : int):
     depth_slider_changed(0.0)
@@ -361,8 +368,14 @@ func depth_slider_changed(_unused : float):
     mat_3d.depth_enabled = true
     mat_3d.depth_deep_parallax = true
     mat_3d.depth_texture = depth
-    var n2 = depth.duplicate(true)
-    mat_texture.set_shader_param("image", n2)
+    
+    if !indirect_update:
+        var n2 = depth.duplicate(true)
+        mat_texture.set_shader_param("image", n2)
+    
+    indirect_update = true
+    
+    ao_slider_changed(0.0)
 
 
 var ao_ref_image = null
@@ -372,9 +385,9 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
         ao_ref_image = image
         ao_ref_tex = ImageTexture.new()
         ao_ref_tex.create_from_image(image)
-        print("asdf")
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
+    $Helper.keep_3d_linear = true
     mat.shader = preload("res://AOGenerator.gdshader")
     mat.set_shader_param("depth", ao_ref_tex)
     mat.set_shader_param("strength", strength)
@@ -432,9 +445,75 @@ func ao_slider_changed(_unused : float):
     
     mat_3d.ao_enabled = true
     mat_3d.ao_texture = ao
-    var n2 = ao.duplicate(true)
-    mat_texture.set_shader_param("image", n2)
+    
+    if !indirect_update:
+        var n2 = ao.duplicate(true)
+        mat_texture.set_shader_param("image", n2)
+    
+    indirect_update = true
+    
+    light_remover_slider_changed(0.0)
 
+var albedo_ref_image = null
+var albedo_ref_tex = null
+var albedo_ref_ao_image = null
+var albedo_ref_ao_tex = null
+func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_image : Image, depth_image, ao_strength, ao_limit, ao_gamma, ao_desat):
+    if albedo_ref_image != albedo_image or albedo_ref_tex == null:
+        albedo_ref_image = albedo_image
+        albedo_ref_tex = ImageTexture.new()
+        albedo_ref_tex.create_from_image(albedo_image)
+    
+    if albedo_ref_ao_image != ao_image or albedo_ref_ao_tex == null:
+        albedo_ref_ao_image = ao_image
+        albedo_ref_ao_tex = ImageTexture.new()
+        albedo_ref_ao_tex.create_from_image(ao_image)
+    
+    var mat = $Helper/Quad.material_override as ShaderMaterial
+    $Helper.keep_3d_linear = false
+    mat.shader = preload("res://AORemover.gdshader")
+    mat.set_shader_param("albedo", albedo_ref_tex)
+    mat.set_shader_param("ao", albedo_ref_ao_tex)
+    mat.set_shader_param("ao_strength", ao_strength)
+    mat.set_shader_param("ao_limit", ao_limit)
+    mat.set_shader_param("ao_gamma", ao_gamma)
+    mat.set_shader_param("ao_desat", ao_desat)
+    
+    var size = albedo_image.get_size()
+    $Helper.size = size
+    $Helper/Quad.scale.x = size.x / size.y
+    
+    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+    VisualServer.force_draw(false, 0.0)
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    
+    return $Helper.get_texture().get_data()
+
+func light_remover_slider_changed(_unused : float):
+    if albedo_image == null:
+        return
+    if setting_sliders:
+        return
+    
+    var ao_strength = read_range($"Tabs/Shading Remover/Slider")
+    var ao_limit = read_range($"Tabs/Shading Remover/Slider2")
+    var ao_gamma = read_range($"Tabs/Shading Remover/Slider3")
+    var ao_desat = read_range($"Tabs/Shading Remover/Slider4")
+    
+    ao_strength = ao_strength*ao_strength*30.0
+    
+    albedo_image_display = create_unlit_albedo_image(albedo_image, ao_image, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
+    
+    albedo = ImageTexture.new()
+    albedo.create_from_image(albedo_image_display)
+    albedo.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    
+    mat_3d.albedo_texture = albedo
+    if !indirect_update:
+        var n2 = albedo.duplicate(true)
+        mat_texture.set_shader_param("image", n2)
 
 func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius):
     mixing_bias = mixing_bias*mixing_bias
@@ -456,6 +535,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     color_tex.create_from_image(img)
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
+    $Helper.keep_3d_linear = true
     mat.shader = preload("res://MetallicityGenerator.gdshader")
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("colors", color_tex)
@@ -504,8 +584,9 @@ func metal_slider_changed(_unused : float):
     mat_3d.metallic_texture = metal
     mat_3d.metallic_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_RED
     
-    var n2 = metal.duplicate(true)
-    mat_texture.set_shader_param("image", n2)
+    if !indirect_update:
+        var n2 = metal.duplicate(true)
+        mat_texture.set_shader_param("image", n2)
 
 
 func roughness_slider_changed(_unused : float):
@@ -535,8 +616,9 @@ func roughness_slider_changed(_unused : float):
     mat_3d.roughness_texture = roughness
     mat_3d.roughness_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_GREEN
     
-    var n2 = roughness.duplicate(true)
-    mat_texture.set_shader_param("image", n2)
+    if !indirect_update:
+        var n2 = roughness.duplicate(true)
+        mat_texture.set_shader_param("image", n2)
 
 
 var zoom = 0
@@ -587,6 +669,7 @@ func _input(_event):
 var processing = false
 var current_preview_texture = null
 func _process(delta : float):
+    indirect_update = false
     processing = true
     
     mat_3d.metallic_specular = read_range($"Tabs/Config/HSlider")
@@ -650,6 +733,8 @@ func _process(delta : float):
         next_texture = metal
     elif roughness and current_tab == $"Tabs/Roughness Map":
         next_texture = roughness
+    elif ao and current_tab == $"Tabs/AO Map":
+        next_texture = ao
     else:
         next_texture = albedo
     

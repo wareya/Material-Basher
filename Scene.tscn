@@ -445,42 +445,49 @@ custom_constants/separation = 9
 margin_right = 16.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="VSlider2" type="VSlider" parent="Tabs/Depth Map/Freqs"]
 margin_left = 25.0
 margin_right = 41.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="VSlider3" type="VSlider" parent="Tabs/Depth Map/Freqs"]
 margin_left = 50.0
 margin_right = 66.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="VSlider4" type="VSlider" parent="Tabs/Depth Map/Freqs"]
 margin_left = 75.0
 margin_right = 91.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="VSlider5" type="VSlider" parent="Tabs/Depth Map/Freqs"]
 margin_left = 100.0
 margin_right = 116.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="VSlider6" type="VSlider" parent="Tabs/Depth Map/Freqs"]
 margin_left = 125.0
 margin_right = 141.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="VSlider7" type="VSlider" parent="Tabs/Depth Map/Freqs"]
 margin_left = 150.0
 margin_right = 166.0
 margin_bottom = 116.0
 min_value = -100.0
+value = 100.0
 
 [node name="Presets" type="VBoxContainer" parent="Tabs/Depth Map/Freqs"]
 margin_left = 175.0
@@ -931,6 +938,70 @@ margin_bottom = 186.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
+
+[node name="Shading Remover" type="VBoxContainer" parent="Tabs"]
+margin_left = 8.0
+margin_top = 40.0
+margin_right = 48.0
+margin_bottom = 80.0
+
+[node name="Label" type="Label" parent="Tabs/Shading Remover"]
+margin_right = 165.0
+margin_bottom = 14.0
+size_flags_horizontal = 5
+text = "AO Removal"
+
+[node name="Slider" type="HSlider" parent="Tabs/Shading Remover"]
+margin_top = 18.0
+margin_right = 165.0
+margin_bottom = 34.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+
+[node name="Label2" type="Label" parent="Tabs/Shading Remover"]
+margin_top = 38.0
+margin_right = 165.0
+margin_bottom = 52.0
+size_flags_horizontal = 5
+text = "AO Removal Limit"
+
+[node name="Slider2" type="HSlider" parent="Tabs/Shading Remover"]
+margin_top = 56.0
+margin_right = 165.0
+margin_bottom = 72.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 100.0
+
+[node name="Label3" type="Label" parent="Tabs/Shading Remover"]
+margin_top = 76.0
+margin_right = 165.0
+margin_bottom = 90.0
+size_flags_horizontal = 5
+text = "AO Removal Gamma"
+
+[node name="Slider3" type="HSlider" parent="Tabs/Shading Remover"]
+margin_top = 94.0
+margin_right = 165.0
+margin_bottom = 110.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label4" type="Label" parent="Tabs/Shading Remover"]
+margin_top = 114.0
+margin_right = 165.0
+margin_bottom = 128.0
+size_flags_horizontal = 5
+text = "AO Removal Desaturation"
+
+[node name="Slider4" type="HSlider" parent="Tabs/Shading Remover"]
+margin_top = 132.0
+margin_right = 165.0
+margin_bottom = 148.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 25.0
 
 [node name="Ambience" type="VBoxContainer" parent="Tabs"]
 visible = false
