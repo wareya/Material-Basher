@@ -88,12 +88,32 @@ vec4 sample_bicubic_blurry(sampler2D tex, vec2 uv, int mip_level) {
     else
     {
         mip_level -= 1;
-        vec2 off = 0.5/vec2(textureSize(tex, mip_level));
-        vec4 a = sample_bicubic(tex, uv + vec2(-1, -1)*off, mip_level);
-        vec4 b = sample_bicubic(tex, uv + vec2( 1, -1)*off, mip_level);
-        vec4 c = sample_bicubic(tex, uv + vec2(-1,  1)*off, mip_level);
-        vec4 d = sample_bicubic(tex, uv + vec2( 1,  1)*off, mip_level);
-        return (a+b+d+d)*0.25;
+        vec2 off = 0.25/vec2(textureSize(tex, mip_level));
+        vec4 c00 = sample_bicubic(tex, uv + vec2(-1, -1)*off, mip_level);
+        vec4 c20 = sample_bicubic(tex, uv + vec2( 1, -1)*off, mip_level);
+        vec4 c02 = sample_bicubic(tex, uv + vec2(-1,  1)*off, mip_level);
+        vec4 c22 = sample_bicubic(tex, uv + vec2( 1,  1)*off, mip_level);
+        return (c00+c20+c02+c22)/4.0;
+    }
+}
+vec4 sample_bicubic_super_blurry(sampler2D tex, vec2 uv, int mip_level) {
+    if(mip_level == 0)
+        return sample_bicubic(tex, uv, mip_level);
+    else if(mip_level == 1)
+        return sample_bicubic_blurry(tex, uv, mip_level);
+    else
+    {
+        mip_level -= 2;
+        vec2 off = 0.25/vec2(textureSize(tex, mip_level));
+        vec4 ret = vec4(0);
+        for (int y = -3; y <= 3; y += 2)
+        {
+            for (int x = -3; x <= 3; x += 2)
+            {
+                ret += sample_bicubic(tex, uv + vec2(ivec2(x, y))*off, mip_level);
+            }
+        }
+        return ret/16.0;
     }
 }
 

@@ -12,7 +12,11 @@ var metal : ImageTexture
 var roughness_image : Image
 var roughness : ImageTexture
 
+var ao_image : Image
+var ao : ImageTexture
+
 var albedo_image : Image
+var albedo_image_display : Image
 var albedo : ImageTexture
 
 var mat_3d = SpatialMaterial.new()
@@ -65,6 +69,12 @@ func _ready():
     $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self, "metal_slider_changed")
+    
+    $"Tabs/AO Map/Slider".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider2".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider3".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider4".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider5".connect("value_changed", self, "ao_slider_changed")
     
     $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
@@ -163,14 +173,14 @@ func files_dropped(files : PoolStringArray, _screen : int):
         return
     
     albedo_image = image
-    
+    albedo_image_display = albedo_image.duplicate()
     albedo = ImageTexture.new()
-    albedo.create_from_image(albedo_image)
+    albedo.create_from_image(albedo_image_display)
     albedo.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
     
     mat_3d.albedo_texture = albedo
     
-    #$"3D/MeshHolder/Mesh".material_override = mat_3d
+    # FIXME clear up the rest of the material
     
     normal_slider_changed(0.0)
     depth_slider_changed(0.0)
@@ -346,6 +356,67 @@ func depth_slider_changed(_unused : float):
     var n2 = depth.duplicate(true)
     mat_texture.set_shader_param("image", n2)
 
+
+var ao_ref_image = null
+var ao_ref_tex = null
+func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, freq_balance):
+    if ao_ref_image != image or ao_ref_tex == null:
+        ao_ref_image = image
+        ao_ref_tex = ImageTexture.new()
+        ao_ref_tex.create_from_image(image)
+        print("asdf")
+    
+    var mat = $Helper/Quad.material_override as ShaderMaterial
+    mat.shader = preload("res://AOGenerator.gdshader")
+    mat.set_shader_param("depth", ao_ref_tex)
+    mat.set_shader_param("strength", strength)
+    mat.set_shader_param("freq_low", freq_low)
+    mat.set_shader_param("freq_mid", freq_mid)
+    mat.set_shader_param("freq_high", freq_high)
+    mat.set_shader_param("freq_balance", freq_balance)
+    
+    var size = image.get_size()
+    $Helper.size = size
+    $Helper/Quad.scale.x = size.x / size.y
+    
+    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+    VisualServer.force_draw(false, 0.0)
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    
+    return $Helper.get_texture().get_data()
+
+
+func ao_option_picked(_unused : int):
+    ao_slider_changed(0.0)
+func ao_slider_changed(_unused : float):
+    if depth_image == null:
+        return
+    if setting_sliders:
+        return
+    
+    var strength = read_range($"Tabs/AO Map/Slider")
+    var freq_high = read_range($"Tabs/AO Map/Slider2")
+    var freq_mid = read_range($"Tabs/AO Map/Slider5")
+    var freq_low = read_range($"Tabs/AO Map/Slider3")
+    var freq_balance = read_range($"Tabs/AO Map/Slider4")
+    
+    ao_image = create_ao_texture(depth_image, strength*strength*100.0, freq_high, freq_mid, freq_low, freq_balance)
+    print($"Tabs/AO Map/Slider2".value)
+    print($"Tabs/AO Map/Slider3".value)
+    
+    ao = ImageTexture.new()
+    ao.create_from_image(ao_image)
+    ao.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    ao.flags |= ImageTexture.FLAG_FILTER
+    
+    mat_3d.ao_enabled = true
+    mat_3d.ao_texture = ao
+    var n2 = ao.duplicate(true)
+    mat_texture.set_shader_param("image", n2)
+
+
 func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius):
     mixing_bias = mixing_bias*mixing_bias
     if ref_image != image or ref_tex == null:
@@ -386,6 +457,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     
     return $Helper.get_texture().get_data()
 
+
 func metal_slider_changed(_unused : float):
     if albedo_image == null:
         return
@@ -416,6 +488,7 @@ func metal_slider_changed(_unused : float):
     var n2 = metal.duplicate(true)
     mat_texture.set_shader_param("image", n2)
 
+
 func roughness_slider_changed(_unused : float):
     if albedo_image == null:
         return
@@ -445,6 +518,7 @@ func roughness_slider_changed(_unused : float):
     
     var n2 = roughness.duplicate(true)
     mat_texture.set_shader_param("image", n2)
+
 
 var zoom = 0
 func _input(_event):
@@ -489,6 +563,7 @@ func _input(_event):
                 $"3D/CameraHolder".global_translation -= right*event.relative.x * whee * sens
         x = clamp(x, -90, 90)
         $"3D/CameraHolder".rotation_degrees.x = x
+
 
 var processing = false
 var current_preview_texture = null
