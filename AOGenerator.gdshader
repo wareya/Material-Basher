@@ -9,6 +9,12 @@ uniform float freq_mid;
 uniform float freq_high;
 uniform float freq_balance;
 
+uniform float exponent;
+uniform float bias;
+uniform float contrast;
+uniform float fine_limit;
+uniform float rough_limit;
+
 void vertex() {
     UV = UV;
 }
@@ -88,7 +94,19 @@ vec4 sample_bicubic_super_blurry(sampler2D tex, vec2 uv, int mip_level) {
     if(mip_level == 0)
         return sample_bicubic(tex, uv, mip_level);
     else if(mip_level == 1)
-        return sample_bicubic_blurry(tex, uv, mip_level);
+    {
+        mip_level -= 1;
+        vec2 off = 0.5/vec2(textureSize(tex, mip_level));
+        vec4 ret = vec4(0);
+        for (int y = -1; y <= 1; y += 2)
+        {
+            for (int x = -1; x <= 1; x += 2)
+            {
+                ret += sample_bicubic(tex, uv + vec2(ivec2(x, y))*off, mip_level);
+            }
+        }
+        return ret/4.0;
+    }
     else
     {
         mip_level -= 2;
@@ -153,8 +171,26 @@ void fragment() {
     float mid  = get_octave(depth, UV, float(max_level)*real_freq_mid).r;
     float low  = get_octave(depth, UV, float(max_level)*real_freq_low).r;
     
-    float ao_fine  = 1.0 - max(0, fine-mid)*strength;
-    float ao_broad = 1.0 - max(0, mid -low)*strength;
+    float real_bias = bias-0.5;
     
-    ALBEDO = vec3(mix(ao_fine, ao_broad, freq_balance));
+    float raw_ao_fine  = min( fine_limit, fine-mid);
+    float raw_ao_broad = min(rough_limit, mid -low);
+    
+    float ao_fine  = 1.0 - max(0, raw_ao_fine  - real_bias)*strength;
+    float ao_broad = 1.0 - max(0, raw_ao_broad - real_bias)*strength;
+    
+    float f = mix(ao_fine, ao_broad, freq_balance);
+    
+    f = (f-1.0)*contrast*2.0+1.0;
+    
+    float real_exponent = clamp(exponent, 0.01, 0.99)*2.0;
+    if (real_exponent > 1.0)
+    {
+        real_exponent = 2.0-real_exponent;
+        f = 1.0-pow(1.0-f, 1.0/real_exponent);
+    }
+    else
+        f = pow(f, 1.0/real_exponent);
+    
+    ALBEDO = vec3(f);
 }

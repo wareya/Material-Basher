@@ -27,6 +27,7 @@ shader_param/lightpoint = null
 shader_param/depth_offset = null
 shader_param/channel = null
 shader_param/generate_normal = null
+shader_param/microfacets = null
 shader_param/albedo = Color( 1, 1, 1, 1 )
 
 [sub_resource type="QuadMesh" id=17]
@@ -321,71 +322,85 @@ margin_right = 100.0
 margin_bottom = 140.0
 text = "Zero"
 
-[node name="Label3" type="Label" parent="Tabs/Normal Map"]
+[node name="Label8" type="Label" parent="Tabs/Normal Map"]
 margin_top = 200.0
 margin_right = 275.0
 margin_bottom = 214.0
-text = "Darkpoint Value"
+text = "Microfacets"
 
-[node name="Slider2" type="HSlider" parent="Tabs/Normal Map"]
+[node name="Slider6" type="HSlider" parent="Tabs/Normal Map"]
 margin_top = 218.0
 margin_right = 275.0
 margin_bottom = 234.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
+value = 100.0
 
-[node name="Label4" type="Label" parent="Tabs/Normal Map"]
+[node name="Label3" type="Label" parent="Tabs/Normal Map"]
 margin_top = 238.0
 margin_right = 275.0
 margin_bottom = 252.0
-text = "Midpoint Value"
+text = "Darkpoint Value"
 
-[node name="Slider3" type="HSlider" parent="Tabs/Normal Map"]
+[node name="Slider2" type="HSlider" parent="Tabs/Normal Map"]
 margin_top = 256.0
 margin_right = 275.0
 margin_bottom = 272.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
-value = 50.0
 
-[node name="Label5" type="Label" parent="Tabs/Normal Map"]
+[node name="Label4" type="Label" parent="Tabs/Normal Map"]
 margin_top = 276.0
 margin_right = 275.0
 margin_bottom = 290.0
-text = "Lightpoint Value"
+text = "Midpoint Value"
 
-[node name="Slider4" type="HSlider" parent="Tabs/Normal Map"]
+[node name="Slider3" type="HSlider" parent="Tabs/Normal Map"]
 margin_top = 294.0
 margin_right = 275.0
 margin_bottom = 310.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
-value = 100.0
+value = 50.0
 
-[node name="Label6" type="Label" parent="Tabs/Normal Map"]
+[node name="Label5" type="Label" parent="Tabs/Normal Map"]
 margin_top = 314.0
 margin_right = 275.0
 margin_bottom = 328.0
-text = "Midpoint Offset"
+text = "Lightpoint Value"
 
-[node name="Slider5" type="HSlider" parent="Tabs/Normal Map"]
+[node name="Slider4" type="HSlider" parent="Tabs/Normal Map"]
 margin_top = 332.0
 margin_right = 275.0
 margin_bottom = 348.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
-value = 50.0
+value = 100.0
 
-[node name="Label7" type="Label" parent="Tabs/Normal Map"]
+[node name="Label6" type="Label" parent="Tabs/Normal Map"]
 margin_top = 352.0
 margin_right = 275.0
 margin_bottom = 366.0
+text = "Midpoint Offset"
+
+[node name="Slider5" type="HSlider" parent="Tabs/Normal Map"]
+margin_top = 370.0
+margin_right = 275.0
+margin_bottom = 386.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label7" type="Label" parent="Tabs/Normal Map"]
+margin_top = 390.0
+margin_right = 275.0
+margin_bottom = 404.0
 text = "Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Normal Map"]
-margin_top = 370.0
+margin_top = 408.0
 margin_right = 275.0
-margin_bottom = 390.0
+margin_bottom = 428.0
 text = "Grey"
 flat = true
 
@@ -508,6 +523,19 @@ margin_top = 96.0
 margin_right = 100.0
 margin_bottom = 116.0
 text = "Zero"
+
+[node name="Label9" type="Label" parent="Tabs/Depth Map"]
+margin_top = 176.0
+margin_right = 275.0
+margin_bottom = 190.0
+text = "Microfacets"
+
+[node name="Slider7" type="HSlider" parent="Tabs/Depth Map"]
+margin_top = 194.0
+margin_right = 275.0
+margin_bottom = 210.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
 
 [node name="Label3" type="Label" parent="Tabs/Depth Map"]
 margin_top = 176.0
@@ -827,6 +855,82 @@ margin_bottom = 186.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
+
+[node name="Label6" type="Label" parent="Tabs/AO Map"]
+margin_top = 152.0
+margin_right = 275.0
+margin_bottom = 166.0
+size_flags_horizontal = 5
+text = "Exponent"
+
+[node name="Slider6" type="HSlider" parent="Tabs/AO Map"]
+margin_top = 170.0
+margin_right = 275.0
+margin_bottom = 186.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+min_value = 1.0
+value = 50.0
+
+[node name="Label7" type="Label" parent="Tabs/AO Map"]
+margin_top = 152.0
+margin_right = 275.0
+margin_bottom = 166.0
+size_flags_horizontal = 5
+text = "Bias"
+
+[node name="Slider7" type="HSlider" parent="Tabs/AO Map"]
+margin_top = 170.0
+margin_right = 275.0
+margin_bottom = 186.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label8" type="Label" parent="Tabs/AO Map"]
+margin_top = 152.0
+margin_right = 275.0
+margin_bottom = 166.0
+size_flags_horizontal = 5
+text = "Contrast"
+
+[node name="Slider8" type="HSlider" parent="Tabs/AO Map"]
+margin_top = 170.0
+margin_right = 275.0
+margin_bottom = 186.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 50.0
+
+[node name="Label9" type="Label" parent="Tabs/AO Map"]
+margin_top = 152.0
+margin_right = 275.0
+margin_bottom = 166.0
+size_flags_horizontal = 5
+text = "Fine Detail Limit"
+
+[node name="Slider9" type="HSlider" parent="Tabs/AO Map"]
+margin_top = 170.0
+margin_right = 275.0
+margin_bottom = 186.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 100.0
+
+[node name="Label10" type="Label" parent="Tabs/AO Map"]
+margin_top = 152.0
+margin_right = 275.0
+margin_bottom = 166.0
+size_flags_horizontal = 5
+text = "Rough Detail Limit"
+
+[node name="Slider10" type="HSlider" parent="Tabs/AO Map"]
+margin_top = 170.0
+margin_right = 275.0
+margin_bottom = 186.0
+size_flags_horizontal = 3
+size_flags_vertical = 1
+value = 100.0
 
 [node name="Ambience" type="VBoxContainer" parent="Tabs"]
 visible = false

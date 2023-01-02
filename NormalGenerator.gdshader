@@ -21,6 +21,8 @@ uniform vec3 channel;
 
 uniform float generate_normal;
 
+uniform float microfacets;
+
 void vertex() {
     UV = UV;
 }
@@ -82,25 +84,23 @@ vec4 sample_bicubic(sampler2D tex, vec2 uv, int mip_level) {
     return done;
 }
 
-vec4 sample_bicubic_blurry(sampler2D tex, vec2 uv, int mip_level) {
-    if(mip_level == 0)
-        return sample_bicubic(tex, uv, mip_level);
-    else
-    {
-        mip_level -= 1;
-        vec2 off = 0.25/vec2(textureSize(tex, mip_level));
-        vec4 c00 = sample_bicubic(tex, uv + vec2(-1, -1)*off, mip_level);
-        vec4 c20 = sample_bicubic(tex, uv + vec2( 1, -1)*off, mip_level);
-        vec4 c02 = sample_bicubic(tex, uv + vec2(-1,  1)*off, mip_level);
-        vec4 c22 = sample_bicubic(tex, uv + vec2( 1,  1)*off, mip_level);
-        return (c00+c20+c02+c22)/4.0;
-    }
-}
 vec4 sample_bicubic_super_blurry(sampler2D tex, vec2 uv, int mip_level) {
     if(mip_level == 0)
         return sample_bicubic(tex, uv, mip_level);
     else if(mip_level == 1)
-        return sample_bicubic_blurry(tex, uv, mip_level);
+    {
+        mip_level -= 1;
+        vec2 off = 0.5/vec2(textureSize(tex, mip_level));
+        vec4 ret = vec4(0);
+        for (int y = -1; y <= 1; y += 2)
+        {
+            for (int x = -1; x <= 1; x += 2)
+            {
+                ret += sample_bicubic(tex, uv + vec2(ivec2(x, y))*off, mip_level);
+            }
+        }
+        return ret/4.0;
+    }
     else
     {
         mip_level -= 2;
@@ -122,16 +122,16 @@ vec4 get_mip_level(sampler2D tex, vec2 uv, int mip_level) {
     if (generate_normal > 0.5)
     {
         vec2 off = stride/vec2(textureSize(albedo, mip_level));
-        float x1 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(-1, 0), mip_level).rgb, channel)*3.0;
-        float x2 = dot(sample_bicubic_blurry(albedo, uv + off * vec2( 1, 0), mip_level).rgb, channel)*3.0;
-        float y1 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(0, -1), mip_level).rgb, channel)*3.0;
-        float y2 = dot(sample_bicubic_blurry(albedo, uv + off * vec2(0,  1), mip_level).rgb, channel)*3.0;
+        float x1 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2(-1, 0), mip_level).rgb, channel)*3.0;
+        float x2 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2( 1, 0), mip_level).rgb, channel)*3.0;
+        float y1 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2(0, -1), mip_level).rgb, channel)*3.0;
+        float y2 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2(0,  1), mip_level).rgb, channel)*3.0;
         
         return vec4(x1, x2, y1, y2)/stride*0.5;
     }
     else
     {
-        return vec4(dot(sample_bicubic_blurry(albedo, uv, mip_level).rgb, channel)*3.0, 0, 0, 0);
+        return vec4(dot(sample_bicubic_super_blurry(albedo, uv, mip_level).rgb, channel)*3.0, 0, 0, 0);
     }
 }
 
@@ -161,10 +161,13 @@ vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
     //float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);
     //float mip_level = float(max_level) - octave_level;
     float mip_level = float(max_level) - float(octave+3);
-    if (octave == 6 && generate_normal > 0.5)
-        mip_level = 0.0;
-    else if (octave == 5 && generate_normal > 0.5)
-        mip_level = mix(float(max_level) - 7.0, 0.0, 0.5);
+    float with_microfacets = mip_level;
+    if (octave == 6)
+        with_microfacets = 0.0;
+    else if (octave == 5)
+        with_microfacets = mix(float(max_level) - 7.0, 0.0, 0.5);
+    mip_level = mix(mip_level, with_microfacets, microfacets);
+    
     mip_level = max(0.0, mip_level);
     
     float lower = floor(mip_level);

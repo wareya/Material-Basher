@@ -75,6 +75,11 @@ func _ready():
     $"Tabs/AO Map/Slider3".connect("value_changed", self, "ao_slider_changed")
     $"Tabs/AO Map/Slider4".connect("value_changed", self, "ao_slider_changed")
     $"Tabs/AO Map/Slider5".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider6".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider7".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider8".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider9".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider10".connect("value_changed", self, "ao_slider_changed")
     
     $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
@@ -238,7 +243,7 @@ func write_range(_range : Range, val : float):
 
 var ref_image = null
 var ref_tex = null
-func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, generate_normal):
+func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal):
     if ref_image != image or ref_tex == null:
         ref_image = image
         ref_tex = ImageTexture.new()
@@ -253,6 +258,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     mat.set_shader_param("midpoint_offset", midpoint_offset)
     mat.set_shader_param("lightpoint", lightpoint)
     mat.set_shader_param("depth_offset", depth_offset)
+    mat.set_shader_param("microfacets", microfacets)
     mat.set_shader_param("generate_normal", generate_normal)
     
     var parent = get_node("Tabs/%s Map" % [["Depth"], ["Normal"]][int(generate_normal)])
@@ -309,10 +315,11 @@ func normal_slider_changed(_unused : float):
     var midpoint = read_range($"Tabs/Normal Map/Slider3")
     var midpoint_offset = read_range($"Tabs/Normal Map/Slider5")
     var lightpoint = read_range($"Tabs/Normal Map/Slider4")
+    var microfacets = read_range($"Tabs/Normal Map/Slider6")
     
     var depth_offset = 0.0;
     
-    normal_image = create_normal_texture(albedo_image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 1.0)
+    normal_image = create_normal_texture(albedo_image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0)
     #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
@@ -339,10 +346,11 @@ func depth_slider_changed(_unused : float):
     var midpoint = read_range($"Tabs/Depth Map/Slider3")
     var midpoint_offset = read_range($"Tabs/Depth Map/Slider5")
     var lightpoint = read_range($"Tabs/Depth Map/Slider4")
+    var microfacets = read_range($"Tabs/Depth Map/Slider7")
     
     var depth_offset = read_range($"Tabs/Depth Map/Slider6")
     
-    depth_image = create_normal_texture(albedo_image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, 0.0)
+    depth_image = create_normal_texture(albedo_image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 0.0)
     #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
@@ -359,7 +367,7 @@ func depth_slider_changed(_unused : float):
 
 var ao_ref_image = null
 var ao_ref_tex = null
-func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, freq_balance):
+func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, bias, contrast, fine_limit, rough_limit):
     if ao_ref_image != image or ao_ref_tex == null:
         ao_ref_image = image
         ao_ref_tex = ImageTexture.new()
@@ -374,6 +382,11 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     mat.set_shader_param("freq_mid", freq_mid)
     mat.set_shader_param("freq_high", freq_high)
     mat.set_shader_param("freq_balance", freq_balance)
+    mat.set_shader_param("exponent", exponent)
+    mat.set_shader_param("bias", bias)
+    mat.set_shader_param("contrast", contrast)
+    mat.set_shader_param("fine_limit", fine_limit)
+    mat.set_shader_param("rough_limit", rough_limit)
     
     var size = image.get_size()
     $Helper.size = size
@@ -401,10 +414,16 @@ func ao_slider_changed(_unused : float):
     var freq_mid = read_range($"Tabs/AO Map/Slider5")
     var freq_low = read_range($"Tabs/AO Map/Slider3")
     var freq_balance = read_range($"Tabs/AO Map/Slider4")
+    var exponent = read_range($"Tabs/AO Map/Slider6")
+    var bias = read_range($"Tabs/AO Map/Slider7")
+    var comparison_bias = read_range($"Tabs/AO Map/Slider7")
+    var contrast = read_range($"Tabs/AO Map/Slider8")
+    var fine_limit = read_range($"Tabs/AO Map/Slider9")
+    var rough_limit = read_range($"Tabs/AO Map/Slider10")
     
-    ao_image = create_ao_texture(depth_image, strength*strength*100.0, freq_high, freq_mid, freq_low, freq_balance)
-    print($"Tabs/AO Map/Slider2".value)
-    print($"Tabs/AO Map/Slider3".value)
+    strength = max(0.00000001, strength*strength*100.0);
+    
+    ao_image = create_ao_texture(depth_image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
     
     ao = ImageTexture.new()
     ao.create_from_image(ao_image)
