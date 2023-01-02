@@ -1,12 +1,8 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://NormalGenerator.gdshader" type="Shader" id=2]
-[ext_resource path="res://DiamondPlate006C_2K_Roughness.jpg" type="Texture" id=3]
 [ext_resource path="res://AllTabContainer.gd" type="Script" id=4]
-[ext_resource path="res://Bricks076A_2K_Color 256.jpg" type="Texture" id=5]
-[ext_resource path="res://DiamondPlate006C_2K_Color.jpg" type="Texture" id=6]
-[ext_resource path="res://DiamondPlate006C_2K_Metalness.jpg" type="Texture" id=7]
 
 [sub_resource type="Environment" id=13]
 
@@ -34,30 +30,6 @@ shader_param/albedo = Color( 1, 1, 1, 1 )
 
 [sub_resource type="QuadMesh" id=17]
 
-[sub_resource type="ProceduralSky" id=6]
-sun_latitude = -180.0
-texture_size = 3
-
-[sub_resource type="Environment" id=5]
-background_mode = 2
-background_sky = SubResource( 6 )
-ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
-ambient_light_sky_contribution = 0.0
-
-[sub_resource type="SpatialMaterial" id=27]
-albedo_texture = ExtResource( 6 )
-metallic = 1.0
-metallic_specular = 0.0
-metallic_texture = ExtResource( 7 )
-roughness = 0.63
-roughness_texture = ExtResource( 3 )
-uv1_scale = Vector3( 2, 1, 1 )
-
-[sub_resource type="SphereMesh" id=26]
-material = SubResource( 27 )
-radial_segments = 256
-rings = 128
-
 [sub_resource type="Gradient" id=1]
 interpolation_mode = 2
 offsets = PoolRealArray( 0.150838, 0.603352, 0.748603, 0.871508, 1 )
@@ -78,6 +50,20 @@ margin_left = 8.0
 margin_right = 8.0
 margin_top = 8.0
 margin_bottom = 8.0
+
+[sub_resource type="ProceduralSky" id=6]
+sun_latitude = -180.0
+texture_size = 3
+
+[sub_resource type="Environment" id=5]
+background_mode = 2
+background_sky = SubResource( 6 )
+ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
+ambient_light_sky_contribution = 0.0
+
+[sub_resource type="SphereMesh" id=26]
+radial_segments = 256
+rings = 128
 
 [sub_resource type="Gradient" id=20]
 interpolation_mode = 2
@@ -102,8 +88,8 @@ margin_bottom = 5.0
 
 [sub_resource type="Gradient" id=23]
 interpolation_mode = 2
-offsets = PoolRealArray( 0.150838, 0.314607, 0.544944, 0.758427, 1 )
-colors = PoolColorArray( 0.424988, 0.45264, 0.515625, 0.45098, 0.554199, 0.582218, 0.625, 0.641643, 0.28125, 0.28125, 0.28125, 1, 0.761719, 0.761719, 0.761719, 1, 1, 1, 1, 0 )
+offsets = PoolRealArray( 0.150838, 0.353933, 0.544944, 0.758427, 1 )
+colors = PoolColorArray( 0.260649, 0.293519, 0.368652, 0.752941, 0.385893, 0.430838, 0.501465, 0.784314, 0.28125, 0.28125, 0.28125, 1, 0.761719, 0.761719, 0.761719, 1, 1, 1, 1, 0 )
 
 [sub_resource type="GradientTexture2D" id=24]
 flags = 5
@@ -158,6 +144,23 @@ margin_left = 640.0
 expand = true
 stretch_mode = 6
 
+[node name="PanelContainer" type="PanelContainer" parent="."]
+margin_left = 156.0
+margin_top = 13.0
+margin_right = 253.0
+margin_bottom = 110.0
+custom_styles/panel = SubResource( 3 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="TextureRect" type="TextureRect" parent="PanelContainer"]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 89.0
+margin_bottom = 89.0
+expand = true
+
 [node name="3D" type="Spatial" parent="."]
 
 [node name="LightHolder" type="Spatial" parent="3D"]
@@ -184,10 +187,13 @@ current = true
 [node name="Tabs" type="Container" parent="."]
 show_behind_parent = true
 margin_left = 16.0
-margin_top = 83.0
+margin_top = 121.0
 margin_right = 307.0
-margin_bottom = 448.0
+margin_bottom = 486.0
 script = ExtResource( 4 )
+__meta__ = {
+"_edit_group_": true
+}
 panel_bg = SubResource( 3 )
 tab_bg = SubResource( 22 )
 tab_inactive_bg = SubResource( 25 )
@@ -823,61 +829,75 @@ edit_alpha = false
 presets_enabled = false
 presets_visible = false
 
-[node name="Shader Config" type="VBoxContainer" parent="Tabs"]
+[node name="Config" type="VBoxContainer" parent="Tabs"]
 visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 
-[node name="Label" type="Label" parent="Tabs/Shader Config"]
+[node name="Label" type="Label" parent="Tabs/Config"]
 margin_right = 104.0
 margin_bottom = 14.0
 text = "Specular"
 
-[node name="HSlider" type="HSlider" parent="Tabs/Shader Config"]
+[node name="HSlider" type="HSlider" parent="Tabs/Config"]
 margin_top = 18.0
 margin_right = 104.0
 margin_bottom = 34.0
 size_flags_horizontal = 3
 value = 50.0
 
-[node name="Label4" type="Label" parent="Tabs/Shader Config"]
+[node name="Label4" type="Label" parent="Tabs/Config"]
 margin_top = 38.0
 margin_right = 104.0
 margin_bottom = 52.0
 text = "Roughness"
 
-[node name="HSlider4" type="HSlider" parent="Tabs/Shader Config"]
+[node name="HSlider4" type="HSlider" parent="Tabs/Config"]
 margin_top = 56.0
 margin_right = 104.0
 margin_bottom = 72.0
 size_flags_horizontal = 3
 value = 100.0
 
-[node name="Label2" type="Label" parent="Tabs/Shader Config"]
+[node name="Label2" type="Label" parent="Tabs/Config"]
 margin_top = 76.0
 margin_right = 104.0
 margin_bottom = 90.0
 text = "Normal Strength"
 
-[node name="HSlider2" type="HSlider" parent="Tabs/Shader Config"]
+[node name="HSlider2" type="HSlider" parent="Tabs/Config"]
 margin_top = 94.0
 margin_right = 104.0
 margin_bottom = 110.0
 size_flags_horizontal = 3
 value = 100.0
 
-[node name="Label3" type="Label" parent="Tabs/Shader Config"]
+[node name="Label3" type="Label" parent="Tabs/Config"]
 margin_top = 114.0
 margin_right = 104.0
 margin_bottom = 128.0
 text = "Depth Strength"
 
-[node name="HSlider3" type="HSlider" parent="Tabs/Shader Config"]
+[node name="HSlider3" type="HSlider" parent="Tabs/Config"]
 margin_top = 132.0
 margin_right = 104.0
 margin_bottom = 148.0
 size_flags_horizontal = 3
 value = 25.0
+
+[node name="Button" type="Button" parent="Tabs/Config"]
+margin_right = 12.0
+margin_bottom = 20.0
+text = "Reset View"
+
+[node name="Label5" type="Label" parent="Tabs/Config"]
+margin_right = 40.0
+margin_bottom = 745.0
+text = "
+Settings under this tab do not affect exported materials will look, only how they are previewed.
+
+Camera controls: middle click drag to rotate, shift middle click drag to pan, mouse wheel to zoom."
+autowrap = true
 
 [node name="Shape" type="VBoxContainer" parent="Tabs"]
 visible = false
@@ -894,13 +914,54 @@ size_flags_horizontal = 3
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer"]
 margin_right = 40.0
 margin_bottom = 14.0
-text = "Light Rotation"
+text = "Model Rotation"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer"]
 margin_right = 16.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
 step = 0.1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Shape"]
+margin_left = 4.0
+margin_top = 24.0
+margin_right = 112.0
+margin_bottom = 64.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer3"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Model Slant"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer3"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+min_value = -100.0
+step = 0.1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Shape"]
+margin_left = 4.0
+margin_top = 24.0
+margin_right = 112.0
+margin_bottom = 64.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer2"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Model Scale"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer2"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+min_value = 0.1
+max_value = 1000.0
+step = 0.0
+value = 10.0
+exp_edit = true
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Shape"]
 margin_left = 4.0
@@ -957,6 +1018,11 @@ margin_bottom = 92.0
 size_flags_horizontal = 3
 text = "Plane (Slanted)"
 
+[node name="Label" type="Label" parent="Tabs/Shape"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Or, drag and drop a wavefrom obj file."
+
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
 show_behind_parent = true
@@ -971,23 +1037,22 @@ margin_left = 8.0
 margin_top = 8.0
 margin_right = 299.0
 margin_bottom = 373.0
-texture = ExtResource( 5 )
 expand = true
 
 [node name="ToggleMat" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 30.0
-margin_top = 20.0
-margin_right = 139.0
-margin_bottom = 40.0
+margin_left = 24.0
+margin_top = 37.0
+margin_right = 133.0
+margin_bottom = 57.0
 text = "Toggle Material"
 
 [node name="ToggleAlbedo" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 30.0
-margin_top = 51.0
-margin_right = 139.0
-margin_bottom = 71.0
+margin_left = 24.0
+margin_top = 68.0
+margin_right = 133.0
+margin_bottom = 88.0
 text = "Show Albedo"
 
 [node name="Warnings" type="Label" parent="."]
@@ -995,10 +1060,10 @@ show_behind_parent = true
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 16.0
-margin_top = -42.0
+margin_left = 344.0
+margin_top = -133.0
 margin_right = -12.0
-margin_bottom = -28.0
+margin_bottom = -17.0
 custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 custom_constants/shadow_offset_x = 1

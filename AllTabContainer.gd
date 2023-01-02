@@ -50,7 +50,7 @@ func _process(delta):
             button.add_stylebox_override("pressed", tab_bg)
             button.add_stylebox_override("disabled", tab_bg)
         else:
-            button.add_color_override("font_color", Color(0.2, 0.2, 0.2, 0.85))
+            button.add_color_override("font_color", Color(0.75, 0.75, 0.75, 1))
             button.add_stylebox_override("normal", tab_inactive_bg)
             button.add_stylebox_override("hover", tab_inactive_bg)
             button.add_stylebox_override("focus", tab_inactive_bg)

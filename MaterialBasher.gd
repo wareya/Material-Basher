@@ -76,6 +76,8 @@ func _ready():
     $Tabs/Light/HBoxContainer2/HSlider.connect("value_changed", self, "light_rotation_update")
     
     $Tabs/Shape/HBoxContainer/HSlider.connect("value_changed", self, "shape_rotation_update")
+    $Tabs/Shape/HBoxContainer3/HSlider.connect("value_changed", self, "shape_slant_update")
+    $Tabs/Shape/HBoxContainer2/HSlider.connect("value_changed", self, "shape_size_update")
     
     set_uv_scale(Vector3(2, 1, 1))
     
@@ -91,6 +93,14 @@ func _ready():
     $Tabs/Shape/Button4.connect("pressed", self, "set_mesh", ["sideways cylinder"])
     $Tabs/Shape/Button5.connect("pressed", self, "set_mesh", ["plane"])
     $Tabs/Shape/Button7.connect("pressed", self, "set_mesh", ["plane slanted"])
+    
+    $Tabs/Config/Button.connect("pressed", self, "reset_view")
+
+func reset_view():
+    $"3D/CameraHolder".global_translation = Vector3()
+    $"3D/CameraHolder".rotation = Vector3()
+    zoom = 0
+    $"3D/CameraHolder/Camera".translation.z = 3 * pow(2, -zoom/16.0 * 1.3)
 
 func color_changed(new_color : Color, which : String):
     if which == "ambient":
@@ -120,21 +130,33 @@ func files_dropped(files : PoolStringArray, _screen : int):
     file.open(fname, File.READ)
     var buffer = file.get_buffer(file.get_len())
     
-    albedo_image = Image.new()
+    var image = Image.new()
     fname = fname.to_lower()
     if fname.ends_with("bmp"):
-        albedo_image.load_bmp_from_buffer(buffer)
+        image.load_bmp_from_buffer(buffer)
     elif fname.ends_with("png"):
-        albedo_image.load_png_from_buffer(buffer)
+        image.load_png_from_buffer(buffer)
     elif fname.ends_with("jpg") or fname.ends_with("jpeg"):
-        albedo_image.load_jpg_from_buffer(buffer)
+        image.load_jpg_from_buffer(buffer)
     elif fname.ends_with("tga"):
-        albedo_image.load_tga_from_buffer(buffer)
+        image.load_tga_from_buffer(buffer)
     elif fname.ends_with("webp"):
-        albedo_image.load_webp_from_buffer(buffer)
-    else:
-        albedo_image = null
+        image.load_webp_from_buffer(buffer)
+    elif fname.ends_with("obj"):
+        var f = File.new()
+        f.open(fname, File.READ)
+        var text = f.get_as_text()
+        $"3D/MeshHolder/Mesh".mesh = ObjLoader.parse_obj(text)
+        set_uv_scale(Vector3(1,1,1))
+        $"3D/MeshHolder/Mesh".scale = Vector3(1,1,1)
+        $"3D/MeshHolder/Mesh".rotation_degrees.x = 0
+        $Tabs/Shape/HBoxContainer2/HSlider.value = 10 * $"3D/MeshHolder/Mesh".scale.x
+        $Tabs/Shape/HBoxContainer3/HSlider.value = $"3D/MeshHolder/Mesh".rotation_degrees.x
         return
+    else:
+        return
+    
+    albedo_image = image
     
     albedo = ImageTexture.new()
     albedo.create_from_image(albedo_image)
@@ -308,6 +330,7 @@ func depth_slider_changed(_unused : float):
     mat_texture.set_shader_param("image", n2)
 
 func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius):
+    mixing_bias = mixing_bias*mixing_bias
     if ref_image != image or ref_tex == null:
         ref_image = image
         ref_tex = ImageTexture.new()
@@ -436,19 +459,29 @@ func _input(_event):
         var sensitivity = 0.22 * 0.75
         var x = $"3D/CameraHolder".rotation_degrees.x
         if (event.button_mask & BUTTON_MASK_MIDDLE):
-            x -= event.relative.y * sensitivity
-            $"3D/CameraHolder".rotation_degrees.y -= event.relative.x * sensitivity
+            if !event.shift:
+                x -= event.relative.y * sensitivity
+                $"3D/CameraHolder".rotation_degrees.y -= event.relative.x * sensitivity
+            else:
+                var d = $"3D/CameraHolder/Camera".global_transform.basis
+                var right = d.xform(Vector3.RIGHT)
+                var up = d.xform(Vector3.UP)
+                var whee = $"3D/CameraHolder/Camera".translation.z
+                var sens = 0.002
+                $"3D/CameraHolder".global_translation += up*event.relative.y * whee * sens
+                $"3D/CameraHolder".global_translation -= right*event.relative.x * whee * sens
         x = clamp(x, -90, 90)
         $"3D/CameraHolder".rotation_degrees.x = x
 
 var processing = false
+var current_preview_texture = null
 func _process(delta : float):
     processing = true
     
-    mat_3d.metallic_specular = read_range($"Tabs/Shader Config/HSlider")
-    mat_3d.roughness = read_range($"Tabs/Shader Config/HSlider4")
-    mat_3d.normal_scale = read_range($"Tabs/Shader Config/HSlider2")
-    mat_3d.depth_scale = read_range($"Tabs/Shader Config/HSlider3") * 0.05 * 4.0
+    mat_3d.metallic_specular = read_range($"Tabs/Config/HSlider")
+    mat_3d.roughness = read_range($"Tabs/Config/HSlider4")
+    mat_3d.normal_scale = read_range($"Tabs/Config/HSlider2")
+    mat_3d.depth_scale = read_range($"Tabs/Config/HSlider3") * 0.05 * 4.0
     
     if $Tabs/Shape/CheckBox.pressed:
         $"3D/MeshHolder/Mesh".rotation.y += delta*0.1
@@ -471,8 +504,38 @@ func _process(delta : float):
         update()
     
     $"Warnings".text = ""
+    if !normal_image:
+        $"Warnings".text += "Note: You must load an albedo texture by drag-and-dropping it onto the window before you can do anything.\n"
     if mat_3d.uv1_triplanar:
-        $"Warnings".text = "Warning: Depth maps don't display with triplanar-mapped objects (triplanar sphere and cylinders)"
+        $"Warnings".text += "Warning: Depth maps don't display with triplanar-mapped objects (triplanar sphere and cylinders).\n"
+    
+    var zero_roughness_found = false
+    if $Tabs/Config/HSlider4.value == 0:
+        zero_roughness_found = true
+    for slider in get_tree().get_nodes_in_group("RoughnessSliders"):
+        if slider.value == 0:
+            zero_roughness_found = true
+    
+    if zero_roughness_found:
+        $"Warnings".text += "Warning: Unless you're creating materials for a raytracer, exactly zero roughness is ill-advised, because it will hide point light reflections.\n"
+    
+    var current_tab = $Tabs.button_tabs[$Tabs.active_button]
+    
+    var next_texture = null
+    if normal and current_tab == $"Tabs/Normal Map":
+        next_texture = normal
+    elif depth and current_tab == $"Tabs/Depth Map":
+        next_texture = depth
+    elif metal and current_tab == $"Tabs/Metal Map":
+        next_texture = metal
+    elif roughness and current_tab == $"Tabs/Roughness Map":
+        next_texture = roughness
+    else:
+        next_texture = albedo
+    
+    if current_preview_texture != next_texture:
+        current_preview_texture = next_texture
+        $PanelContainer/TextureRect.texture = next_texture.duplicate(true)
 
     processing = false
 
@@ -520,6 +583,7 @@ func end_picking_color():
         button.connect("pressed", self, "delete_color", [box, "metallicity_update"])
     elif color_picking == "roughness":
         slider.connect("value_changed", self, "roughness_update")
+        slider.add_to_group("RoughnessSliders")
         button.connect("pressed", self, "delete_color", [box, "roughness_update"])
     
     box.add_child(icon)
@@ -588,6 +652,16 @@ func shape_rotation_update(_unused):
         return
     $"3D/MeshHolder/Mesh".rotation_degrees.y = 360*read_range($Tabs/Shape/HBoxContainer/HSlider)
 
+func shape_slant_update(_unused):
+    if processing:
+        return
+    $"3D/MeshHolder/Mesh".rotation_degrees.x = $Tabs/Shape/HBoxContainer3/HSlider.value
+
+func shape_size_update(_unused):
+    if processing:
+        return
+    $"3D/MeshHolder/Mesh".scale = Vector3(1,1,1)*read_range($Tabs/Shape/HBoxContainer2/HSlider)*100.0
+
 func set_mesh(which : String):
     $"3D/MeshHolder/Mesh".translation.y = 0
     $"3D/MeshHolder/Mesh".rotation.x = 0
@@ -638,4 +712,6 @@ func set_mesh(which : String):
         mesh = CubeMesh.new()
         mesh.size.z = 0
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 45
+    $Tabs/Shape/HBoxContainer2/HSlider.value = 10 * $"3D/MeshHolder/Mesh".scale.x
+    $Tabs/Shape/HBoxContainer3/HSlider.value = $"3D/MeshHolder/Mesh".rotation_degrees.x
     $"3D/MeshHolder/Mesh".mesh = mesh

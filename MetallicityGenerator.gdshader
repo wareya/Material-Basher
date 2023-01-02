@@ -26,7 +26,7 @@ float get_metallicity(vec2 uv) {
         vec3 color = data.rgb;
         float metal = data.a;
         float weight = length(color - albedo_color);
-        weight = 1.0/(weight*weight + mixing_bias/10.0 + 0.00001);
+        weight = 1.0/(weight*weight + mixing_bias/10.0 + 0.000001);
         metallicity += metal*weight;
         energy += weight;
         mean += metal;

@@ -13,9 +13,15 @@ _global_script_classes=[ {
 "class": "AllTabContainer",
 "language": "GDScript",
 "path": "res://AllTabContainer.gd"
+}, {
+"base": "Reference",
+"class": "ObjLoader",
+"language": "GDScript",
+"path": "res://ObjLoader.gd"
 } ]
 _global_script_class_icons={
-"AllTabContainer": ""
+"AllTabContainer": "",
+"ObjLoader": ""
 }
 
 [application]
