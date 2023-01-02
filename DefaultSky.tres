@@ -1,0 +1,7 @@
+[gd_resource type="ProceduralSky" format=2]
+
+[resource]
+sky_energy = 2.0
+ground_energy = 2.0
+sun_latitude = -81.57
+texture_size = 3

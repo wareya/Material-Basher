@@ -2,6 +2,7 @@
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://NormalGenerator.gdshader" type="Shader" id=2]
+[ext_resource path="res://DefaultSky.tres" type="ProceduralSky" id=3]
 [ext_resource path="res://AllTabContainer.gd" type="Script" id=4]
 
 [sub_resource type="Environment" id=13]
@@ -51,19 +52,15 @@ margin_right = 8.0
 margin_top = 8.0
 margin_bottom = 8.0
 
-[sub_resource type="ProceduralSky" id=6]
-sun_latitude = -180.0
-texture_size = 3
-
 [sub_resource type="Environment" id=5]
 background_mode = 2
-background_sky = SubResource( 6 )
+background_sky = ExtResource( 3 )
+background_energy = 0.5
 ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
-ambient_light_sky_contribution = 0.0
 
 [sub_resource type="SphereMesh" id=26]
-radial_segments = 256
-rings = 128
+radial_segments = 118
+rings = 64
 
 [sub_resource type="Gradient" id=20]
 interpolation_mode = 2
@@ -758,6 +755,51 @@ margin_top = 24.0
 margin_right = -4.0
 margin_bottom = -4.0
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Ambience"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Label" type="Label" parent="Tabs/Ambience/HBoxContainer3"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Sky"
+
+[node name="OptionButton" type="OptionButton" parent="Tabs/Ambience/HBoxContainer3"]
+margin_right = 29.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Ambience"]
+margin_right = 91.0
+margin_bottom = 40.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Ambience/HBoxContainer"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Sky Light Mix"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Ambience/HBoxContainer"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Ambience"]
+margin_right = 91.0
+margin_bottom = 40.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Ambience/HBoxContainer2"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Sky Energy"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Ambience/HBoxContainer2"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+value = 50.0
+
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
 margin_left = 4.0
 margin_top = 4.0
@@ -884,6 +926,11 @@ margin_right = 104.0
 margin_bottom = 148.0
 size_flags_horizontal = 3
 value = 25.0
+
+[node name="CheckButton" type="CheckBox" parent="Tabs/Config"]
+margin_right = 129.0
+margin_bottom = 40.0
+text = "Depth as height"
 
 [node name="Button" type="Button" parent="Tabs/Config"]
 margin_right = 12.0

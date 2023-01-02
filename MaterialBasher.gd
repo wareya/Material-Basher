@@ -38,6 +38,12 @@ func _ready():
     $"Tabs/Depth Map/OptionButton".add_item("Blue")
     $"Tabs/Depth Map/OptionButton".add_item("Yellow")
     
+    $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Procedural")
+    $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Office")
+    $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Sunset")
+    
+    $Tabs/Ambience/HBoxContainer3/OptionButton.connect("item_selected", self, "sky_option_picked")
+    
     for _type in ["normal", "depth"]:
         var type : String = _type
         var parent = get_node("Tabs/%s Map" % [type.capitalize()])
@@ -269,6 +275,17 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     
     return $Helper.get_texture().get_data()
 
+func sky_option_picked(which : int):
+    if which == 0:
+        $"3D/WorldEnvironment".environment.background_sky = preload("res://DefaultSky.tres")
+    else:
+        $"3D/WorldEnvironment".environment.background_sky = PanoramaSky.new()
+        ($"3D/WorldEnvironment".environment.background_sky as PanoramaSky).radiance_size = PanoramaSky.RADIANCE_SIZE_128
+        if which == 1:
+            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://unfinished_office_4k.exr")
+        elif which == 2:
+            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://belfast_sunset_puresky_4k.exr")
+
 func normal_option_picked(_unused : int):
     normal_slider_changed(0.0)
 func normal_slider_changed(_unused : float):
@@ -482,6 +499,15 @@ func _process(delta : float):
     mat_3d.roughness = read_range($"Tabs/Config/HSlider4")
     mat_3d.normal_scale = read_range($"Tabs/Config/HSlider2")
     mat_3d.depth_scale = read_range($"Tabs/Config/HSlider3") * 0.05 * 4.0
+    mat_3d.depth_flip_binormal = $Tabs/Config/CheckButton.pressed
+    mat_3d.depth_flip_tangent = $Tabs/Config/CheckButton.pressed
+    
+    $"3D/WorldEnvironment".environment.ambient_light_sky_contribution = read_range($Tabs/Ambience/HBoxContainer/HSlider)
+    $"3D/WorldEnvironment".environment.background_energy = read_range($Tabs/Ambience/HBoxContainer2/HSlider)
+    
+    var which = $Tabs/Ambience/HBoxContainer3/OptionButton.selected
+    if which > 0:
+        $"3D/WorldEnvironment".environment.background_energy *= 0.5
     
     if $Tabs/Shape/CheckBox.pressed:
         $"3D/MeshHolder/Mesh".rotation.y += delta*0.1
