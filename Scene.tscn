@@ -945,6 +945,7 @@ size_flags_vertical = 1
 value = 100.0
 
 [node name="Shading Remover" type="VBoxContainer" parent="Tabs"]
+visible = false
 margin_left = 8.0
 margin_top = 40.0
 margin_right = 48.0
@@ -1292,12 +1293,6 @@ margin_bottom = 20.0
 size_flags_horizontal = 3
 text = "Sphere"
 
-[node name="Button6" type="Button" parent="Tabs/Shape"]
-margin_right = 126.0
-margin_bottom = 20.0
-size_flags_horizontal = 3
-text = "Sphere (Triplanar)"
-
 [node name="Button2" type="Button" parent="Tabs/Shape"]
 margin_top = 24.0
 margin_right = 126.0
@@ -1336,7 +1331,7 @@ text = "Plane (Slanted)"
 [node name="Label" type="Label" parent="Tabs/Shape"]
 margin_right = 40.0
 margin_bottom = 14.0
-text = "Or, drag and drop a wavefrom obj file."
+text = "Or, drag and drop a wavefront obj file."
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
@@ -1354,20 +1349,28 @@ margin_right = 299.0
 margin_bottom = 373.0
 expand = true
 
+[node name="ToggleUI" type="Button" parent="."]
+show_behind_parent = true
+margin_left = 24.0
+margin_top = 21.0
+margin_right = 133.0
+margin_bottom = 41.0
+text = "Toggle UI"
+
 [node name="ToggleMat" type="Button" parent="."]
 show_behind_parent = true
 margin_left = 24.0
-margin_top = 37.0
+margin_top = 52.0
 margin_right = 133.0
-margin_bottom = 57.0
+margin_bottom = 72.0
 text = "Toggle Material"
 
 [node name="ToggleAlbedo" type="Button" parent="."]
 show_behind_parent = true
 margin_left = 24.0
-margin_top = 68.0
+margin_top = 82.0
 margin_right = 133.0
-margin_bottom = 88.0
+margin_bottom = 102.0
 text = "Show Albedo"
 
 [node name="Warnings" type="Label" parent="."]

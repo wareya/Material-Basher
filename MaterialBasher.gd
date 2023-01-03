@@ -31,7 +31,7 @@ func set_uv_scale(scale : Vector3):
 func _ready():
     # TODO: settings for diffuse/specular model etc
     # TODO: normal lighting removal
-    # TODO: 
+    # TODO: depth vs height vs displacement setting
     
     $"3D/MeshHolder/Mesh".global_rotation.y += 1.5
     
@@ -98,6 +98,7 @@ func _ready():
     
     $ToggleMat.connect("pressed", self, "toggle_mat")
     $ToggleAlbedo.connect("pressed", self, "show_albedo")
+    $ToggleUI.connect("pressed", self, "toggle_ui")
     get_tree().connect("files_dropped", self, "files_dropped")
     
     $"Tabs/Ambience/ColorPicker".connect("color_changed", self, "color_changed", ["ambient"])
@@ -118,7 +119,6 @@ func _ready():
     $"Tabs/Roughness Map/Button".connect("pressed", self, "start_picking_color", ["roughness", -1])
     
     $Tabs/Shape/Button.connect("pressed", self, "set_mesh", ["sphere"])
-    $Tabs/Shape/Button6.connect("pressed", self, "set_mesh", ["sphere triplanar"])
     $Tabs/Shape/Button2.connect("pressed", self, "set_mesh", ["cube"])
     $Tabs/Shape/Button3.connect("pressed", self, "set_mesh", ["cylinder"])
     $Tabs/Shape/Button4.connect("pressed", self, "set_mesh", ["sideways cylinder"])
@@ -145,15 +145,26 @@ func toggle_mat():
     else:
         $"3D/MeshHolder/Mesh".material_override = mat_3d
 
+var albedo_shown = false
 func show_albedo():
     if albedo_image:
-        if !$TextureRect.visible:
+        if !albedo_shown:
             var texture = ImageTexture.new()
             texture.create_from_image(albedo_image)
             $TextureRect.texture = texture
+            albedo_shown = true
             $TextureRect.visible = true
         else:
+            albedo_shown = false
             $TextureRect.visible = false
+
+func toggle_ui():
+    $Tabs.visible = !$Tabs.visible
+    $PanelContainer.visible = $Tabs.visible
+    $Warnings.visible = $Tabs.visible
+    $ToggleMat.visible = $Tabs.visible
+    $ToggleAlbedo.visible = $Tabs.visible
+    $TextureRect.visible = $Tabs.visible and albedo_shown
 
 func files_dropped(files : PoolStringArray, _screen : int):
     var fname : String = files[0]
@@ -792,11 +803,11 @@ func end_picking_color():
     
     if color_picking == "metal":
         slider.connect("value_changed", self, "metallicity_update")
-        button.connect("pressed", self, "delete_color", [box, "metallicity_update"])
+        button.connect("pressed", self, "delete_color", [box, "metal"])
     elif color_picking == "roughness":
         slider.connect("value_changed", self, "roughness_update")
         slider.add_to_group("RoughnessSliders")
-        button.connect("pressed", self, "delete_color", [box, "roughness_update"])
+        button.connect("pressed", self, "delete_color", [box, "roughness"])
     
     box.add_child(icon)
     box.add_child(label)
@@ -820,11 +831,12 @@ func roughness_update(_unused):
 
 func delete_color(which, type):
     which.queue_free()
-    if type == "metallicity":
+    if type == "metal":
         $"Tabs/Metal Map".remove_child(which)
+        metal_slider_changed(0.0)
     elif type == "roughness":
         $"Tabs/Roughness Map".remove_child(which)
-    metal_slider_changed(0.0)
+        roughness_slider_changed(0.0)
 
 func cancel_picking_color():
     color_picking = ""
@@ -892,18 +904,17 @@ func set_mesh(which : String):
         mesh = CubeMesh.new()
         $"3D/MeshHolder/Mesh".scale *= 0.7
     elif which == "cylinder":
-        mesh = CylinderMesh.new()
-        mesh.radial_segments = 256
-        mesh.rings = 0
+        mesh = preload("res://cylinder_good_uvs.obj")
         $"3D/MeshHolder/Mesh".scale *= 0.7
         set_uv_scale(Vector3(1, 1, 1))
     elif which == "sideways cylinder":
-        mesh = CylinderMesh.new()
-        mesh.radial_segments = 256
-        mesh.rings = 0
+        #mesh = CylinderMesh.new()
+        #mesh.radial_segments = 256
+        #mesh.rings = 0
+        mesh = preload("res://cylinder_good_uvs.obj")
         $"3D/MeshHolder/Mesh".scale *= 0.7
-        $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
         set_uv_scale(Vector3(1, 1, 1))
+        $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
     elif which == "plane":
         mesh = CubeMesh.new()
         mesh.size.z = 0
