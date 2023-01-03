@@ -39,6 +39,10 @@ gdscript/warnings/return_value_discarded=false
 window/size/width=1280
 window/size/height=720
 
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/native_dialogs/plugin.cfg" )
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true

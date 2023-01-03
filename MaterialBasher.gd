@@ -27,13 +27,17 @@ func set_uv_scale(scale : Vector3):
     mat_texture.set_shader_param("uv1_scale", mat_3d.uv1_scale)
     mat_texture.set_shader_param("uv1_offset", mat_3d.uv1_offset)
 
-# Called when the node enters the scene tree for the first time.
 func _ready():
     # TODO: settings for diffuse/specular model etc
     # TODO: normal lighting removal
     # TODO: depth vs height vs displacement setting
+    # TODO: export
+    
+    $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog, "hide")
+    
     
     $"3D/MeshHolder/Mesh".global_rotation.y += 1.5
+    
     
     $"Tabs/Normal Map/OptionButton".add_item("Grey")
     $"Tabs/Normal Map/OptionButton".add_item("Red")
@@ -41,17 +45,38 @@ func _ready():
     $"Tabs/Normal Map/OptionButton".add_item("Blue")
     $"Tabs/Normal Map/OptionButton".add_item("Yellow")
     
+    
     $"Tabs/Depth Map/OptionButton".add_item("Grey")
     $"Tabs/Depth Map/OptionButton".add_item("Red")
     $"Tabs/Depth Map/OptionButton".add_item("Green")
     $"Tabs/Depth Map/OptionButton".add_item("Blue")
     $"Tabs/Depth Map/OptionButton".add_item("Yellow")
     
+    
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Procedural")
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Office")
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Sunset")
     
     $Tabs/Ambience/HBoxContainer3/OptionButton.connect("item_selected", self, "sky_option_picked")
+    
+    
+    for button in $Tabs/Export/GridContainer.get_children():
+        if not button is OptionButton:
+            continue
+        button.add_item("Metallicity")
+        button.add_item("Roughness")
+        button.add_item("AO")
+        button.add_item("Depth")
+    
+    $Tabs/Export/GridContainer/OptionButton.selected = 0
+    $Tabs/Export/GridContainer/OptionButton2.selected = 1
+    $Tabs/Export/GridContainer/OptionButton3.selected = 2
+    
+    $Tabs/Export/Button.connect("pressed", self, "save_albedo")
+    $Tabs/Export/Button2.connect("pressed", self, "save_normal")
+    $Tabs/Export/Button3.connect("pressed", self, "save_pbr")
+    
+    
     
     for _type in ["normal", "depth"]:
         var type : String = _type
@@ -126,6 +151,94 @@ func _ready():
     $Tabs/Shape/Button7.connect("pressed", self, "set_mesh", ["plane slanted"])
     
     $Tabs/Config/Button.connect("pressed", self, "reset_view")
+
+var NativeDialog = preload("res://addons/native_dialogs/native_dialogs.gd")
+
+func save_albedo():
+    save_image(albedo_image_display, "albedo.png", "Albedo", "Albedo cannot be saved until an image has been loaded.")
+
+func save_normal():
+    var save_image : Image = normal_image
+    if $Tabs/Export/CheckBox.pressed:
+        save_image = normal_image.duplicate()
+        var size = save_image.get_size()
+        save_image.lock()
+        for y in size.y:
+            for x in size.x:
+                var r = save_image.get_pixel(x, y).r
+                var g = save_image.get_pixel(x, y).g
+                var b = save_image.get_pixel(x, y).b
+                g = 1.0-g
+                save_image.set_pixel(x, y, Color(r, g, b))
+        save_image.unlock()
+    save_image(save_image, "normal.png", "Normal", "Normal cannot be saved until an albedo has been loaded.")
+
+func pbr_pick_image(selection):
+    if selection == 0:
+        return metal_image
+    elif selection == 1:
+        return roughness_image
+    elif selection == 2:
+        return ao_image
+    elif selection == 3:
+        return depth_image
+
+func save_pbr():
+    var size = albedo_image.get_size()
+    var image = Image.new()
+    image.create(size.x, size.y, false, Image.FORMAT_RGB8)
+    var red = pbr_pick_image($Tabs/Export/GridContainer/OptionButton.selected)
+    var green = pbr_pick_image($Tabs/Export/GridContainer/OptionButton2.selected)
+    var blue = pbr_pick_image($Tabs/Export/GridContainer/OptionButton3.selected)
+    if !red or !green or !blue:
+        $PopupDialog/VBoxContainer/Label.text = "PBR map cannot be saved until an albedo has been loaded."
+        $PopupDialog.show()
+        return
+    
+    image.lock()
+    red.lock()
+    if green != red:
+        green.lock()
+    if blue != green and blue != red:
+        blue.lock()
+    for y in size.y:
+        for x in size.x:
+            var r = red.get_pixel(x, y).r
+            var g = green.get_pixel(x, y).r
+            var b = blue.get_pixel(x, y).r
+            if $Tabs/Export/GridContainer/CheckBox.pressed:
+                if red == roughness_image:
+                    r = 1.0 - r
+                if green == roughness_image:
+                    g = 1.0 - g
+                if blue == roughness_image:
+                    b = 1.0 - b
+            image.set_pixel(x, y, Color(r, g, b))
+    save_image(image, "pbr.png", "PBR", "")
+    
+    image.unlock()
+    red.unlock()
+    if green != red:
+        green.unlock()
+    if blue != green and blue != red:
+        blue.unlock()
+
+func save_image(image : Image, default_fname : String, name_caps : String, error_text : String):
+    if image == null:
+        $PopupDialog/VBoxContainer/Label.text = error_text
+        $PopupDialog.show()
+        return
+    
+    var fo : Control = get_focus_owner()
+    if fo:
+        fo.release_focus()
+    
+    $NativeDialogSaveFile.initial_path = default_fname
+    $NativeDialogSaveFile.title = "Save %s Image" % [name_caps]
+    $NativeDialogSaveFile.show()
+    var fname = yield($NativeDialogSaveFile, "file_selected")
+    image.save_png(fname)
+        
 
 func reset_view():
     $"3D/CameraHolder".global_translation = Vector3()
@@ -339,7 +452,7 @@ func normal_slider_changed(_unused : float):
     var lightpoint = read_range($"Tabs/Normal Map/Slider4")
     var microfacets = read_range($"Tabs/Normal Map/Slider6")
     
-    var depth_offset = 0.0;
+    var depth_offset = 0.0
     
     normal_image = create_normal_texture(albedo_image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0)
     #normal_image.convert(Image.FORMAT_RGBA8)
@@ -450,7 +563,7 @@ func ao_slider_changed(_unused : float):
     var fine_limit = read_range($"Tabs/AO Map/Slider9")
     var rough_limit = read_range($"Tabs/AO Map/Slider10")
     
-    strength = max(0.00000001, strength*strength*100.0);
+    strength = max(0.00000001, strength*strength*100.0)
     
     ao_image = create_ao_texture(depth_image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
     

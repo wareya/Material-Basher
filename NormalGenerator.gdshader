@@ -121,17 +121,17 @@ vec4 get_mip_level(sampler2D tex, vec2 uv, int mip_level) {
     float stride = 0.5;
     if (generate_normal > 0.5)
     {
-        vec2 off = stride/vec2(textureSize(albedo, mip_level));
-        float x1 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2(-1, 0), mip_level).rgb, channel)*3.0;
-        float x2 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2( 1, 0), mip_level).rgb, channel)*3.0;
-        float y1 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2(0, -1), mip_level).rgb, channel)*3.0;
-        float y2 = dot(sample_bicubic_super_blurry(albedo, uv + off * vec2(0,  1), mip_level).rgb, channel)*3.0;
+        vec2 off = stride/vec2(textureSize(tex, mip_level));
+        float x1 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2(-1, 0), mip_level).rgb, channel)*3.0;
+        float x2 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2( 1, 0), mip_level).rgb, channel)*3.0;
+        float y1 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2(0, -1), mip_level).rgb, channel)*3.0;
+        float y2 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2(0,  1), mip_level).rgb, channel)*3.0;
         
         return vec4(x1, x2, y1, y2)/stride*0.5;
     }
     else
     {
-        return vec4(dot(sample_bicubic_super_blurry(albedo, uv, mip_level).rgb, channel)*3.0, 0, 0, 0);
+        return vec4(dot(sample_bicubic_super_blurry(tex, uv, mip_level).rgb, channel)*3.0, 0, 0, 0);
     }
 }
 
@@ -140,22 +140,22 @@ vec4 get_mip_level_fast(sampler2D tex, vec2 uv, int mip_level) {
     float stride = 0.5;
     if (generate_normal > 0.5)
     {
-        vec2 off = stride/vec2(textureSize(albedo, mip_level));
-        float x1 = dot(texture(albedo, uv + off * vec2(-1, 0), float(mip_level)).rgb, channel);
-        float x2 = dot(texture(albedo, uv + off * vec2( 1, 0), float(mip_level)).rgb, channel);
-        float y1 = dot(texture(albedo, uv + off * vec2(0, -1), float(mip_level)).rgb, channel);
-        float y2 = dot(texture(albedo, uv + off * vec2(0,  1), float(mip_level)).rgb, channel);
+        vec2 off = stride/vec2(textureSize(tex, mip_level));
+        float x1 = dot(texture(tex, uv + off * vec2(-1, 0), float(mip_level)).rgb, channel);
+        float x2 = dot(texture(tex, uv + off * vec2( 1, 0), float(mip_level)).rgb, channel);
+        float y1 = dot(texture(tex, uv + off * vec2(0, -1), float(mip_level)).rgb, channel);
+        float y2 = dot(texture(tex, uv + off * vec2(0,  1), float(mip_level)).rgb, channel);
         
         return vec4(x1, x2, y1, y2)/stride*0.5;
     }
     else
     {
-        return vec4(dot(texture(albedo, uv, float(mip_level)).rgb, channel)*3.0, 0, 0, 0);
+        return vec4(dot(texture(tex, uv, float(mip_level)).rgb, channel)*3.0, 0, 0, 0);
     }
 }
 
 vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
-    vec2 base_size = vec2(textureSize(albedo, 0));
+    vec2 base_size = vec2(textureSize(tex, 0));
     int max_level = int(floor(log2(max(base_size.x, base_size.y))));
     //float octave_adjusted = mix(2.22, 6.0, float(octave)/6.0);
     //float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);

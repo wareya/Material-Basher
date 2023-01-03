@@ -1,9 +1,10 @@
-[gd_scene load_steps=20 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://NormalGenerator.gdshader" type="Shader" id=2]
 [ext_resource path="res://DefaultSky.tres" type="ProceduralSky" id=3]
 [ext_resource path="res://AllTabContainer.gd" type="Script" id=4]
+[ext_resource path="res://addons/native_dialogs/bin/native_dialog_save_file.gdns" type="Script" id=5]
 
 [sub_resource type="Environment" id=13]
 
@@ -79,6 +80,7 @@ fill_to = Vector2( 0.5, 0 )
 
 [sub_resource type="StyleBoxTexture" id=22]
 texture = SubResource( 21 )
+region_rect = Rect2( 0, 0, 10, 10 )
 margin_left = 5.0
 margin_right = 5.0
 margin_top = 5.0
@@ -105,6 +107,25 @@ margin_left = 5.0
 margin_right = 5.0
 margin_top = 5.0
 margin_bottom = 5.0
+
+[sub_resource type="Gradient" id=27]
+offsets = PoolRealArray( 0.146067, 0.292135, 0.848315, 1 )
+colors = PoolColorArray( 0.398926, 0.315762, 0.0701237, 0.596078, 0.791016, 0.632181, 0.216293, 0.607843, 1, 1, 1, 1, 1, 1, 1, 0 )
+
+[sub_resource type="GradientTexture2D" id=28]
+gradient = SubResource( 27 )
+width = 16
+height = 16
+fill = 1
+fill_from = Vector2( 0.5, 0.5 )
+fill_to = Vector2( 0.5, 0 )
+
+[sub_resource type="StyleBoxTexture" id=29]
+texture = SubResource( 28 )
+margin_left = 7.0
+margin_right = 7.0
+margin_top = 6.0
+margin_bottom = 8.0
 
 [node name="Scene" type="Control"]
 anchor_right = 1.0
@@ -1070,10 +1091,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 4.0
-margin_top = 4.0
-margin_right = 320.0
-margin_bottom = 416.0
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 324.0
+margin_bottom = 420.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1130,10 +1151,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 324.0
-margin_bottom = 420.0
+margin_left = 12.0
+margin_top = 12.0
+margin_right = 328.0
+margin_bottom = 424.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
@@ -1146,69 +1167,72 @@ margin_right = 40.0
 margin_bottom = 40.0
 
 [node name="Label" type="Label" parent="Tabs/Config"]
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 14.0
 text = "Specular"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Config"]
 margin_top = 18.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 34.0
 size_flags_horizontal = 3
 value = 50.0
 
 [node name="Label4" type="Label" parent="Tabs/Config"]
 margin_top = 38.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 52.0
 text = "Roughness"
 
 [node name="HSlider4" type="HSlider" parent="Tabs/Config"]
 margin_top = 56.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 72.0
 size_flags_horizontal = 3
 value = 100.0
 
 [node name="Label2" type="Label" parent="Tabs/Config"]
 margin_top = 76.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 90.0
 text = "Normal Strength"
 
 [node name="HSlider2" type="HSlider" parent="Tabs/Config"]
 margin_top = 94.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 110.0
 size_flags_horizontal = 3
 value = 100.0
 
 [node name="Label3" type="Label" parent="Tabs/Config"]
 margin_top = 114.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 128.0
 text = "Depth Strength"
 
 [node name="HSlider3" type="HSlider" parent="Tabs/Config"]
 margin_top = 132.0
-margin_right = 104.0
+margin_right = 129.0
 margin_bottom = 148.0
 size_flags_horizontal = 3
 value = 25.0
 
 [node name="CheckButton" type="CheckBox" parent="Tabs/Config"]
+margin_top = 152.0
 margin_right = 129.0
-margin_bottom = 40.0
+margin_bottom = 176.0
 text = "Depth as height"
 
 [node name="Button" type="Button" parent="Tabs/Config"]
-margin_right = 12.0
-margin_bottom = 20.0
+margin_top = 180.0
+margin_right = 129.0
+margin_bottom = 200.0
 text = "Reset View"
 
 [node name="Label5" type="Label" parent="Tabs/Config"]
-margin_right = 40.0
-margin_bottom = 745.0
+margin_top = 204.0
+margin_right = 129.0
+margin_bottom = 422.0
 text = "
 Settings under this tab do not affect exported materials will look, only how they are previewed.
 
@@ -1221,56 +1245,58 @@ margin_right = 40.0
 margin_bottom = 40.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Shape"]
-margin_left = 4.0
-margin_top = 24.0
-margin_right = 112.0
-margin_bottom = 64.0
+margin_right = 240.0
+margin_bottom = 16.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer"]
-margin_right = 40.0
-margin_bottom = 14.0
+margin_top = 1.0
+margin_right = 97.0
+margin_bottom = 15.0
 text = "Model Rotation"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer"]
-margin_right = 16.0
+margin_left = 101.0
+margin_right = 240.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
 step = 0.1
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Shape"]
-margin_left = 4.0
-margin_top = 24.0
-margin_right = 112.0
-margin_bottom = 64.0
+margin_top = 20.0
+margin_right = 240.0
+margin_bottom = 36.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer3"]
-margin_right = 40.0
-margin_bottom = 14.0
+margin_top = 1.0
+margin_right = 75.0
+margin_bottom = 15.0
 text = "Model Slant"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer3"]
-margin_right = 16.0
+margin_left = 79.0
+margin_right = 240.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
 min_value = -100.0
 step = 0.1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Shape"]
-margin_left = 4.0
-margin_top = 24.0
-margin_right = 112.0
-margin_bottom = 64.0
+margin_top = 40.0
+margin_right = 240.0
+margin_bottom = 56.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer2"]
-margin_right = 40.0
-margin_bottom = 14.0
+margin_top = 1.0
+margin_right = 77.0
+margin_bottom = 15.0
 text = "Model Scale"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer2"]
-margin_right = 16.0
+margin_left = 81.0
+margin_right = 240.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
 min_value = 0.1
@@ -1280,58 +1306,138 @@ value = 10.0
 exp_edit = true
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Shape"]
-margin_left = 4.0
-margin_top = 24.0
-margin_right = 165.0
-margin_bottom = 48.0
+margin_top = 60.0
+margin_right = 240.0
+margin_bottom = 84.0
 pressed = true
 text = "Automatically Rotate"
 
 [node name="Button" type="Button" parent="Tabs/Shape"]
-margin_right = 126.0
-margin_bottom = 20.0
+margin_top = 88.0
+margin_right = 240.0
+margin_bottom = 108.0
 size_flags_horizontal = 3
 text = "Sphere"
 
 [node name="Button2" type="Button" parent="Tabs/Shape"]
-margin_top = 24.0
-margin_right = 126.0
-margin_bottom = 44.0
+margin_top = 112.0
+margin_right = 240.0
+margin_bottom = 132.0
 size_flags_horizontal = 3
 text = "Cube"
 
 [node name="Button3" type="Button" parent="Tabs/Shape"]
-margin_top = 48.0
-margin_right = 126.0
-margin_bottom = 68.0
+margin_top = 136.0
+margin_right = 240.0
+margin_bottom = 156.0
 size_flags_horizontal = 3
 text = "Cylinder"
 
 [node name="Button4" type="Button" parent="Tabs/Shape"]
-margin_top = 96.0
-margin_right = 126.0
-margin_bottom = 116.0
+margin_top = 160.0
+margin_right = 240.0
+margin_bottom = 180.0
 size_flags_horizontal = 3
 text = "Cylinder (Sideways)"
 
 [node name="Button5" type="Button" parent="Tabs/Shape"]
-margin_top = 72.0
-margin_right = 126.0
-margin_bottom = 92.0
+margin_top = 184.0
+margin_right = 240.0
+margin_bottom = 204.0
 size_flags_horizontal = 3
 text = "Plane"
 
 [node name="Button7" type="Button" parent="Tabs/Shape"]
-margin_top = 72.0
-margin_right = 126.0
-margin_bottom = 92.0
+margin_top = 208.0
+margin_right = 240.0
+margin_bottom = 228.0
 size_flags_horizontal = 3
 text = "Plane (Slanted)"
 
 [node name="Label" type="Label" parent="Tabs/Shape"]
-margin_right = 40.0
-margin_bottom = 14.0
+margin_top = 232.0
+margin_right = 240.0
+margin_bottom = 246.0
 text = "Or, drag and drop a wavefront obj file."
+
+[node name="Export" type="VBoxContainer" parent="Tabs"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+size_flags_horizontal = 3
+
+[node name="Button" type="Button" parent="Tabs/Export"]
+margin_right = 172.0
+margin_bottom = 20.0
+text = "Save Albedo"
+
+[node name="Button2" type="Button" parent="Tabs/Export"]
+margin_top = 24.0
+margin_right = 172.0
+margin_bottom = 44.0
+text = "Save Normal Map"
+
+[node name="CheckBox" type="CheckBox" parent="Tabs/Export"]
+margin_top = 48.0
+margin_right = 172.0
+margin_bottom = 72.0
+text = "Save DX-Style Normal"
+
+[node name="Button3" type="Button" parent="Tabs/Export"]
+margin_top = 76.0
+margin_right = 172.0
+margin_bottom = 96.0
+text = "Save PBR Map"
+
+[node name="GridContainer" type="GridContainer" parent="Tabs/Export"]
+margin_top = 100.0
+margin_right = 172.0
+margin_bottom = 196.0
+columns = 2
+
+[node name="Label" type="Label" parent="Tabs/Export/GridContainer"]
+margin_top = 3.0
+margin_right = 139.0
+margin_bottom = 17.0
+text = "Red Channel"
+
+[node name="OptionButton" type="OptionButton" parent="Tabs/Export/GridContainer"]
+margin_left = 143.0
+margin_right = 172.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+
+[node name="Label2" type="Label" parent="Tabs/Export/GridContainer"]
+margin_top = 27.0
+margin_right = 139.0
+margin_bottom = 41.0
+text = "Green Channel"
+
+[node name="OptionButton2" type="OptionButton" parent="Tabs/Export/GridContainer"]
+margin_left = 143.0
+margin_top = 24.0
+margin_right = 172.0
+margin_bottom = 44.0
+size_flags_horizontal = 3
+
+[node name="Label3" type="Label" parent="Tabs/Export/GridContainer"]
+margin_top = 51.0
+margin_right = 139.0
+margin_bottom = 65.0
+text = "Blue Channel"
+
+[node name="OptionButton3" type="OptionButton" parent="Tabs/Export/GridContainer"]
+margin_left = 143.0
+margin_top = 48.0
+margin_right = 172.0
+margin_bottom = 68.0
+size_flags_horizontal = 3
+
+[node name="CheckBox" type="CheckBox" parent="Tabs/Export/GridContainer"]
+margin_top = 72.0
+margin_right = 139.0
+margin_bottom = 96.0
+text = "Invert Roughness"
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
@@ -1388,3 +1494,42 @@ custom_constants/shadow_offset_x = 1
 custom_constants/shadow_offset_y = 1
 custom_constants/shadow_as_outline = 1
 autowrap = true
+
+[node name="PopupDialog" type="PanelContainer" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 537.0
+margin_top = 336.0
+margin_right = -537.0
+margin_bottom = -348.0
+custom_styles/panel = SubResource( 29 )
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopupDialog"]
+margin_left = 7.0
+margin_top = 6.0
+margin_right = 199.0
+margin_bottom = 61.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="PopupDialog/VBoxContainer"]
+margin_right = 192.0
+margin_bottom = 31.0
+text = "Albedo cannot be saved until an image has been loaded."
+autowrap = true
+
+[node name="CenterContainer" type="CenterContainer" parent="PopupDialog/VBoxContainer"]
+margin_top = 35.0
+margin_right = 192.0
+margin_bottom = 55.0
+
+[node name="Button" type="Button" parent="PopupDialog/VBoxContainer/CenterContainer"]
+margin_left = 80.0
+margin_right = 111.0
+margin_bottom = 20.0
+text = "OK"
+
+[node name="NativeDialogSaveFile" type="Node" parent="."]
+script = ExtResource( 5 )
+filters = PoolStringArray( "*.png ; PNG Image" )
