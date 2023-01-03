@@ -24,10 +24,15 @@ var mat_texture = preload("res://UnshadedPlain.material")
 
 func set_uv_scale(scale : Vector3):
     mat_3d.uv1_scale = scale
-    mat_texture.set_shader_param("uv1_scale", scale)
+    mat_texture.set_shader_param("uv1_scale", mat_3d.uv1_scale)
+    mat_texture.set_shader_param("uv1_offset", mat_3d.uv1_offset)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+    # TODO: settings for diffuse/specular model etc
+    # TODO: normal lighting removal
+    # TODO: 
+    
     $"3D/MeshHolder/Mesh".global_rotation.y += 1.5
     
     $"Tabs/Normal Map/OptionButton".add_item("Grey")
@@ -502,7 +507,9 @@ func light_remover_slider_changed(_unused : float):
     var ao_gamma = read_range($"Tabs/Shading Remover/Slider3")
     var ao_desat = read_range($"Tabs/Shading Remover/Slider4")
     
-    ao_strength = ao_strength*ao_strength*30.0
+    ao_desat = ao_desat*ao_desat
+    
+    ao_strength = ao_strength*ao_strength*16.0
     
     albedo_image_display = create_unlit_albedo_image(albedo_image, ao_image, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
     
@@ -706,6 +713,8 @@ func _process(delta : float):
     if color_picking != "":
         update()
     
+    var current_tab = $Tabs.button_tabs[$Tabs.active_button]
+    
     $"Warnings".text = ""
     if !normal_image:
         $"Warnings".text += "Note: You must load an albedo texture by drag-and-dropping it onto the window before you can do anything.\n"
@@ -721,8 +730,6 @@ func _process(delta : float):
     
     if zero_roughness_found:
         $"Warnings".text += "Warning: Unless you're creating materials for a raytracer, exactly zero roughness is ill-advised, because it will hide point light reflections.\n"
-    
-    var current_tab = $Tabs.button_tabs[$Tabs.active_button]
     
     var next_texture = null
     if normal and current_tab == $"Tabs/Normal Map":
@@ -871,23 +878,16 @@ func set_mesh(which : String):
     $"3D/MeshHolder/Mesh".translation.y = 0
     $"3D/MeshHolder/Mesh".rotation.x = 0
     $"3D/MeshHolder/Mesh".scale = Vector3(1, 1, 1)
-    set_uv_scale(Vector3(3, 2, 2))
     mat_3d.uv1_triplanar = false
     mat_3d.uv1_triplanar_sharpness = 16.0
     mat_3d.uv1_offset = Vector3(0.0, 0.0, 0.0)
+    set_uv_scale(Vector3(3, 2, 2))
     var mesh = null
     if which == "sphere":
         mesh = SphereMesh.new()
         mesh.radial_segments = 256
         mesh.rings = 128
         set_uv_scale(Vector3(2, 1, 1))
-    elif which == "sphere triplanar":
-        mesh = SphereMesh.new()
-        mesh.radial_segments = 256
-        mesh.rings = 128
-        mat_3d.uv1_triplanar = true
-        set_uv_scale(Vector3(0.5, 0.5, 0.5))
-        mat_3d.uv1_offset = Vector3(0.5, 0.5, 0.5)
     elif which == "cube":
         mesh = CubeMesh.new()
         $"3D/MeshHolder/Mesh".scale *= 0.7
@@ -896,18 +896,14 @@ func set_mesh(which : String):
         mesh.radial_segments = 256
         mesh.rings = 0
         $"3D/MeshHolder/Mesh".scale *= 0.7
-        mat_3d.uv1_triplanar = true
-        set_uv_scale(Vector3(0.5, 0.5, 0.5))
-        mat_3d.uv1_offset = Vector3(0.5, 0.5, 0.5)
+        set_uv_scale(Vector3(1, 1, 1))
     elif which == "sideways cylinder":
         mesh = CylinderMesh.new()
         mesh.radial_segments = 256
         mesh.rings = 0
         $"3D/MeshHolder/Mesh".scale *= 0.7
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
-        mat_3d.uv1_triplanar = true
-        set_uv_scale(Vector3(0.5, 0.5, 0.5))
-        mat_3d.uv1_offset = Vector3(0.5, 0.5, 0.5)
+        set_uv_scale(Vector3(1, 1, 1))
     elif which == "plane":
         mesh = CubeMesh.new()
         mesh.size.z = 0

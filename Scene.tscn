@@ -790,6 +790,11 @@ margin_top = 40.0
 margin_right = -8.0
 margin_bottom = 103.0
 
+[node name="Label11" type="Label" parent="Tabs/AO Map"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Note: AO generation uses the depth map."
+
 [node name="Label" type="Label" parent="Tabs/AO Map"]
 margin_right = 275.0
 margin_bottom = 14.0
@@ -945,60 +950,66 @@ margin_top = 40.0
 margin_right = 48.0
 margin_bottom = 80.0
 
-[node name="Label" type="Label" parent="Tabs/Shading Remover"]
-margin_right = 165.0
+[node name="Label12" type="Label" parent="Tabs/Shading Remover"]
+margin_right = 234.0
 margin_bottom = 14.0
+text = "Note: AO removal uses the AO map."
+
+[node name="Label" type="Label" parent="Tabs/Shading Remover"]
+margin_top = 18.0
+margin_right = 234.0
+margin_bottom = 32.0
 size_flags_horizontal = 5
 text = "AO Removal"
 
 [node name="Slider" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 18.0
-margin_right = 165.0
-margin_bottom = 34.0
+margin_top = 36.0
+margin_right = 234.0
+margin_bottom = 52.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label2" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 38.0
-margin_right = 165.0
-margin_bottom = 52.0
+margin_top = 56.0
+margin_right = 234.0
+margin_bottom = 70.0
 size_flags_horizontal = 5
 text = "AO Removal Limit"
 
 [node name="Slider2" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 56.0
-margin_right = 165.0
-margin_bottom = 72.0
+margin_top = 74.0
+margin_right = 234.0
+margin_bottom = 90.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Label3" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 76.0
-margin_right = 165.0
-margin_bottom = 90.0
+margin_top = 94.0
+margin_right = 234.0
+margin_bottom = 108.0
 size_flags_horizontal = 5
 text = "AO Removal Gamma"
 
 [node name="Slider3" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 94.0
-margin_right = 165.0
-margin_bottom = 110.0
+margin_top = 112.0
+margin_right = 234.0
+margin_bottom = 128.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label4" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 114.0
-margin_right = 165.0
-margin_bottom = 128.0
+margin_top = 132.0
+margin_right = 234.0
+margin_bottom = 146.0
 size_flags_horizontal = 5
 text = "AO Removal Desaturation"
 
 [node name="Slider4" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 132.0
-margin_right = 165.0
-margin_bottom = 148.0
+margin_top = 150.0
+margin_right = 234.0
+margin_bottom = 166.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 25.0
