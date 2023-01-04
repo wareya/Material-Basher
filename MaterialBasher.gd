@@ -23,6 +23,7 @@ var mat_3d = SpatialMaterial.new()
 var mat_texture = preload("res://resources/UnshadedPlain.material")
 
 func set_uv_scale(scale : Vector3):
+    mat_3d.flags_transparent = true
     mat_3d.uv1_scale = scale
     mat_texture.set_shader_param("uv1_scale", mat_3d.uv1_scale)
     mat_texture.set_shader_param("uv1_offset", mat_3d.uv1_offset)
@@ -321,14 +322,15 @@ func files_dropped(files : PoolStringArray, _screen : int):
     
     mat_3d.albedo_texture = albedo
     
-    # FIXME clear up the rest of the material
-    
+    no_recurse = true
     normal_slider_changed(0.0)
     depth_slider_changed(0.0)
     metal_slider_changed(0.0)
     roughness_slider_changed(0.0)
     ao_slider_changed(0.0)
+    no_recurse = false
 
+var no_recurse
 
 var setting_sliders = false
 func normal_freq_preset(mode : String):
@@ -421,6 +423,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     var size = image.get_size()
     $Helper.size = size
     $Helper/Quad.scale.x = size.x / size.y
+    $Helper/Quad.force_update_transform()
     
     $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
     get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
@@ -508,7 +511,8 @@ func depth_slider_changed(_unused : float):
     
     indirect_update = true
     
-    ao_slider_changed(0.0)
+    if !no_recurse:
+        ao_slider_changed(0.0)
 
 
 var ao_ref_image = null
@@ -537,6 +541,7 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     var size = image.get_size()
     $Helper.size = size
     $Helper/Quad.scale.x = size.x / size.y
+    $Helper/Quad.force_update_transform()
     
     $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
     get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
@@ -585,7 +590,8 @@ func ao_slider_changed(_unused : float):
     
     indirect_update = true
     
-    light_remover_slider_changed(0.0)
+    if !no_recurse:
+        light_remover_slider_changed(0.0)
 
 var albedo_ref_image = null
 var albedo_ref_tex = null
@@ -615,6 +621,7 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     var size = albedo_image.get_size()
     $Helper.size = size
     $Helper/Quad.scale.x = size.x / size.y
+    $Helper/Quad.force_update_transform()
     
     $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
     get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
@@ -686,6 +693,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     var size = image.get_size()
     $Helper.size = size
     $Helper/Quad.scale.x = size.x / size.y
+    $Helper/Quad.force_update_transform()
     
     $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
     get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
