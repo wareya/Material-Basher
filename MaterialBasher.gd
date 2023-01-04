@@ -384,7 +384,9 @@ func write_range(_range : Range, val : float):
 var ref_image = null
 var ref_tex = null
 func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal):
+    var tex_is_new = false
     if ref_image != image or ref_tex == null:
+        tex_is_new = true
         ref_image = image
         ref_tex = ImageTexture.new()
         ref_tex.create_from_image(image)
@@ -398,16 +400,24 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         var path = "Helper"+str(i+1)
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
-        viewport.size = size
+        if viewport.size != size:
+            viewport.size = size
         quad.scale.x = size.x / size.y
         quad.force_update_transform()
         
-        var mat2 = ShaderMaterial.new()
-        quad.material_override = mat2
-        viewport.keep_3d_linear = true
-        mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
+        if quad.material_override == null:
+            var mat2 = ShaderMaterial.new()
+            quad.material_override = mat2
+        var mat2 = quad.material_override
         
-        mat2.set_shader_param("input", ref_tex)
+        viewport.keep_3d_linear = true
+        viewport.hdr = false
+        
+        if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
+            mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
+        
+        if tex_is_new:
+            mat2.set_shader_param("input", ref_tex)
         mat2.set_shader_param("octave", i)
         mat2.set_shader_param("microfacets", microfacets)
         mat2.set_shader_param("raw_mip_ratio", -1.0)
@@ -552,19 +562,60 @@ func depth_slider_changed(_unused : float):
 var ao_ref_image = null
 var ao_ref_tex = null
 func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, bias, contrast, fine_limit, rough_limit):
+    var tex_is_new = false
     if ao_ref_image != image or ao_ref_tex == null:
+        tex_is_new = true
         ao_ref_image = image
         ao_ref_tex = ImageTexture.new()
         ao_ref_tex.create_from_image(image)
     
+    var size = image.get_size()
+    
     var mat = $Helper/Quad.material_override as ShaderMaterial
     $Helper.keep_3d_linear = true
     mat.shader = preload("res://shaders/AOGenerator.gdshader")
+    
+    var i = 0
+    for freq in [freq_high, freq_high*freq_mid, freq_high*freq_mid*freq_low]:
+        var path = "Helper"+str(i+8)
+        var viewport : Viewport = get_node(path)
+        var quad = viewport.get_node("Quad")
+        if viewport.size != size:
+            viewport.size = size
+        quad.scale.x = size.x / size.y
+        quad.force_update_transform()
+        
+        if quad.material_override == null:
+            var mat2 = ShaderMaterial.new()
+            quad.material_override = mat2
+        var mat2 = quad.material_override
+        
+        viewport.keep_3d_linear = true
+        viewport.hdr = true
+        
+        if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
+            mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
+        
+        if tex_is_new:
+            mat2.set_shader_param("input", ao_ref_tex)
+        mat2.set_shader_param("octave", 0)
+        mat2.set_shader_param("microfacets", 0.0)
+        mat2.set_shader_param("raw_mip_ratio", freq)
+        
+        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+        VisualServer.force_draw(false, 0.0)
+        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+        viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+        
+        var octave = viewport.get_texture()
+        octave.flags |= Texture.FLAG_FILTER
+        octave.flags |= Texture.FLAG_REPEAT
+        mat.set_shader_param("octave_"+str(i), octave)
+        i += 1
+    
     mat.set_shader_param("depth", ao_ref_tex)
     mat.set_shader_param("strength", strength)
-    mat.set_shader_param("freq_low", freq_low)
-    mat.set_shader_param("freq_mid", freq_mid)
-    mat.set_shader_param("freq_high", freq_high)
     mat.set_shader_param("freq_balance", freq_balance)
     mat.set_shader_param("exponent", exponent)
     mat.set_shader_param("bias", bias)
@@ -572,7 +623,6 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     mat.set_shader_param("fine_limit", fine_limit)
     mat.set_shader_param("rough_limit", rough_limit)
     
-    var size = image.get_size()
     $Helper.size = size
     $Helper/Quad.scale.x = size.x / size.y
     $Helper/Quad.force_update_transform()
