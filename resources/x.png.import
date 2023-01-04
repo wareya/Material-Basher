@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/unfinished_office_4k.exr-3df7d28ae02d9b27680fe0e864c0a733.stex"
+path="res://.import/x.png-b866b7937e18279e9c1c27e86245dafe.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://unfinished_office_4k.exr"
-dest_files=[ "res://.import/unfinished_office_4k.exr-3df7d28ae02d9b27680fe0e864c0a733.stex" ]
+source_file="res://resources/x.png"
+dest_files=[ "res://.import/x.png-b866b7937e18279e9c1c27e86245dafe.stex" ]
 
 [params]
 
@@ -21,7 +21,7 @@ compress/bptc_ldr=0
 compress/normal_map=0
 flags/repeat=0
 flags/filter=true
-flags/mipmaps=true
+flags/mipmaps=false
 flags/anisotropic=false
 flags/srgb=2
 process/fix_alpha_border=true

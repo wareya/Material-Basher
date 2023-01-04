@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/belfast_sunset_puresky_2k.exr-abbb920c7a48eb3c22474a1caad02f1e.stex"
+path="res://.import/spoit.png-48aa3bba23311b7574a8d0c0d1ade49e.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://belfast_sunset_puresky_2k.exr"
-dest_files=[ "res://.import/belfast_sunset_puresky_2k.exr-abbb920c7a48eb3c22474a1caad02f1e.stex" ]
+source_file="res://resources/spoit.png"
+dest_files=[ "res://.import/spoit.png-48aa3bba23311b7574a8d0c0d1ade49e.stex" ]
 
 [params]
 

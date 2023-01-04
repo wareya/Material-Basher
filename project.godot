@@ -12,12 +12,12 @@ _global_script_classes=[ {
 "base": "Container",
 "class": "AllTabContainer",
 "language": "GDScript",
-"path": "res://AllTabContainer.gd"
+"path": "res://types/AllTabContainer.gd"
 }, {
 "base": "Reference",
 "class": "ObjLoader",
 "language": "GDScript",
-"path": "res://ObjLoader.gd"
+"path": "res://types/ObjLoader.gd"
 } ]
 _global_script_class_icons={
 "AllTabContainer": "",
@@ -28,7 +28,11 @@ _global_script_class_icons={
 
 config/name="Material Basher"
 run/main_scene="res://Scene.tscn"
-config/icon="res://icon.png"
+config/icon="res://resources/icon.png"
+
+[audio]
+
+default_bus_layout="res://resources/default_bus_layout.tres"
 
 [debug]
 
@@ -55,4 +59,4 @@ common/enable_pause_aware_picking=true
 
 quality/filters/anisotropic_filter_level=8
 quality/filters/msaa=3
-environment/default_environment="res://default_env.tres"
+environment/default_environment="res://resources/default_env.tres"

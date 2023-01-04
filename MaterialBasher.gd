@@ -20,7 +20,7 @@ var albedo_image_display : Image
 var albedo : ImageTexture
 
 var mat_3d = SpatialMaterial.new()
-var mat_texture = preload("res://UnshadedPlain.material")
+var mat_texture = preload("res://resources/UnshadedPlain.material")
 
 func set_uv_scale(scale : Vector3):
     mat_3d.uv1_scale = scale
@@ -389,7 +389,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
     $Helper.keep_3d_linear = true
-    mat.shader = preload("res://NormalGenerator.gdshader")
+    mat.shader = preload("res://shaders/NormalGenerator.gdshader")
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("darkpoint", darkpoint)
@@ -432,14 +432,14 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
 
 func sky_option_picked(which : int):
     if which == 0:
-        $"3D/WorldEnvironment".environment.background_sky = preload("res://DefaultSky.tres")
+        $"3D/WorldEnvironment".environment.background_sky = preload("res://resources/DefaultSky.tres")
     else:
         $"3D/WorldEnvironment".environment.background_sky = PanoramaSky.new()
         ($"3D/WorldEnvironment".environment.background_sky as PanoramaSky).radiance_size = PanoramaSky.RADIANCE_SIZE_128
         if which == 1:
-            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://unfinished_office_4k.exr")
+            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://resources/unfinished_office_4k.exr")
         elif which == 2:
-            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://belfast_sunset_puresky_2k.exr")
+            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://resources/belfast_sunset_puresky_2k.exr")
 
 func normal_option_picked(_unused : int):
     normal_slider_changed(0.0)
@@ -521,7 +521,7 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
     $Helper.keep_3d_linear = true
-    mat.shader = preload("res://AOGenerator.gdshader")
+    mat.shader = preload("res://shaders/AOGenerator.gdshader")
     mat.set_shader_param("depth", ao_ref_tex)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("freq_low", freq_low)
@@ -604,7 +604,7 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
     $Helper.keep_3d_linear = false
-    mat.shader = preload("res://AORemover.gdshader")
+    mat.shader = preload("res://shaders/AORemover.gdshader")
     mat.set_shader_param("albedo", albedo_ref_tex)
     mat.set_shader_param("ao", albedo_ref_ao_tex)
     mat.set_shader_param("ao_strength", ao_strength)
@@ -674,7 +674,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     
     var mat = $Helper/Quad.material_override as ShaderMaterial
     $Helper.keep_3d_linear = true
-    mat.shader = preload("res://MetallicityGenerator.gdshader")
+    mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("colors", color_tex)
     mat.set_shader_param("mixing_bias", mixing_bias)
@@ -887,7 +887,7 @@ var color_picking = ""
 var color_which = -1
 
 func start_picking_color(type : String, which : int):
-    Input.set_custom_mouse_cursor(preload("res://spoit.png"), Input.CURSOR_ARROW, Vector2(1, 20))
+    Input.set_custom_mouse_cursor(preload("res://resources/spoit.png"), Input.CURSOR_ARROW, Vector2(1, 20))
     color_picking = type
     color_which = which
 
@@ -916,11 +916,11 @@ func end_picking_color():
     slider.max_value = 100
     slider.size_flags_horizontal |= SIZE_EXPAND
     
-    button.texture_hover = preload("res://x.png")
-    button.texture_normal = preload("res://x.png")
-    button.texture_disabled = preload("res://x.png")
-    button.texture_focused = preload("res://x.png")
-    button.texture_pressed = preload("res://x.png")
+    button.texture_hover = preload("res://resources/x.png")
+    button.texture_normal = preload("res://resources/x.png")
+    button.texture_disabled = preload("res://resources/x.png")
+    button.texture_focused = preload("res://resources/x.png")
+    button.texture_pressed = preload("res://resources/x.png")
     
     if color_picking == "metal":
         slider.connect("value_changed", self, "metallicity_update")
@@ -1025,14 +1025,14 @@ func set_mesh(which : String):
         mesh = CubeMesh.new()
         $"3D/MeshHolder/Mesh".scale *= 0.7
     elif which == "cylinder":
-        mesh = preload("res://cylinder_good_uvs.obj")
+        mesh = preload("res://resources/cylinder_good_uvs.obj")
         $"3D/MeshHolder/Mesh".scale *= 0.7
         set_uv_scale(Vector3(1, 1, 1))
     elif which == "sideways cylinder":
         #mesh = CylinderMesh.new()
         #mesh.radial_segments = 256
         #mesh.rings = 0
-        mesh = preload("res://cylinder_good_uvs.obj")
+        mesh = preload("res://resources/cylinder_good_uvs.obj")
         $"3D/MeshHolder/Mesh".scale *= 0.7
         set_uv_scale(Vector3(1, 1, 1))
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
