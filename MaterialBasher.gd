@@ -32,6 +32,7 @@ func _ready():
     # TODO: normal lighting removal
     # TODO: gradient removal
     # TODO: depth vs height vs displacement setting
+    # TODO: save/load parameters to json
     
     
     $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog, "hide")
@@ -438,7 +439,7 @@ func sky_option_picked(which : int):
         if which == 1:
             $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://unfinished_office_4k.exr")
         elif which == 2:
-            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://belfast_sunset_puresky_4k.exr")
+            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://belfast_sunset_puresky_2k.exr")
 
 func normal_option_picked(_unused : int):
     normal_slider_changed(0.0)
