@@ -1,9 +1,8 @@
 shader_type spatial;
 render_mode unshaded, ambient_light_disabled, blend_mix, shadows_disabled, specular_disabled;
-uniform sampler2D depth;
-uniform sampler2D octave_0;
-uniform sampler2D octave_1;
-uniform sampler2D octave_2;
+uniform sampler2D octave_0 : hint_albedo;
+uniform sampler2D octave_1 : hint_albedo;
+uniform sampler2D octave_2 : hint_albedo;
 
 uniform float strength;
 
@@ -20,7 +19,7 @@ void vertex() {
 }
 
 void fragment() {
-    vec2 base_size = vec2(textureSize(depth, 0));
+    vec2 base_size = vec2(textureSize(octave_0, 0));
     int max_level = int(floor(log2(max(base_size.x, base_size.y))));
     
     float fine = texture(octave_0, UV).r;

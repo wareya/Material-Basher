@@ -393,9 +393,15 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     
     var size = image.get_size()
     
+    $HelperNormal.keep_3d_linear = true
+    if $HelperNormal/Quad.material_override == null:
+        $HelperNormal/Quad.material_override = ShaderMaterial.new()
+    var mat = $HelperNormal/Quad.material_override
+    if mat.shader != preload("res://shaders/NormalGenerator.gdshader"):
+        mat.shader = preload("res://shaders/NormalGenerator.gdshader")
+    
     var start = OS.get_ticks_usec()
-    var mat = $Helper/Quad.material_override as ShaderMaterial
-    mat.shader = preload("res://shaders/NormalGenerator.gdshader")
+    
     for i in 7:
         var path = "Helper"+str(i+1)
         var viewport : Viewport = get_node(path)
@@ -411,7 +417,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         var mat2 = quad.material_override
         
         viewport.keep_3d_linear = true
-        viewport.hdr = false
+        viewport.hdr = true
         
         if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
             mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
@@ -422,11 +428,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         mat2.set_shader_param("microfacets", microfacets)
         mat2.set_shader_param("raw_mip_ratio", -1.0)
         
-        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
-        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-        VisualServer.force_draw(false, 0.0)
-        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-        viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+        force_draw_subviewport(viewport)
         
         var octave = viewport.get_texture()
         octave.flags |= Texture.FLAG_FILTER
@@ -436,7 +438,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     var end = OS.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
-    $Helper.keep_3d_linear = true
+    $HelperNormal.keep_3d_linear = true
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("darkpoint", darkpoint)
@@ -465,17 +467,13 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         var v = slider.value / slider.max_value
         mat.set_shader_param("band_strength_"+str(i), v)
     
-    $Helper.size = size
-    $Helper/Quad.scale.x = size.x / size.y
-    $Helper/Quad.force_update_transform()
+    $HelperNormal.size = size
+    $HelperNormal/Quad.scale.x = size.x / size.y
+    $HelperNormal/Quad.force_update_transform()
     
-    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-    VisualServer.force_draw(false, 0.0)
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    force_draw_subviewport($HelperNormal)
     
-    return $Helper.get_texture().get_data()
+    return $HelperNormal.get_texture().get_data()
 
 func sky_option_picked(which : int):
     if which == 0:
@@ -559,6 +557,33 @@ func depth_slider_changed(_unused : float):
         ao_slider_changed(0.0)
 
 
+func get_default_fps_setting():
+    return Engine.target_fps
+onready var fps_default = get_default_fps_setting()
+
+var disabled = 0
+func disable_limiter():
+    disabled += 1
+    Engine.target_fps = 0
+
+func reset_limiter():
+    disabled -= 1
+    if disabled <= 0:
+        Engine.target_fps = fps_default
+
+func force_draw_subviewport(viewport : Viewport):
+    var old_update_mode = viewport.render_target_update_mode
+    viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+    
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+    
+    disable_limiter()
+    VisualServer.force_draw(false, 0.0)
+    reset_limiter()
+    
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+    viewport.render_target_update_mode = old_update_mode
+
 var ao_ref_image = null
 var ao_ref_tex = null
 func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, bias, contrast, fine_limit, rough_limit):
@@ -571,9 +596,14 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     
     var size = image.get_size()
     
-    var mat = $Helper/Quad.material_override as ShaderMaterial
-    $Helper.keep_3d_linear = true
-    mat.shader = preload("res://shaders/AOGenerator.gdshader")
+    $HelperAO.keep_3d_linear = true
+    if $HelperAO/Quad.material_override == null:
+        $HelperAO/Quad.material_override = ShaderMaterial.new()
+    var mat = $HelperAO/Quad.material_override
+    if mat.shader != preload("res://shaders/AOGenerator.gdshader"):
+        mat.shader = preload("res://shaders/AOGenerator.gdshader")
+    
+    var start = OS.get_ticks_usec()
     
     var i = 0
     for freq in [freq_high, freq_high*freq_mid, freq_high*freq_mid*freq_low]:
@@ -602,17 +632,16 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
         mat2.set_shader_param("microfacets", 0.0)
         mat2.set_shader_param("raw_mip_ratio", freq)
         
-        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
-        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-        VisualServer.force_draw(false, 0.0)
-        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-        viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+        force_draw_subviewport(viewport)
         
         var octave = viewport.get_texture()
         octave.flags |= Texture.FLAG_FILTER
         octave.flags |= Texture.FLAG_REPEAT
         mat.set_shader_param("octave_"+str(i), octave)
         i += 1
+    
+    var end = OS.get_ticks_usec()
+    print("update time... ", (end-start)/1000.0, "ms")
     
     mat.set_shader_param("depth", ao_ref_tex)
     mat.set_shader_param("strength", strength)
@@ -623,17 +652,13 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     mat.set_shader_param("fine_limit", fine_limit)
     mat.set_shader_param("rough_limit", rough_limit)
     
-    $Helper.size = size
-    $Helper/Quad.scale.x = size.x / size.y
-    $Helper/Quad.force_update_transform()
+    $HelperAO.size = size
+    $HelperAO/Quad.scale.x = size.x / size.y
+    $HelperAO/Quad.force_update_transform()
     
-    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-    VisualServer.force_draw(false, 0.0)
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    force_draw_subviewport($HelperAO)
     
-    return $Helper.get_texture().get_data()
+    return $HelperAO.get_texture().get_data()
 
 
 func ao_option_picked(_unused : int):
@@ -692,9 +717,13 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
         albedo_ref_ao_tex = ImageTexture.new()
         albedo_ref_ao_tex.create_from_image(ao_image)
     
-    var mat = $Helper/Quad.material_override as ShaderMaterial
-    $Helper.keep_3d_linear = false
-    mat.shader = preload("res://shaders/AORemover.gdshader")
+    $HelperUnlit.keep_3d_linear = false
+    if $HelperUnlit/Quad.material_override == null:
+        $HelperUnlit/Quad.material_override = ShaderMaterial.new()
+    var mat = $HelperUnlit/Quad.material_override
+    if mat.shader != preload("res://shaders/AORemover.gdshader"):
+        mat.shader = preload("res://shaders/AORemover.gdshader")
+    
     mat.set_shader_param("albedo", albedo_ref_tex)
     mat.set_shader_param("ao", albedo_ref_ao_tex)
     mat.set_shader_param("ao_strength", ao_strength)
@@ -703,17 +732,13 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     mat.set_shader_param("ao_desat", ao_desat)
     
     var size = albedo_image.get_size()
-    $Helper.size = size
-    $Helper/Quad.scale.x = size.x / size.y
-    $Helper/Quad.force_update_transform()
+    $HelperUnlit.size = size
+    $HelperUnlit/Quad.scale.x = size.x / size.y
+    $HelperUnlit/Quad.force_update_transform()
     
-    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-    VisualServer.force_draw(false, 0.0)
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    force_draw_subviewport($HelperUnlit)
     
-    return $Helper.get_texture().get_data()
+    return $HelperUnlit.get_texture().get_data()
 
 func light_remover_slider_changed(_unused : float):
     if albedo_image == null:
@@ -763,8 +788,13 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     var color_tex = ImageTexture.new()
     color_tex.create_from_image(img)
     
-    var mat = $Helper/Quad.material_override as ShaderMaterial
-    $Helper.keep_3d_linear = true
+    $HelperDistance.keep_3d_linear = true
+    if $HelperDistance/Quad.material_override == null:
+        $HelperDistance/Quad.material_override = ShaderMaterial.new()
+    var mat = $HelperDistance/Quad.material_override
+    if mat.shader != preload("res://shaders/AORemover.gdshader"):
+        mat.shader = preload("res://shaders/AORemover.gdshader")
+    
     mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("colors", color_tex)
@@ -775,17 +805,13 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     mat.set_shader_param("is_roughness", is_roughness)
     
     var size = image.get_size()
-    $Helper.size = size
-    $Helper/Quad.scale.x = size.x / size.y
-    $Helper/Quad.force_update_transform()
+    $HelperDistance.size = size
+    $HelperDistance/Quad.scale.x = size.x / size.y
+    $HelperDistance/Quad.force_update_transform()
     
-    $Helper.render_target_update_mode = Viewport.UPDATE_ALWAYS
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-    VisualServer.force_draw(false, 0.0)
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-    $Helper.render_target_update_mode = Viewport.UPDATE_DISABLED
+    force_draw_subviewport($HelperDistance)
     
-    return $Helper.get_texture().get_data()
+    return $HelperDistance.get_texture().get_data()
 
 
 func metal_slider_changed(_unused : float):
