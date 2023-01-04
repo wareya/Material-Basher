@@ -10,6 +10,14 @@ uniform float band_strength_4;
 uniform float band_strength_5;
 uniform float band_strength_6;
 
+uniform sampler2D octave_0 : hint_albedo;
+uniform sampler2D octave_1 : hint_albedo;
+uniform sampler2D octave_2 : hint_albedo;
+uniform sampler2D octave_3 : hint_albedo;
+uniform sampler2D octave_4 : hint_albedo;
+uniform sampler2D octave_5 : hint_albedo;
+uniform sampler2D octave_6 : hint_albedo;
+
 uniform float darkpoint;
 uniform float midpoint;
 uniform float midpoint_offset;
@@ -27,139 +35,10 @@ void vertex() {
     UV = UV;
 }
 
-float weight_1(float i) {
-    return -2.0*i*i*i + 3.0*i*i;
-}
-
-float weight_2(float i) {
-    return i*i*i - i*i;
-}
-
-vec4 bicubic(vec4 a, vec4 b, vec4 c, vec4 d, float i) {
-    a = c-a;
-    d = d-b;
-    float a_w = -weight_2(1.0 - i);
-    float b_w = 1.0 - weight_1(i);
-    float c_w = 1.0 - b_w;
-    float d_w = weight_2(i);
-    
-    //return mix(b, c, i);
-    return a*a_w + b*b_w + c*c_w + d*d_w;
-}
-
-vec4 texelFetchSafe(sampler2D tex, ivec2 uv, int mip_level) {
-    ivec2 s = textureSize(tex, mip_level);
-    //uv += s/2;
-    uv.x = ((uv.x % s.x) + s.x) % s.x;
-    uv.y = ((uv.y % s.y) + s.y) % s.y;
-    return texelFetch(tex, uv, mip_level);
-}
-
-vec4 bicubic_stride(sampler2D tex, ivec2 b, ivec2 c, int mip_level, float i) {
-    vec4 h_a = texelFetchSafe(tex, b + (b-c), mip_level);
-    vec4 h_b = texelFetchSafe(tex, b        , mip_level);
-    vec4 h_c = texelFetchSafe(tex, c        , mip_level);
-    vec4 h_d = texelFetchSafe(tex, c + (c-b), mip_level);
-    
-    return bicubic(h_a, h_b, h_c, h_d, i);
-    //return h_b;// bicubic(h_a, h_b, h_c, h_d, i);
-}
-
-vec4 sample_bicubic(sampler2D tex, vec2 uv, int mip_level) {
-    vec2 px = 1.0/vec2(textureSize(tex, mip_level));
-    
-    uv -= px*0.5;
-    
-    ivec2 uv_start = ivec2(floor(uv / px));
-    float x_i = (uv.x/px.x - float(uv_start.x));
-    float y_i = (uv.y/px.y - float(uv_start.y));
-    
-    vec4 a = bicubic_stride(tex, uv_start + ivec2(0, -1), uv_start + ivec2(1, -1), mip_level, x_i);
-    vec4 b = bicubic_stride(tex, uv_start + ivec2(0,  0), uv_start + ivec2(1,  0), mip_level, x_i);
-    vec4 c = bicubic_stride(tex, uv_start + ivec2(0,  1), uv_start + ivec2(1,  1), mip_level, x_i);
-    vec4 d = bicubic_stride(tex, uv_start + ivec2(0,  2), uv_start + ivec2(1,  2), mip_level, x_i);
-    
-    vec4 done = bicubic(a, b, c, d, y_i);
-    
-    return done;
-}
-
-vec4 sample_bicubic_super_blurry(sampler2D tex, vec2 uv, int mip_level) {
-    if(mip_level == 0)
-        return sample_bicubic(tex, uv, mip_level);
-    else if(mip_level == 1)
-    {
-        mip_level -= 1;
-        vec2 off = 0.5/vec2(textureSize(tex, mip_level));
-        vec4 ret = vec4(0);
-        for (int y = -1; y <= 1; y += 2)
-        {
-            for (int x = -1; x <= 1; x += 2)
-            {
-                ret += sample_bicubic(tex, uv + vec2(ivec2(x, y))*off, mip_level);
-            }
-        }
-        return ret/4.0;
-    }
-    else
-    {
-        mip_level -= 2;
-        vec2 off = 0.25/vec2(textureSize(tex, mip_level));
-        vec4 ret = vec4(0);
-        for (int y = -3; y <= 3; y += 2)
-        {
-            for (int x = -3; x <= 3; x += 2)
-            {
-                ret += sample_bicubic(tex, uv + vec2(ivec2(x, y))*off, mip_level);
-            }
-        }
-        return ret/16.0;
-    }
-}
-
-vec4 get_mip_level(sampler2D tex, vec2 uv, int mip_level) {
-    float stride = 0.5;
-    if (generate_normal > 0.5)
-    {
-        vec2 off = stride/vec2(textureSize(tex, mip_level));
-        float x1 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2(-1, 0), mip_level).rgb, channel)*3.0;
-        float x2 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2( 1, 0), mip_level).rgb, channel)*3.0;
-        float y1 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2(0, -1), mip_level).rgb, channel)*3.0;
-        float y2 = dot(sample_bicubic_super_blurry(tex, uv + off * vec2(0,  1), mip_level).rgb, channel)*3.0;
-        
-        return vec4(x1, x2, y1, y2)/stride*0.5;
-    }
-    else
-    {
-        return vec4(dot(sample_bicubic_super_blurry(tex, uv, mip_level).rgb, channel)*3.0, 0, 0, 0);
-    }
-}
-
-// TODO integrate
-vec4 get_mip_level_fast(sampler2D tex, vec2 uv, int mip_level) {
-    float stride = 0.5;
-    if (generate_normal > 0.5)
-    {
-        vec2 off = stride/vec2(textureSize(tex, mip_level));
-        float x1 = dot(texture(tex, uv + off * vec2(-1, 0), float(mip_level)).rgb, channel);
-        float x2 = dot(texture(tex, uv + off * vec2( 1, 0), float(mip_level)).rgb, channel);
-        float y1 = dot(texture(tex, uv + off * vec2(0, -1), float(mip_level)).rgb, channel);
-        float y2 = dot(texture(tex, uv + off * vec2(0,  1), float(mip_level)).rgb, channel);
-        
-        return vec4(x1, x2, y1, y2)/stride*0.5;
-    }
-    else
-    {
-        return vec4(dot(texture(tex, uv, float(mip_level)).rgb, channel)*3.0, 0, 0, 0);
-    }
-}
-
-vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
-    vec2 base_size = vec2(textureSize(tex, 0));
+float octave_to_mip_level(int octave) {
+    vec2 base_size = vec2(textureSize(albedo, 0));
     int max_level = int(floor(log2(max(base_size.x, base_size.y))));
-    //float octave_adjusted = mix(2.22, 6.0, float(octave)/6.0);
-    //float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);
-    //float mip_level = float(max_level) - octave_level;
+    
     float offset = 2.0;
     float mip_level = float(max_level) - float(octave) - offset;
     float with_microfacets = mip_level;
@@ -171,18 +50,31 @@ vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
     
     mip_level = max(0.0, mip_level);
     
-    float lower = floor(mip_level);
-    float higher = ceil(mip_level);
-    float between = mip_level-lower;
-    
-    vec4 a = get_mip_level(tex, uv, int(lower));
-    vec4 b = get_mip_level(tex, uv, int(higher));
-    
-    vec4 c = mix(a, b, between);
-    
-    return c;
+    return mip_level;
 }
 
+const float stride = 0.5;
+vec4 get_mip_level(sampler2D tex, vec2 uv, int octave) {
+    float mip_level = octave_to_mip_level(octave);
+    if (generate_normal > 0.5)
+    {
+        float low = floor(mip_level);
+        float high = ceil(mip_level);
+        vec2 size_low  = stride/vec2(textureSize(albedo, int(low)));
+        vec2 size_high = stride/vec2(textureSize(albedo, int(high)));
+        vec2 off = mix(size_low, size_high, mip_level - low);
+        float x1 = dot(texture(tex, uv + off * vec2(-1, 0)).rgb, channel)*3.0;
+        float x2 = dot(texture(tex, uv + off * vec2( 1, 0)).rgb, channel)*3.0;
+        float y1 = dot(texture(tex, uv + off * vec2(0, -1)).rgb, channel)*3.0;
+        float y2 = dot(texture(tex, uv + off * vec2(0,  1)).rgb, channel)*3.0;
+        
+        return vec4(x1, x2, y1, y2);
+    }
+    else
+    {
+        return vec4(dot(texture(tex, uv).rgb, channel)*3.0, 0, 0, 0);
+    }
+}
 float map_to_points(float x) {
     float offset = midpoint_offset;
     if (offset < 0.001)
@@ -211,6 +103,16 @@ void fragment() {
         band_strength_6
     };
     
+    vec4 samples[] = {
+        get_mip_level(octave_0, UV, 0),
+        get_mip_level(octave_1, UV, 1),
+        get_mip_level(octave_2, UV, 2),
+        get_mip_level(octave_3, UV, 3),
+        get_mip_level(octave_4, UV, 4),
+        get_mip_level(octave_5, UV, 5),
+        get_mip_level(octave_6, UV, 6)
+    };
+    
     float energy = 0.0;
     float x1 = 0.0;
     float x2 = 0.0;
@@ -224,7 +126,7 @@ void fragment() {
             amp *= 2.0;
         else if (i == 1)
             amp *= 1.5;
-        vec4 data = get_octave(albedo, UV, i)*abs(amp);
+        vec4 data = samples[i]*abs(amp);
         mapped_midpoint += map_to_points(image_midpoint*abs(amp))*sign(amp);
         x1 += map_to_points(data.x)*sign(amp);
         x2 += map_to_points(data.y)*sign(amp);
@@ -244,10 +146,10 @@ void fragment() {
     
     if (generate_normal > 0.5)
     {
-        x1 *= strength;
-        x2 *= strength;
-        y1 *= strength;
-        y2 *= strength;
+        x1 *= strength*0.5/stride;
+        x2 *= strength*0.5/stride;
+        y1 *= strength*0.5/stride;
+        y2 *= strength*0.5/stride;
         
         vec3 x_n = cross(vec3(0, -1, 0), normalize(vec3(1, 0, x2-x1)));
         vec3 y_n = cross(vec3(1,  0, 0), normalize(vec3(0, 1, y2-y1)));
@@ -263,7 +165,6 @@ void fragment() {
             ALBEDO = vec3(0.5, 1.0, 0.5);
         else
             ALBEDO = n;
-        //ALBEDO = sample_bicubic(albedo, UV, 1).rgb;
     }
     else
     {

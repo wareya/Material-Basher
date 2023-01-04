@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=26 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://shaders/NormalGenerator.gdshader" type="Shader" id=2]
@@ -33,6 +33,9 @@ shader_param/albedo = Color( 1, 1, 1, 1 )
 
 [sub_resource type="QuadMesh" id=17]
 
+[sub_resource type="ViewportTexture" id=31]
+viewport_path = NodePath("Helper4")
+
 [sub_resource type="Gradient" id=1]
 interpolation_mode = 2
 offsets = PoolRealArray( 0.150838, 0.603352, 0.748603, 0.871508, 1 )
@@ -59,6 +62,8 @@ background_mode = 2
 background_sky = ExtResource( 3 )
 background_energy = 0.5
 ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
+
+[sub_resource type="SpatialMaterial" id=30]
 
 [sub_resource type="SphereMesh" id=26]
 radial_segments = 118
@@ -155,12 +160,160 @@ fov = 90.0
 material_override = SubResource( 16 )
 mesh = SubResource( 17 )
 
+[node name="Helper1" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper1"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper1"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
+[node name="Helper2" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper2"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
+[node name="Helper3" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper3"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper3"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
+[node name="Helper4" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper4"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper4"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
+[node name="Helper5" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper5"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper5"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
+[node name="Helper6" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper6"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper6"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
+[node name="Helper7" type="Viewport" parent="."]
+size = Vector2( 256, 256 )
+own_world = true
+world = SubResource( 14 )
+transparent_bg = true
+handle_input_locally = false
+hdr = false
+render_target_v_flip = true
+render_target_update_mode = 0
+gui_disable_input = true
+gui_snap_controls_to_pixels = false
+
+[node name="Camera" type="Camera" parent="Helper7"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+current = true
+fov = 90.0
+
+[node name="Quad" type="MeshInstance" parent="Helper7"]
+material_override = SubResource( 16 )
+mesh = SubResource( 17 )
+
 [node name="TextureRect" type="TextureRect" parent="."]
 visible = false
 show_behind_parent = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 640.0
+texture = SubResource( 31 )
 expand = true
 stretch_mode = 6
 
@@ -196,6 +349,7 @@ environment = SubResource( 5 )
 [node name="MeshHolder" type="Spatial" parent="3D"]
 
 [node name="Mesh" type="MeshInstance" parent="3D/MeshHolder"]
+material_override = SubResource( 30 )
 mesh = SubResource( 26 )
 
 [node name="CameraHolder" type="Spatial" parent="3D"]

@@ -80,7 +80,6 @@ func _ready():
     $Tabs/Export/Button3.connect("pressed", self, "save_pbr")
     
     
-    
     for _type in ["normal", "depth"]:
         var type : String = _type
         var parent = get_node("Tabs/%s Map" % [type.capitalize()])
@@ -98,6 +97,7 @@ func _ready():
         for child in parent.get_node("Freqs/Presets").get_children():
             if child is Button:
                 child.connect("pressed", self, "%s_freq_preset" % [type], [child.name.to_lower()])
+    
     
     $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
@@ -389,9 +389,44 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         ref_tex = ImageTexture.new()
         ref_tex.create_from_image(image)
     
+    var size = image.get_size()
+    
+    var start = OS.get_ticks_usec()
     var mat = $Helper/Quad.material_override as ShaderMaterial
-    $Helper.keep_3d_linear = true
     mat.shader = preload("res://shaders/NormalGenerator.gdshader")
+    for i in 7:
+        var path = "Helper"+str(i+1)
+        var viewport : Viewport = get_node(path)
+        var quad = viewport.get_node("Quad")
+        viewport.size = size
+        quad.scale.x = size.x / size.y
+        quad.force_update_transform()
+        
+        var mat2 = ShaderMaterial.new()
+        quad.material_override = mat2
+        viewport.keep_3d_linear = true
+        mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
+        
+        mat2.set_shader_param("input", ref_tex)
+        mat2.set_shader_param("octave", i)
+        mat2.set_shader_param("microfacets", microfacets)
+        mat2.set_shader_param("raw_mip_ratio", -1.0)
+        
+        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+        VisualServer.force_draw(false, 0.0)
+        get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+        viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+        
+        var octave = viewport.get_texture()
+        octave.flags |= Texture.FLAG_FILTER
+        octave.flags |= Texture.FLAG_REPEAT
+        mat.set_shader_param("octave_"+str(i), octave)
+    
+    var end = OS.get_ticks_usec()
+    print("update time... ", (end-start)/1000.0, "ms")
+    
+    $Helper.keep_3d_linear = true
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("darkpoint", darkpoint)
@@ -420,7 +455,6 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         var v = slider.value / slider.max_value
         mat.set_shader_param("band_strength_"+str(i), v)
     
-    var size = image.get_size()
     $Helper.size = size
     $Helper/Quad.scale.x = size.x / size.y
     $Helper/Quad.force_update_transform()
