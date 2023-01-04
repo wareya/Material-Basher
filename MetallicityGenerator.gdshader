@@ -8,6 +8,7 @@ uniform float contrast;
 uniform float bias;
 uniform int shrink_radius;
 uniform int blur_radius;
+uniform bool is_roughness;
 
 void vertex() {
     UV = UV;

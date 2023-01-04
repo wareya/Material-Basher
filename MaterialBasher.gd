@@ -30,8 +30,9 @@ func set_uv_scale(scale : Vector3):
 func _ready():
     # TODO: settings for diffuse/specular model etc
     # TODO: normal lighting removal
+    # TODO: gradient removal
     # TODO: depth vs height vs displacement setting
-    # TODO: export
+    
     
     $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog, "hide")
     
@@ -324,6 +325,8 @@ func files_dropped(files : PoolStringArray, _screen : int):
     normal_slider_changed(0.0)
     depth_slider_changed(0.0)
     metal_slider_changed(0.0)
+    roughness_slider_changed(0.0)
+    ao_slider_changed(0.0)
 
 
 var setting_sliders = false
@@ -646,7 +649,7 @@ func light_remover_slider_changed(_unused : float):
         var n2 = albedo.duplicate(true)
         mat_texture.set_shader_param("image", n2)
 
-func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius):
+func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness):
     mixing_bias = mixing_bias*mixing_bias
     if ref_image != image or ref_tex == null:
         ref_image = image
@@ -654,7 +657,10 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
         ref_tex.create_from_image(image)
     
     if colors.size() == 0:
-        colors = [Color(0, 0, 0, 0)]
+        if is_roughness:
+            colors = [Color(0, 0, 0, 1)]
+        else:
+            colors = [Color(0, 0, 0, 0)]
     
     var img = Image.new()
     img.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
@@ -674,6 +680,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     mat.set_shader_param("contrast", contrast)
     mat.set_shader_param("shrink_radius", shrink_radius)
     mat.set_shader_param("blur_radius", blur_radius)
+    mat.set_shader_param("is_roughness", is_roughness)
     
     var size = image.get_size()
     $Helper.size = size
@@ -706,7 +713,7 @@ func metal_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius)
+    metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius, false)
     
     metal = ImageTexture.new()
     metal.create_from_image(metal_image)
@@ -738,7 +745,7 @@ func roughness_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    roughness_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius)
+    roughness_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius, true)
     
     roughness = ImageTexture.new()
     roughness.create_from_image(roughness_image)

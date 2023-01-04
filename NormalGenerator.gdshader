@@ -160,12 +160,13 @@ vec4 get_octave(sampler2D tex, vec2 uv, int octave) {
     //float octave_adjusted = mix(2.22, 6.0, float(octave)/6.0);
     //float octave_level = mix(0.0, float(max_level), float(octave_adjusted)/6.0);
     //float mip_level = float(max_level) - octave_level;
-    float mip_level = float(max_level) - float(octave+3);
+    float offset = 2.0;
+    float mip_level = float(max_level) - float(octave) - offset;
     float with_microfacets = mip_level;
     if (octave == 6)
         with_microfacets = 0.0;
     else if (octave == 5)
-        with_microfacets = mix(float(max_level) - 7.0, 0.0, 0.5);
+        with_microfacets = mix(float(max_level) - 4.0 - offset, 0.0, 0.33);
     mip_level = mix(mip_level, with_microfacets, microfacets);
     
     mip_level = max(0.0, mip_level);
