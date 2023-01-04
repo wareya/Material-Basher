@@ -2,8 +2,10 @@
 
 Material Basher is a tool made in Godot 3 for turning non-PBR textures
 into PBR-workflow-compatible material data. This does not create accurate
-PBR materials, it just makes it possible to use textures in PBR rendering
-pipelines without then being incredibly ugly.
+PBR materials, it just makes it possible to use non-PBR textures in
+PBR rendering pipelines without then being incredibly ugly.
+
+![Screenshot](https://user-images.githubusercontent.com/585488/210592454-d7ee3e77-380b-4d37-b184-4cdd80e91d2b.png)
 
 ## Features
 
