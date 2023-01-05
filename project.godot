@@ -63,6 +63,20 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
-quality/filters/anisotropic_filter_level=8
-quality/filters/msaa=3
+quality/intended_usage/framebuffer_allocation=3
+quality/directional_shadow/size=256
+quality/directional_shadow/size.mobile=256
+quality/shadow_atlas/size=256
+quality/shadow_atlas/size.mobile=256
+quality/shadow_atlas/quadrant_0_subdiv=0
+quality/shadow_atlas/quadrant_1_subdiv=0
+quality/shadow_atlas/quadrant_2_subdiv=0
+quality/shadow_atlas/quadrant_3_subdiv=0
+quality/shadows/filter_mode=0
+quality/depth_prepass/enable=false
+quality/skinning/force_software_skinning=true
+quality/subsurface_scattering/quality=0
+quality/subsurface_scattering/scale=0
+quality/subsurface_scattering/weight_samples=false
+quality/filters/msaa=2
 environment/default_environment="res://resources/default_env.tres"

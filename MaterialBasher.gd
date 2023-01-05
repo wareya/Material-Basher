@@ -417,23 +417,21 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         var mat2 = quad.material_override
         
         viewport.keep_3d_linear = true
-        viewport.hdr = true
+        viewport.hdr = false
         
         if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
             mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
         
-        if tex_is_new:
-            mat2.set_shader_param("input", ref_tex)
+        mat2.set_shader_param("input", ref_tex)
         mat2.set_shader_param("octave", i)
         mat2.set_shader_param("microfacets", microfacets)
         mat2.set_shader_param("raw_mip_ratio", -1.0)
         
-        force_draw_subviewport(viewport)
+        force_draw_subviewports([viewport])
         
-        var octave = viewport.get_texture()
-        octave.flags |= Texture.FLAG_FILTER
-        octave.flags |= Texture.FLAG_REPEAT
-        mat.set_shader_param("octave_"+str(i), octave)
+        var img = ImageTexture.new()
+        mat.set_shader_param("octave_"+str(i), viewport.get_texture())
+    
     
     var end = OS.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
@@ -471,9 +469,16 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     $HelperNormal/Quad.scale.x = size.x / size.y
     $HelperNormal/Quad.force_update_transform()
     
-    force_draw_subviewport($HelperNormal)
+    force_draw_subviewports([$HelperNormal])
     
-    return $HelperNormal.get_texture().get_data()
+    var img = $HelperNormal.get_texture().get_data()
+    
+    for i in 7:
+        mat.set_shader_param("octave_"+str(i), null)
+    $HelperNormal.size = Vector2(2, 2)
+    force_draw_subviewports([$HelperNormal])
+    
+    return img
 
 func sky_option_picked(which : int):
     if which == 0:
@@ -571,9 +576,12 @@ func reset_limiter():
     if disabled <= 0:
         Engine.target_fps = fps_default
 
-func force_draw_subviewport(viewport : Viewport):
-    var old_update_mode = viewport.render_target_update_mode
-    viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+func force_draw_subviewports(viewports : Array):
+    var old_update_modes = []
+    for _viewport in viewports:
+        var viewport : Viewport = _viewport
+        old_update_modes.push_back(viewport.render_target_update_mode)
+        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
     
     get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
     
@@ -582,7 +590,11 @@ func force_draw_subviewport(viewport : Viewport):
     reset_limiter()
     
     get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-    viewport.render_target_update_mode = old_update_mode
+    
+    for i in viewports.size():
+        var viewport = viewports[i]
+        var old_update_mode = old_update_modes[i]
+        viewport.render_target_update_mode = old_update_mode
 
 var ao_ref_image = null
 var ao_ref_tex = null
@@ -605,6 +617,7 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     
     var start = OS.get_ticks_usec()
     
+    var subviewports = []
     var i = 0
     for freq in [freq_high, freq_high*freq_mid, freq_high*freq_mid*freq_low]:
         var path = "Helper"+str(i+8)
@@ -632,7 +645,7 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
         mat2.set_shader_param("microfacets", 0.0)
         mat2.set_shader_param("raw_mip_ratio", freq)
         
-        force_draw_subviewport(viewport)
+        subviewports.push_back(viewport)
         
         var octave = viewport.get_texture()
         octave.flags |= Texture.FLAG_FILTER
@@ -640,10 +653,11 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
         mat.set_shader_param("octave_"+str(i), octave)
         i += 1
     
+    force_draw_subviewports(subviewports)
+    
     var end = OS.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
-    mat.set_shader_param("depth", ao_ref_tex)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("freq_balance", freq_balance)
     mat.set_shader_param("exponent", exponent)
@@ -656,7 +670,8 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     $HelperAO/Quad.scale.x = size.x / size.y
     $HelperAO/Quad.force_update_transform()
     
-    force_draw_subviewport($HelperAO)
+    force_draw_subviewports([$HelperAO])
+    mat.shader = null
     
     return $HelperAO.get_texture().get_data()
 
@@ -717,6 +732,8 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
         albedo_ref_ao_tex = ImageTexture.new()
         albedo_ref_ao_tex.create_from_image(ao_image)
     
+    var start = OS.get_ticks_usec()
+    
     $HelperUnlit.keep_3d_linear = false
     if $HelperUnlit/Quad.material_override == null:
         $HelperUnlit/Quad.material_override = ShaderMaterial.new()
@@ -736,7 +753,9 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     $HelperUnlit/Quad.scale.x = size.x / size.y
     $HelperUnlit/Quad.force_update_transform()
     
-    force_draw_subviewport($HelperUnlit)
+    force_draw_subviewports([$HelperUnlit])
+    var end = OS.get_ticks_usec()
+    print("update time... ", (end-start)/1000.0, "ms")
     
     return $HelperUnlit.get_texture().get_data()
 
@@ -809,7 +828,8 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     $HelperDistance/Quad.scale.x = size.x / size.y
     $HelperDistance/Quad.force_update_transform()
     
-    force_draw_subviewport($HelperDistance)
+    force_draw_subviewports([$HelperDistance])
+    mat.shader = null
     
     return $HelperDistance.get_texture().get_data()
 
@@ -997,7 +1017,13 @@ func _process(delta : float):
     
     if current_preview_texture != next_texture:
         current_preview_texture = next_texture
-        $PanelContainer/TextureRect.texture = next_texture.duplicate(true)
+        var data : Image = next_texture.get_data()
+        print(data.get_format())
+        var tex = ImageTexture.new()
+        tex.create_from_image(data)
+        tex.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+        
+        $PanelContainer/TextureRect.texture = tex
 
     processing = false
 
