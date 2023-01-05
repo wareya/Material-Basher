@@ -32,15 +32,6 @@ buttons and sliders until the material looks good. Have fun!
 What? Making non-PBR textures look good with PBR properties is an art,
 not a science. Practice, practice, practice.
 
-## SLOW.
-
-Normal map, depth map, and AO map generation currently use a very slow
-texture sampling technique in a very inefficient and wasteful way, in
-order to avoid interpolation artifacts. I will fix this in the future.
-
-Also, all the expensive stuff is done on the GPU in GLSL shaders, so if
-you have a weak or integrated GPU things might not work well at all.
-
 # License
 
 Copyright 2023 "Wareya" (wareya@gmail.com) and any contributors
