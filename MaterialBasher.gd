@@ -18,6 +18,7 @@ var ao : ImageTexture
 var albedo_image : Image
 var albedo_image_display : Image
 var albedo : ImageTexture
+var albedo_display : ImageTexture
 
 var mat_3d = SpatialMaterial.new()
 var mat_texture = preload("res://resources/UnshadedPlain.material")
@@ -318,12 +319,15 @@ func files_dropped(files : PoolStringArray, _screen : int):
         return
     
     albedo_image = image
-    albedo_image_display = albedo_image.duplicate()
     albedo = ImageTexture.new()
-    albedo.create_from_image(albedo_image_display)
-    albedo.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    albedo.create_from_image(albedo_image)
     
-    mat_3d.albedo_texture = albedo
+    albedo_image_display = albedo_image.duplicate()
+    albedo_display = ImageTexture.new()
+    albedo_display.create_from_image(albedo_image_display)
+    albedo_display.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    
+    mat_3d.albedo_texture = albedo_display
     
     no_recurse = true
     normal_slider_changed(0.0)
@@ -792,11 +796,11 @@ func light_remover_slider_changed(_unused : float):
     
     albedo_image_display = create_unlit_albedo_image(albedo, ao, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
     
-    albedo = ImageTexture.new()
-    albedo.create_from_image(albedo_image_display)
-    albedo.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    albedo_display = ImageTexture.new()
+    albedo_display.create_from_image(albedo_image_display)
+    albedo_display.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
     
-    mat_3d.albedo_texture = albedo
+    mat_3d.albedo_texture = albedo_display
     if !indirect_update:
         var n2 = albedo.duplicate(true)
         mat_texture.set_shader_param("image", n2)

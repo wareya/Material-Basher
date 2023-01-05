@@ -131,11 +131,11 @@ void fragment() {
         if (early_adjust)
         {
             vec4 data = samples[i];
-            mapped_midpoint += map_to_points(image_midpoint)*abs(amp);
-            x1 += map_to_points(data.x)*abs(amp);
-            x2 += map_to_points(data.y)*abs(amp);
-            y1 += map_to_points(data.z)*abs(amp);
-            y2 += map_to_points(data.w)*abs(amp);
+            mapped_midpoint += map_to_points(image_midpoint)*amp;
+            x1 += map_to_points(data.x)*amp;
+            x2 += map_to_points(data.y)*amp;
+            y1 += map_to_points(data.z)*amp;
+            y2 += map_to_points(data.w)*amp;
         }
         else
         {
