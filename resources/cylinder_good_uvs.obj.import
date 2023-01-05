@@ -1,20 +1,21 @@
 [remap]
 
 importer="wavefront_obj"
+importer_version=1
 type="Mesh"
-path="res://.import/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh"
+uid="uid://cfdyrgeni0vfj"
+path="res://.godot/imported/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh"
 
 [deps]
 
-files=[ "res://.import/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh" ]
+files=["res://.godot/imported/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh"]
 
 source_file="res://resources/cylinder_good_uvs.obj"
-dest_files=[ "res://.import/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh", "res://.import/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh" ]
+dest_files=["res://.godot/imported/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh", "res://.godot/imported/cylinder_good_uvs.obj-fed9510b8883dfea6ff3a2cbffe121c0.mesh"]
 
 [params]
 
 generate_tangents=true
-scale_mesh=Vector3( 1, 1, 1 )
-offset_mesh=Vector3( 0, 0, 0 )
-octahedral_compression=true
-optimize_mesh_flags=4286
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true

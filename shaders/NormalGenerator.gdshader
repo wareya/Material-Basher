@@ -1,6 +1,6 @@
 shader_type spatial;
 render_mode unshaded, ambient_light_disabled, blend_mix, shadows_disabled, specular_disabled;
-uniform sampler2D albedo : hint_albedo;
+uniform sampler2D albedo : source_color;
 uniform float strength;
 uniform float band_strength_0;
 uniform float band_strength_1;
@@ -10,13 +10,13 @@ uniform float band_strength_4;
 uniform float band_strength_5;
 uniform float band_strength_6;
 
-uniform sampler2D octave_0 : hint_albedo;
-uniform sampler2D octave_1 : hint_albedo;
-uniform sampler2D octave_2 : hint_albedo;
-uniform sampler2D octave_3 : hint_albedo;
-uniform sampler2D octave_4 : hint_albedo;
-uniform sampler2D octave_5 : hint_albedo;
-uniform sampler2D octave_6 : hint_albedo;
+uniform sampler2D octave_0 : source_color;
+uniform sampler2D octave_1 : source_color;
+uniform sampler2D octave_2 : source_color;
+uniform sampler2D octave_3 : source_color;
+uniform sampler2D octave_4 : source_color;
+uniform sampler2D octave_5 : source_color;
+uniform sampler2D octave_6 : source_color;
 
 uniform float darkpoint;
 uniform float midpoint;

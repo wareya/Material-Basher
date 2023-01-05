@@ -27,10 +27,10 @@ static func parse_obj(text : String):
         elif type == "vn":
             normals.push_back(Vector3(data[0].to_float(), data[1].to_float(), data[2].to_float()))
         elif type == "f":
-            var face_v = PoolVector3Array()
-            var face_n = PoolVector3Array()
-            var face_uv = PoolVector2Array()
-            data.invert()
+            var face_v = PackedVector3Array()
+            var face_n = PackedVector3Array()
+            var face_uv = PackedVector2Array()
+            data.reverse()
             for _susbtr in data:
                 var substr : String = _susbtr
                 var indexes = substr.split("/")
@@ -62,6 +62,6 @@ static func parse_obj(text : String):
         #stool.add_vertex()
         #stool.add_normal(face[1])
         #stool.add_uv(face[2])
-        stool.add_triangle_fan(face[0], face[2], PoolColorArray(), PoolVector2Array(), face[1])
+        stool.add_triangle_fan(face[0], face[2], PackedColorArray(), PackedVector2Array(), face[1])
     
     return stool.commit()

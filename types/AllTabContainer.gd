@@ -1,9 +1,10 @@
+@tool
 extends Container
 class_name AllTabContainer
 
-export (StyleBox) var panel_bg = null
-export (StyleBox) var tab_bg = null
-export (StyleBox) var tab_inactive_bg = null
+@export var panel_bg : StyleBox = null
+@export var tab_bg : StyleBox = null
+@export var tab_inactive_bg : StyleBox = null
 
 var panel : Panel = null
 func _ready():
@@ -15,7 +16,7 @@ func _ready():
         var button = Button.new()
         button.text = child.name
         button_tabs[button] = child
-        button.connect("pressed", self, "_button_pressed", [button])
+        button.connect("pressed", self._button_pressed.bind(button))
         add_child(button)
         move_child(button, i)
         i += 1
@@ -24,7 +25,7 @@ func _ready():
         active_button = button_tabs.keys()[0]
     
     panel = Panel.new()
-    panel.add_stylebox_override("panel", panel_bg)
+    panel.add_theme_stylebox_override("panel", panel_bg)
     add_child(panel)
     move_child(panel, 0)
 
@@ -43,34 +44,34 @@ func _process(delta):
     for _button in button_tabs.keys():
         var button : Button = _button
         if button == active_button:
-            button.add_color_override("font_color", Color(0.88, 0.88, 0.88, 1))
-            button.add_stylebox_override("normal", tab_bg)
-            button.add_stylebox_override("hover", tab_bg)
-            button.add_stylebox_override("focus", tab_bg)
-            button.add_stylebox_override("pressed", tab_bg)
-            button.add_stylebox_override("disabled", tab_bg)
+            button.add_theme_color_override("font_color", Color(0.88, 0.88, 0.88, 1))
+            button.add_theme_stylebox_override("normal", tab_bg)
+            button.add_theme_stylebox_override("hover", tab_bg)
+            button.add_theme_stylebox_override("focus", tab_bg)
+            button.add_theme_stylebox_override("pressed", tab_bg)
+            button.add_theme_stylebox_override("disabled", tab_bg)
         else:
-            button.add_color_override("font_color", Color(0.75, 0.75, 0.75, 1))
-            button.add_stylebox_override("normal", tab_inactive_bg)
-            button.add_stylebox_override("hover", tab_inactive_bg)
-            button.add_stylebox_override("focus", tab_inactive_bg)
-            button.add_stylebox_override("pressed", tab_inactive_bg)
-            button.add_stylebox_override("disabled", tab_inactive_bg)
+            button.add_theme_color_override("font_color", Color(0.75, 0.75, 0.75, 1))
+            button.add_theme_stylebox_override("normal", tab_inactive_bg)
+            button.add_theme_stylebox_override("hover", tab_inactive_bg)
+            button.add_theme_stylebox_override("focus", tab_inactive_bg)
+            button.add_theme_stylebox_override("pressed", tab_inactive_bg)
+            button.add_theme_stylebox_override("disabled", tab_inactive_bg)
     
 func _notification(what):
-    var margin_left = panel_bg.get_margin(MARGIN_LEFT)
-    var margin_right = panel_bg.get_margin(MARGIN_RIGHT)
-    var margin_top = panel_bg.get_margin(MARGIN_TOP)
-    var margin_bottom = panel_bg.get_margin(MARGIN_BOTTOM)
+    var margin_left = panel_bg.get_margin(SIDE_LEFT)
+    var margin_right = panel_bg.get_margin(SIDE_RIGHT)
+    var margin_top = panel_bg.get_margin(SIDE_TOP)
+    var margin_bottom = panel_bg.get_margin(SIDE_BOTTOM)
     
     if what == NOTIFICATION_SORT_CHILDREN:
-        var width = rect_size.x
+        var width = size.x
         for _child in get_children():
             var child : Node = _child
             if child in button_tabs or child == panel:
                 continue
             if child.visible:
-                width = child.rect_size.x
+                width = child.size.x
         
         var cursor_x = 0
         var cursor_y = 0
@@ -78,17 +79,17 @@ func _notification(what):
         var row_height = 0
         for _button in button_tabs.keys():
             var button : Button = _button
-            var size = button.get_minimum_size()
-            row_height = max(size.y, row_height)
+            var child_size = button.get_minimum_size()
+            row_height = max(child_size.y, row_height)
             var over_size = false
             var done_wrap = false
-            if size.x + cursor_x > rect_size.x and cursor_x > 0:
+            if child_size.x + cursor_x > size.x and cursor_x > 0:
                 cursor_y += row_height
                 cursor_x = 0
                 done_wrap = true
-            button.rect_position = Vector2(cursor_x, cursor_y)
-            cursor_x += size.x
-            if cursor_x > rect_size.x and !done_wrap:
+            button.position = Vector2(cursor_x, cursor_y)
+            cursor_x += child_size.x
+            if cursor_x > size.x and !done_wrap:
                 cursor_y += row_height
                 cursor_x = 0
         
@@ -98,13 +99,13 @@ func _notification(what):
             var child : Node = _child
             if child in button_tabs or child == panel:
                 continue
-            fit_child_in_rect(child, Rect2(margin_left, cursor_y + margin_top, rect_size.x, 0))
+            fit_child_in_rect(child, Rect2(margin_left, cursor_y + margin_top, size.x, 0))
             if child.visible:
-                rect_size.y = cursor_y + child.rect_size.y
-                rect_size.x = child.rect_size.x
+                size.y = cursor_y + child.size.y
+                size.x = child.size.x
         
         if panel:
-            panel.rect_position = Vector2(0, cursor_y)
-            panel.rect_size = Vector2(rect_size.x + margin_left + margin_right, rect_size.y - cursor_y + margin_top + margin_bottom)
+            panel.position = Vector2(0, cursor_y)
+            panel.size = Vector2(size.x + margin_left + margin_right, size.y - cursor_y + margin_top + margin_bottom)
             panel.show_behind_parent = true
 

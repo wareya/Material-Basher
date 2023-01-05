@@ -48,4 +48,5 @@ void fragment() {
         f = pow(f, 1.0/real_exponent);
     
     ALBEDO = vec3(f);
+    ALBEDO = vec3(1.0);
 }

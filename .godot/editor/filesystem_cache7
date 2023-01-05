@@ -1,0 +1,22 @@
+0b7126e0c6e86d3ec295a72f5aa6e0bd
+::res://::1672890073
+export_presets.cfg::TextFile::-1::1672882159::0::1::::<><>::
+MaterialBasher.gd::GDScript::-1::1672889665::0::1::::<>Control<>::
+Readme.md::TextFile::-1::1672850937::0::1::::<><>::
+Scene.tscn::PackedScene::8974198425220505194::1672890066::0::1::::<><>::res://MaterialBasher.gd<>uid://d2cfpwwwx8vn0<>uid://dhmoreeoduq51<>res://types/AllTabContainer.gd<>uid://b1ad07lqpxrtr
+Third Party Copyright Info.txt::TextFile::-1::1672797451::0::1::::<><>::
+::res://resources/::1672889919
+belfast_sunset_puresky_2k.exr::CompressedTexture2D::499223150507807246::1672806400::1672885673::1::::<><>::
+cylinder_good_uvs.obj::Mesh::5131466607082998511::1672708288::1672885674::1::::<><>::
+DefaultSky.tres::Sky::7676237102902889702::1672889214::0::1::::<><>::
+default_env.tres::Environment::-1::1672883210::0::1::::<><>::
+icon.png::CompressedTexture2D::9058821147217739999::1672713735::1672885673::1::::<><>::
+spoit.png::CompressedTexture2D::2797071067690619163::1672508436::1672885673::1::::<><>::
+Theme.tres::Theme::4211559112595854147::1672889919::0::1::::<><>::
+unfinished_office_4k.exr::CompressedTexture2D::2449781927361715997::1672629408::1672885674::1::::<><>::
+UnshadedPlain.material::ShaderMaterial::-1::1672846660::0::1::::<><>::
+x.png::CompressedTexture2D::5904574128034217347::1672508622::1672885673::1::::<><>::
+::res://shaders/::1672886069
+::res://types/::1672888495
+AllTabContainer.gd::GDScript::-1::1672888495::0::1::::AllTabContainer<>Container<>::
+ObjLoader.gd::GDScript::-1::1672888293::0::1::::ObjLoader<>RefCounted<>::

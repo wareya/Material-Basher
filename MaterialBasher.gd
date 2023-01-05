@@ -19,16 +19,17 @@ var albedo_image : Image
 var albedo_image_display : Image
 var albedo : ImageTexture
 
-var mat_3d = SpatialMaterial.new()
+var mat_3d = StandardMaterial3D.new()
 var mat_texture = preload("res://resources/UnshadedPlain.material")
 
 func set_uv_scale(scale : Vector3):
     mat_3d.flags_transparent = true
     mat_3d.uv1_scale = scale
-    mat_texture.set_shader_param("uv1_scale", mat_3d.uv1_scale)
-    mat_texture.set_shader_param("uv1_offset", mat_3d.uv1_offset)
+    mat_texture.set_shader_parameter("uv1_scale", mat_3d.uv1_scale)
+    mat_texture.set_shader_parameter("uv1_offset", mat_3d.uv1_offset)
 
 func _ready():
+    mat_3d.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
     # TODO: settings for diffuse/specular model etc
     # TODO: normal lighting removal
     # TODO: gradient removal
@@ -36,7 +37,7 @@ func _ready():
     # TODO: save/load parameters to json
     
     
-    $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog, "hide")
+    $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog.hide)
     
     
     $"3D/MeshHolder/Mesh".global_rotation.y += 1.5
@@ -60,7 +61,7 @@ func _ready():
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Office")
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Sunset")
     
-    $Tabs/Ambience/HBoxContainer3/OptionButton.connect("item_selected", self, "sky_option_picked")
+    $Tabs/Ambience/HBoxContainer3/OptionButton.connect("item_selected", self.sky_option_picked)
     
     
     for button in $Tabs/Export/GridContainer.get_children():
@@ -75,9 +76,9 @@ func _ready():
     $Tabs/Export/GridContainer/OptionButton2.selected = 1
     $Tabs/Export/GridContainer/OptionButton3.selected = 2
     
-    $Tabs/Export/Button.connect("pressed", self, "save_albedo")
-    $Tabs/Export/Button2.connect("pressed", self, "save_normal")
-    $Tabs/Export/Button3.connect("pressed", self, "save_pbr")
+    $Tabs/Export/Button.connect("pressed", self.save_albedo)
+    $Tabs/Export/Button2.connect("pressed", self.save_normal)
+    $Tabs/Export/Button3.connect("pressed", self.save_pbr)
     
     
     for _type in ["normal", "depth"]:
@@ -87,75 +88,75 @@ func _ready():
         
         for child in parent.get_children():
             if child is Range:
-                child.connect("value_changed", self, slider_change)
+                child.connect("value_changed", Callable(self, slider_change))
         for child in parent.get_node("Freqs").get_children():
             if child is Range:
-                child.connect("value_changed", self, slider_change)
+                child.connect("value_changed", Callable(self, slider_change))
         
-        parent.get_node("OptionButton").connect("item_selected", self, "%s_option_picked" % type)
+        parent.get_node("OptionButton").connect("item_selected", Callable(self, "%s_option_picked" % type))
         
         for child in parent.get_node("Freqs/Presets").get_children():
             if child is Button:
-                child.connect("pressed", self, "%s_freq_preset" % [type], [child.name.to_lower()])
+                child.connect("pressed", Callable(self, "%s_freq_preset" % [type]).bind(child.name.to_lower()))
     
     
-    $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
-    $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
-    $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self, "metal_slider_changed")
+    $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self.metal_slider_changed)
+    $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self.metal_slider_changed)
+    $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self.metal_slider_changed)
     
-    $"Tabs/AO Map/Slider".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider2".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider3".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider4".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider5".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider6".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider7".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider8".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider9".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider10".connect("value_changed", self, "ao_slider_changed")
+    $"Tabs/AO Map/Slider".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider2".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider3".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider4".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider5".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider6".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider7".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider8".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider9".connect("value_changed", self.ao_slider_changed)
+    $"Tabs/AO Map/Slider10".connect("value_changed", self.ao_slider_changed)
     
-    $"Tabs/Shading Remover/Slider".connect("value_changed", self, "light_remover_slider_changed")
-    $"Tabs/Shading Remover/Slider2".connect("value_changed", self, "light_remover_slider_changed")
-    $"Tabs/Shading Remover/Slider3".connect("value_changed", self, "light_remover_slider_changed")
-    $"Tabs/Shading Remover/Slider4".connect("value_changed", self, "light_remover_slider_changed")
+    $"Tabs/Shading Remover/Slider".connect("value_changed", self.light_remover_slider_changed)
+    $"Tabs/Shading Remover/Slider2".connect("value_changed", self.light_remover_slider_changed)
+    $"Tabs/Shading Remover/Slider3".connect("value_changed", self.light_remover_slider_changed)
+    $"Tabs/Shading Remover/Slider4".connect("value_changed", self.light_remover_slider_changed)
     
-    $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self.roughness_slider_changed)
+    $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self.roughness_slider_changed)
+    $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self.roughness_slider_changed)
+    $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self.roughness_slider_changed)
     
-    $ToggleMat.connect("pressed", self, "toggle_mat")
-    $ToggleAlbedo.connect("pressed", self, "show_albedo")
-    $ToggleUI.connect("pressed", self, "toggle_ui")
-    get_tree().connect("files_dropped", self, "files_dropped")
+    $ToggleMat.connect("pressed", self.toggle_mat)
+    $ToggleAlbedo.connect("pressed", self.show_albedo)
+    $ToggleUI.connect("pressed", self.toggle_ui)
+    get_viewport().connect("files_dropped", self.files_dropped)
     
-    $"Tabs/Ambience/ColorPicker".connect("color_changed", self, "color_changed", ["ambient"])
-    $"Tabs/Light/ColorPicker".connect("color_changed", self, "color_changed", ["light"])
+    $"Tabs/Ambience/ColorPicker".connect("color_changed", self.color_changed.bind("ambient"))
+    $"Tabs/Light/ColorPicker".connect("color_changed", self.color_changed.bind("light"))
     
-    $Tabs/Light/HBoxContainer/HSlider.connect("value_changed", self, "light_angle_update")
-    $Tabs/Light/HBoxContainer2/HSlider.connect("value_changed", self, "light_rotation_update")
+    $Tabs/Light/HBoxContainer/HSlider.connect("value_changed", self.light_angle_update)
+    $Tabs/Light/HBoxContainer2/HSlider.connect("value_changed", self.light_rotation_update)
     
-    $Tabs/Shape/HBoxContainer/HSlider.connect("value_changed", self, "shape_rotation_update")
-    $Tabs/Shape/HBoxContainer3/HSlider.connect("value_changed", self, "shape_slant_update")
-    $Tabs/Shape/HBoxContainer2/HSlider.connect("value_changed", self, "shape_size_update")
+    $Tabs/Shape/HBoxContainer/HSlider.connect("value_changed", self.shape_rotation_update)
+    $Tabs/Shape/HBoxContainer3/HSlider.connect("value_changed", self.shape_slant_update)
+    $Tabs/Shape/HBoxContainer2/HSlider.connect("value_changed", self.shape_size_update)
     
     set_uv_scale(Vector3(2, 1, 1))
     
     $"3D/MeshHolder/Mesh".material_override = mat_3d
     
-    $"Tabs/Metal Map/Button".connect("pressed", self, "start_picking_color", ["metal", -1])
-    $"Tabs/Roughness Map/Button".connect("pressed", self, "start_picking_color", ["roughness", -1])
+    $"Tabs/Metal Map/Button".connect("pressed", self.start_picking_color.bind("metal", -1))
+    $"Tabs/Roughness Map/Button".connect("pressed", self.start_picking_color.bind("roughness", -1))
     
-    $Tabs/Shape/Button.connect("pressed", self, "set_mesh", ["sphere"])
-    $Tabs/Shape/Button2.connect("pressed", self, "set_mesh", ["cube"])
-    $Tabs/Shape/Button3.connect("pressed", self, "set_mesh", ["cylinder"])
-    $Tabs/Shape/Button4.connect("pressed", self, "set_mesh", ["sideways cylinder"])
-    $Tabs/Shape/Button5.connect("pressed", self, "set_mesh", ["plane"])
-    $Tabs/Shape/Button7.connect("pressed", self, "set_mesh", ["plane slanted"])
+    $Tabs/Shape/Button.connect("pressed", self.set_mesh.bind("sphere"))
+    $Tabs/Shape/Button2.connect("pressed", self.set_mesh.bind("cube"))
+    $Tabs/Shape/Button3.connect("pressed", self.set_mesh.bind("cylinder"))
+    $Tabs/Shape/Button4.connect("pressed", self.set_mesh.bind("sideways cylinder"))
+    $Tabs/Shape/Button5.connect("pressed", self.set_mesh.bind("plane"))
+    $Tabs/Shape/Button7.connect("pressed", self.set_mesh.bind("plane slanted"))
     
-    $Tabs/Config/Button.connect("pressed", self, "reset_view")
+    $Tabs/Config/Button.connect("pressed", self.reset_view)
 
-var NativeDialog = preload("res://addons/native_dialogs/native_dialogs.gd")
+#var NativeDialog = preload("res://addons/native_dialogs/native_dialogs.gd")
 
 func save_albedo():
     save_image(albedo_image_display, "albedo.png", "Albedo", "Albedo cannot be saved until an image has been loaded.")
@@ -165,7 +166,6 @@ func save_normal():
     if $Tabs/Export/CheckBox.pressed:
         save_image = normal_image.duplicate()
         var size = save_image.get_size()
-        save_image.lock()
         for y in size.y:
             for x in size.x:
                 var r = save_image.get_pixel(x, y).r
@@ -173,7 +173,6 @@ func save_normal():
                 var b = save_image.get_pixel(x, y).b
                 g = 1.0-g
                 save_image.set_pixel(x, y, Color(r, g, b))
-        save_image.unlock()
     save_image(save_image, "normal.png", "Normal", "Normal cannot be saved until an albedo has been loaded.")
 
 func pbr_pick_image(selection):
@@ -198,12 +197,6 @@ func save_pbr():
         $PopupDialog.show()
         return
     
-    image.lock()
-    red.lock()
-    if green != red:
-        green.lock()
-    if blue != green and blue != red:
-        blue.lock()
     for y in size.y:
         for x in size.x:
             var r = red.get_pixel(x, y).r
@@ -219,12 +212,6 @@ func save_pbr():
             image.set_pixel(x, y, Color(r, g, b))
     save_image(image, "pbr.png", "PBR", "")
     
-    image.unlock()
-    red.unlock()
-    if green != red:
-        green.unlock()
-    if blue != green and blue != red:
-        blue.unlock()
 
 func save_image(image : Image, default_fname : String, name_caps : String, error_text : String):
     if image == null:
@@ -232,22 +219,22 @@ func save_image(image : Image, default_fname : String, name_caps : String, error
         $PopupDialog.show()
         return
     
-    var fo : Control = get_focus_owner()
+    var fo : Control = get_viewport().gui_get_focus_owner()
     if fo:
         fo.release_focus()
     
     $NativeDialogSaveFile.initial_path = default_fname
     $NativeDialogSaveFile.title = "Save %s Image" % [name_caps]
     $NativeDialogSaveFile.show()
-    var fname = yield($NativeDialogSaveFile, "file_selected")
-    image.save_png(fname)
+    #var fname = yield($NativeDialogSaveFile, "file_selected")
+    #image.save_png(fname)
         
 
 func reset_view():
-    $"3D/CameraHolder".global_translation = Vector3()
+    $"3D/CameraHolder".global_position = Vector3()
     $"3D/CameraHolder".rotation = Vector3()
     zoom = 0
-    $"3D/CameraHolder/Camera".translation.z = 3 * pow(2, -zoom/16.0 * 1.3)
+    $"3D/CameraHolder/Camera".position.z = 3 * pow(2, -zoom/16.0 * 1.3)
 
 func color_changed(new_color : Color, which : String):
     if which == "ambient":
@@ -265,8 +252,7 @@ var albedo_shown = false
 func show_albedo():
     if albedo_image:
         if !albedo_shown:
-            var texture = ImageTexture.new()
-            texture.create_from_image(albedo_image)
+            var texture = ImageTexture.create_from_image(albedo_image)
             $TextureRect.texture = texture
             albedo_shown = true
             $TextureRect.visible = true
@@ -282,11 +268,10 @@ func toggle_ui():
     $ToggleAlbedo.visible = $Tabs.visible
     $TextureRect.visible = $Tabs.visible and albedo_shown
 
-func files_dropped(files : PoolStringArray, _screen : int):
+func files_dropped(files : PackedStringArray):
     var fname : String = files[0]
-    var file = File.new()
-    file.open(fname, File.READ)
-    var buffer = file.get_buffer(file.get_len())
+    var file = FileAccess.open(fname, FileAccess.READ)
+    var buffer = file.get_buffer(file.get_length())
     
     var image = Image.new()
     fname = fname.to_lower()
@@ -301,8 +286,7 @@ func files_dropped(files : PoolStringArray, _screen : int):
     elif fname.ends_with("webp"):
         image.load_webp_from_buffer(buffer)
     elif fname.ends_with("obj"):
-        var f = File.new()
-        f.open(fname, File.READ)
+        var f = FileAccess.open(fname, FileAccess.READ)
         var text = f.get_as_text()
         $"3D/MeshHolder/Mesh".mesh = ObjLoader.parse_obj(text)
         set_uv_scale(Vector3(1,1,1))
@@ -314,11 +298,11 @@ func files_dropped(files : PoolStringArray, _screen : int):
     else:
         return
     
+    image.generate_mipmaps()
+    
     albedo_image = image
     albedo_image_display = albedo_image.duplicate()
-    albedo = ImageTexture.new()
-    albedo.create_from_image(albedo_image_display)
-    albedo.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    albedo = ImageTexture.create_from_image(albedo_image_display)
     
     mat_3d.albedo_texture = albedo
     
@@ -334,8 +318,6 @@ var no_recurse
 
 var setting_sliders = false
 func normal_freq_preset(mode : String):
-    for enemy in get_tree().get_nodes_in_group("Enemy"):
-        enemy.connect("enemy_dead", self, "notify_enemy_dead")
     get_local_mouse_position()
     var array = {
         "flat"   : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
@@ -388,19 +370,18 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     if ref_image != image or ref_tex == null:
         tex_is_new = true
         ref_image = image
-        ref_tex = ImageTexture.new()
-        ref_tex.create_from_image(image)
+        ref_tex = ImageTexture.create_from_image(image)
     
     var size = image.get_size()
     
-    $HelperNormal.keep_3d_linear = true
+    #$HelperNormal.keep_3d_linear = true
     if $HelperNormal/Quad.material_override == null:
         $HelperNormal/Quad.material_override = ShaderMaterial.new()
     var mat = $HelperNormal/Quad.material_override
     if mat.shader != preload("res://shaders/NormalGenerator.gdshader"):
         mat.shader = preload("res://shaders/NormalGenerator.gdshader")
     
-    var start = OS.get_ticks_usec()
+    var start = Time.get_ticks_usec()
     
     for i in 7:
         var path = "Helper"+str(i+1)
@@ -416,36 +397,35 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
             quad.material_override = mat2
         var mat2 = quad.material_override
         
-        viewport.keep_3d_linear = true
-        viewport.hdr = false
+        #viewport.keep_3d_linear = true
+        #viewport.hdr = false
         
         if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
             mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
         
-        mat2.set_shader_param("input", ref_tex)
-        mat2.set_shader_param("octave", i)
-        mat2.set_shader_param("microfacets", microfacets)
-        mat2.set_shader_param("raw_mip_ratio", -1.0)
+        mat2.set_shader_parameter("input", ref_tex)
+        mat2.set_shader_parameter("octave", i)
+        mat2.set_shader_parameter("microfacets", microfacets)
+        mat2.set_shader_parameter("raw_mip_ratio", -1.0)
         
         force_draw_subviewports([viewport])
         
         var img = ImageTexture.new()
-        mat.set_shader_param("octave_"+str(i), viewport.get_texture())
+        mat.set_shader_parameter("octave_"+str(i), viewport.get_texture())
     
-    
-    var end = OS.get_ticks_usec()
+    var end = Time.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
-    $HelperNormal.keep_3d_linear = true
-    mat.set_shader_param("albedo", ref_tex)
-    mat.set_shader_param("strength", strength)
-    mat.set_shader_param("darkpoint", darkpoint)
-    mat.set_shader_param("midpoint", midpoint)
-    mat.set_shader_param("midpoint_offset", midpoint_offset)
-    mat.set_shader_param("lightpoint", lightpoint)
-    mat.set_shader_param("depth_offset", depth_offset)
-    mat.set_shader_param("microfacets", microfacets)
-    mat.set_shader_param("generate_normal", generate_normal)
+    #$HelperNormal.keep_3d_linear = true
+    mat.set_shader_parameter("albedo", null)
+    mat.set_shader_parameter("strength", strength)
+    mat.set_shader_parameter("darkpoint", darkpoint)
+    mat.set_shader_parameter("midpoint", midpoint)
+    mat.set_shader_parameter("midpoint_offset", midpoint_offset)
+    mat.set_shader_parameter("lightpoint", lightpoint)
+    mat.set_shader_parameter("depth_offset", depth_offset)
+    mat.set_shader_parameter("microfacets", microfacets)
+    mat.set_shader_parameter("generate_normal", generate_normal)
     
     var parent = get_node("Tabs/%s Map" % [["Depth"], ["Normal"]][int(generate_normal)])
     
@@ -457,13 +437,13 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         3 : Vector3(0, 0, 1),
         4 : Vector3(0.5, 0.5, 0),
     }[channel_id]
-    mat.set_shader_param("channel", channel)
+    mat.set_shader_parameter("channel", channel)
     
     for i in 7:
         var slider_name = "Freqs/VSlider" + str(i+1)
         var slider = parent.get_node(slider_name)
         var v = slider.value / slider.max_value
-        mat.set_shader_param("band_strength_"+str(i), v)
+        mat.set_shader_parameter("band_strength_"+str(i), v)
     
     $HelperNormal.size = size
     $HelperNormal/Quad.scale.x = size.x / size.y
@@ -471,25 +451,25 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     
     force_draw_subviewports([$HelperNormal])
     
-    var img = $HelperNormal.get_texture().get_data()
+    var img = $HelperNormal.get_texture().get_image()
+    img.generate_mipmaps()
     
-    for i in 7:
-        mat.set_shader_param("octave_"+str(i), null)
-    $HelperNormal.size = Vector2(2, 2)
-    force_draw_subviewports([$HelperNormal])
+    #for i in 7:
+    #    mat.set_shader_parameter("octave_"+str(i), null)
+    #$HelperNormal.size = Vector2(2, 2)
+    #force_draw_subviewports([$HelperNormal])
     
     return img
 
 func sky_option_picked(which : int):
     if which == 0:
-        $"3D/WorldEnvironment".environment.background_sky = preload("res://resources/DefaultSky.tres")
+        $"3D/WorldEnvironment".environment.sky = preload("res://resources/DefaultSky.tres")
     else:
-        $"3D/WorldEnvironment".environment.background_sky = PanoramaSky.new()
-        ($"3D/WorldEnvironment".environment.background_sky as PanoramaSky).radiance_size = PanoramaSky.RADIANCE_SIZE_128
+        $"3D/WorldEnvironment".environment.sky.sky_material = PanoramaSkyMaterial.new()
         if which == 1:
-            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://resources/unfinished_office_4k.exr")
+            $"3D/WorldEnvironment".environment.sky.sky_material.panorama = preload("res://resources/unfinished_office_4k.exr")
         elif which == 2:
-            $"3D/WorldEnvironment".environment.background_sky.panorama = preload("res://resources/belfast_sunset_puresky_2k.exr")
+            $"3D/WorldEnvironment".environment.sky.sky_material.panorama = preload("res://resources/belfast_sunset_puresky_2k.exr")
 
 func normal_option_picked(_unused : int):
     normal_slider_changed(0.0)
@@ -509,17 +489,16 @@ func normal_slider_changed(_unused : float):
     var depth_offset = 0.0
     
     normal_image = create_normal_texture(albedo_image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0)
-    #normal_image.convert(Image.FORMAT_RGBA8)
+    normal_image.srgb_to_linear()
+    normal_image.generate_mipmaps(true)
     
-    normal = ImageTexture.new()
-    normal.create_from_image(normal_image)
-    normal.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    normal = ImageTexture.create_from_image(normal_image)
     
     mat_3d.normal_enabled = true
     mat_3d.normal_texture = normal
     if !indirect_update:
         var n2 = normal.duplicate(true)
-        mat_texture.set_shader_param("image", n2)
+        mat_texture.set_shader_parameter("image", n2)
     
 var indirect_update = false
 
@@ -541,12 +520,10 @@ func depth_slider_changed(_unused : float):
     var depth_offset = read_range($"Tabs/Depth Map/Slider6")
     
     depth_image = create_normal_texture(albedo_image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 0.0)
-    #depth_image.convert(Image.FORMAT_RGBA8)
+    depth_image.srgb_to_linear()
+    depth_image.generate_mipmaps()
     
-    depth = ImageTexture.new()
-    depth.create_from_image(depth_image)
-    depth.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
-    depth.flags |= ImageTexture.FLAG_FILTER
+    depth = ImageTexture.create_from_image(depth_image)
     
     mat_3d.depth_enabled = true
     mat_3d.depth_deep_parallax = true
@@ -554,7 +531,7 @@ func depth_slider_changed(_unused : float):
     
     if !indirect_update:
         var n2 = depth.duplicate(true)
-        mat_texture.set_shader_param("image", n2)
+        mat_texture.set_shader_parameter("image", n2)
     
     indirect_update = true
     
@@ -563,33 +540,36 @@ func depth_slider_changed(_unused : float):
 
 
 func get_default_fps_setting():
-    return Engine.target_fps
-onready var fps_default = get_default_fps_setting()
+    return Engine.max_fps 
+
+@onready var fps_default = get_default_fps_setting()
 
 var disabled = 0
 func disable_limiter():
     disabled += 1
-    Engine.target_fps = 0
+    Engine.max_fps  = 0
 
 func reset_limiter():
     disabled -= 1
     if disabled <= 0:
-        Engine.target_fps = fps_default
+        Engine.max_fps  = fps_default
 
 func force_draw_subviewports(viewports : Array):
     var old_update_modes = []
     for _viewport in viewports:
         var viewport : Viewport = _viewport
         old_update_modes.push_back(viewport.render_target_update_mode)
-        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+        viewport.render_target_update_mode = RenderingServer.VIEWPORT_UPDATE_ALWAYS
     
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+    var window : Window = get_viewport()
+    var window_rid = window.get_viewport_rid()
+    RenderingServer.viewport_set_update_mode(window_rid, RenderingServer.VIEWPORT_UPDATE_DISABLED)
     
     disable_limiter()
-    VisualServer.force_draw(false, 0.0)
+    RenderingServer.force_draw(false, 0.0)
     reset_limiter()
     
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+    RenderingServer.viewport_set_update_mode(window_rid, RenderingServer.VIEWPORT_UPDATE_ALWAYS)
     
     for i in viewports.size():
         var viewport = viewports[i]
@@ -603,19 +583,18 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     if ao_ref_image != image or ao_ref_tex == null:
         tex_is_new = true
         ao_ref_image = image
-        ao_ref_tex = ImageTexture.new()
-        ao_ref_tex.create_from_image(image)
+        ao_ref_tex = ImageTexture.create_from_image(image)
     
     var size = image.get_size()
     
-    $HelperAO.keep_3d_linear = true
+    #$HelperAO.keep_3d_linear = true
     if $HelperAO/Quad.material_override == null:
         $HelperAO/Quad.material_override = ShaderMaterial.new()
     var mat = $HelperAO/Quad.material_override
     if mat.shader != preload("res://shaders/AOGenerator.gdshader"):
         mat.shader = preload("res://shaders/AOGenerator.gdshader")
     
-    var start = OS.get_ticks_usec()
+    var start = Time.get_ticks_usec()
     
     var subviewports = []
     var i = 0
@@ -633,38 +612,36 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
             quad.material_override = mat2
         var mat2 = quad.material_override
         
-        viewport.keep_3d_linear = true
-        viewport.hdr = true
+        #viewport.keep_3d_linear = true
+        #viewport.hdr = true
         
         if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
             mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
         
         if tex_is_new:
-            mat2.set_shader_param("input", ao_ref_tex)
-        mat2.set_shader_param("octave", 0)
-        mat2.set_shader_param("microfacets", 0.0)
-        mat2.set_shader_param("raw_mip_ratio", freq)
+            mat2.set_shader_parameter("input", ao_ref_tex)
+        mat2.set_shader_parameter("octave", 0)
+        mat2.set_shader_parameter("microfacets", 0.0)
+        mat2.set_shader_parameter("raw_mip_ratio", freq)
         
         subviewports.push_back(viewport)
         
         var octave = viewport.get_texture()
-        octave.flags |= Texture.FLAG_FILTER
-        octave.flags |= Texture.FLAG_REPEAT
-        mat.set_shader_param("octave_"+str(i), octave)
+        mat.set_shader_parameter("octave_"+str(i), octave)
         i += 1
     
     force_draw_subviewports(subviewports)
     
-    var end = OS.get_ticks_usec()
+    var end = Time.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
-    mat.set_shader_param("strength", strength)
-    mat.set_shader_param("freq_balance", freq_balance)
-    mat.set_shader_param("exponent", exponent)
-    mat.set_shader_param("bias", bias)
-    mat.set_shader_param("contrast", contrast)
-    mat.set_shader_param("fine_limit", fine_limit)
-    mat.set_shader_param("rough_limit", rough_limit)
+    mat.set_shader_parameter("strength", strength)
+    mat.set_shader_parameter("freq_balance", freq_balance)
+    mat.set_shader_parameter("exponent", exponent)
+    mat.set_shader_parameter("bias", bias)
+    mat.set_shader_parameter("contrast", contrast)
+    mat.set_shader_parameter("fine_limit", fine_limit)
+    mat.set_shader_parameter("rough_limit", rough_limit)
     
     $HelperAO.size = size
     $HelperAO/Quad.scale.x = size.x / size.y
@@ -673,7 +650,7 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     force_draw_subviewports([$HelperAO])
     mat.shader = null
     
-    return $HelperAO.get_texture().get_data()
+    return $HelperAO.get_texture().get_image()
 
 
 func ao_option_picked(_unused : int):
@@ -699,18 +676,17 @@ func ao_slider_changed(_unused : float):
     strength = max(0.00000001, strength*strength*100.0)
     
     ao_image = create_ao_texture(depth_image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
+    ao_image.srgb_to_linear()
+    ao_image.generate_mipmaps()
     
-    ao = ImageTexture.new()
-    ao.create_from_image(ao_image)
-    ao.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
-    ao.flags |= ImageTexture.FLAG_FILTER
+    ao = ImageTexture.create_from_image(ao_image)
     
     mat_3d.ao_enabled = true
     mat_3d.ao_texture = ao
     
     if !indirect_update:
         var n2 = ao.duplicate(true)
-        mat_texture.set_shader_param("image", n2)
+        mat_texture.set_shader_parameter("image", n2)
     
     indirect_update = true
     
@@ -724,29 +700,27 @@ var albedo_ref_ao_tex = null
 func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_image : Image, depth_image, ao_strength, ao_limit, ao_gamma, ao_desat):
     if albedo_ref_image != albedo_image or albedo_ref_tex == null:
         albedo_ref_image = albedo_image
-        albedo_ref_tex = ImageTexture.new()
-        albedo_ref_tex.create_from_image(albedo_image)
+        albedo_ref_tex = ImageTexture.create_from_image(albedo_image)
     
     if albedo_ref_ao_image != ao_image or albedo_ref_ao_tex == null:
         albedo_ref_ao_image = ao_image
-        albedo_ref_ao_tex = ImageTexture.new()
-        albedo_ref_ao_tex.create_from_image(ao_image)
+        albedo_ref_ao_tex = ImageTexture.create_from_image(ao_image)
     
-    var start = OS.get_ticks_usec()
+    var start = Time.get_ticks_usec()
     
-    $HelperUnlit.keep_3d_linear = false
+    #$HelperUnlit.keep_3d_linear = false
     if $HelperUnlit/Quad.material_override == null:
         $HelperUnlit/Quad.material_override = ShaderMaterial.new()
     var mat = $HelperUnlit/Quad.material_override
     if mat.shader != preload("res://shaders/AORemover.gdshader"):
         mat.shader = preload("res://shaders/AORemover.gdshader")
     
-    mat.set_shader_param("albedo", albedo_ref_tex)
-    mat.set_shader_param("ao", albedo_ref_ao_tex)
-    mat.set_shader_param("ao_strength", ao_strength)
-    mat.set_shader_param("ao_limit", ao_limit)
-    mat.set_shader_param("ao_gamma", ao_gamma)
-    mat.set_shader_param("ao_desat", ao_desat)
+    mat.set_shader_parameter("albedo", albedo_ref_tex)
+    mat.set_shader_parameter("ao", albedo_ref_ao_tex)
+    mat.set_shader_parameter("ao_strength", ao_strength)
+    mat.set_shader_parameter("ao_limit", ao_limit)
+    mat.set_shader_parameter("ao_gamma", ao_gamma)
+    mat.set_shader_parameter("ao_desat", ao_desat)
     
     var size = albedo_image.get_size()
     $HelperUnlit.size = size
@@ -754,10 +728,10 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     $HelperUnlit/Quad.force_update_transform()
     
     force_draw_subviewports([$HelperUnlit])
-    var end = OS.get_ticks_usec()
+    var end = Time.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
-    return $HelperUnlit.get_texture().get_data()
+    return $HelperUnlit.get_texture().get_image()
 
 func light_remover_slider_changed(_unused : float):
     if albedo_image == null:
@@ -775,22 +749,20 @@ func light_remover_slider_changed(_unused : float):
     ao_strength = ao_strength*ao_strength*16.0
     
     albedo_image_display = create_unlit_albedo_image(albedo_image, ao_image, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
+    albedo_image_display.generate_mipmaps()
     
-    albedo = ImageTexture.new()
-    albedo.create_from_image(albedo_image_display)
-    albedo.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    albedo = ImageTexture.create_from_image(albedo_image_display)
     
     mat_3d.albedo_texture = albedo
     if !indirect_update:
         var n2 = albedo.duplicate(true)
-        mat_texture.set_shader_param("image", n2)
+        mat_texture.set_shader_parameter("image", n2)
 
 func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness):
     mixing_bias = mixing_bias*mixing_bias
     if ref_image != image or ref_tex == null:
         ref_image = image
-        ref_tex = ImageTexture.new()
-        ref_tex.create_from_image(image)
+        ref_tex = ImageTexture.create_from_image(image)
     
     if colors.size() == 0:
         if is_roughness:
@@ -798,30 +770,27 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
         else:
             colors = [Color(0, 0, 0, 0)]
     
-    var img = Image.new()
-    img.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
-    img.lock()
-    for i in colors.size():
+    print("width...", colors.size())
+    var img = Image.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
+    print("size...", img.get_size())
+    for i in range(colors.size()):
         img.set_pixel(i, 0, colors[i])
-    img.unlock()
-    var color_tex = ImageTexture.new()
-    color_tex.create_from_image(img)
+    var color_tex = ImageTexture.create_from_image(img)
     
-    $HelperDistance.keep_3d_linear = true
+    #$HelperDistance.keep_3d_linear = true
     if $HelperDistance/Quad.material_override == null:
         $HelperDistance/Quad.material_override = ShaderMaterial.new()
     var mat = $HelperDistance/Quad.material_override
-    if mat.shader != preload("res://shaders/AORemover.gdshader"):
-        mat.shader = preload("res://shaders/AORemover.gdshader")
+    if mat.shader != preload("res://shaders/MetallicityGenerator.gdshader"):
+        mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
     
-    mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
-    mat.set_shader_param("albedo", ref_tex)
-    mat.set_shader_param("colors", color_tex)
-    mat.set_shader_param("mixing_bias", mixing_bias)
-    mat.set_shader_param("contrast", contrast)
-    mat.set_shader_param("shrink_radius", shrink_radius)
-    mat.set_shader_param("blur_radius", blur_radius)
-    mat.set_shader_param("is_roughness", is_roughness)
+    mat.set_shader_parameter("albedo", ref_tex)
+    mat.set_shader_parameter("colors", color_tex)
+    mat.set_shader_parameter("mixing_bias", mixing_bias)
+    mat.set_shader_parameter("contrast", contrast)
+    mat.set_shader_parameter("shrink_radius", shrink_radius)
+    mat.set_shader_parameter("blur_radius", blur_radius)
+    mat.set_shader_parameter("is_roughness", is_roughness)
     
     var size = image.get_size()
     $HelperDistance.size = size
@@ -831,7 +800,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     force_draw_subviewports([$HelperDistance])
     mat.shader = null
     
-    return $HelperDistance.get_texture().get_data()
+    return $HelperDistance.get_texture().get_image()
 
 
 func metal_slider_changed(_unused : float):
@@ -853,17 +822,18 @@ func metal_slider_changed(_unused : float):
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
     metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius, false)
+    metal_image.srgb_to_linear()
+    metal_image.generate_mipmaps()
     
-    metal = ImageTexture.new()
-    metal.create_from_image(metal_image)
+    metal = ImageTexture.create_from_image(metal_image)
     
     mat_3d.metallic = 1.0
     mat_3d.metallic_texture = metal
-    mat_3d.metallic_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_RED
+    mat_3d.metallic_texture_channel = StandardMaterial3D.TEXTURE_CHANNEL_RED
     
     if !indirect_update:
         var n2 = metal.duplicate(true)
-        mat_texture.set_shader_param("image", n2)
+        mat_texture.set_shader_parameter("image", n2)
 
 
 func roughness_slider_changed(_unused : float):
@@ -885,17 +855,18 @@ func roughness_slider_changed(_unused : float):
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
     roughness_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius, true)
+    roughness_image.srgb_to_linear()
+    roughness_image.generate_mipmaps()
     
-    roughness = ImageTexture.new()
-    roughness.create_from_image(roughness_image)
+    roughness = ImageTexture.create_from_image(roughness_image)
     
     mat_3d.roughness = 1.0
     mat_3d.roughness_texture = roughness
-    mat_3d.roughness_texture_channel = SpatialMaterial.TEXTURE_CHANNEL_GREEN
+    mat_3d.roughness_texture_channel = StandardMaterial3D.TEXTURE_CHANNEL_GREEN
     
     if !indirect_update:
         var n2 = roughness.duplicate(true)
-        mat_texture.set_shader_param("image", n2)
+        mat_texture.set_shader_parameter("image", n2)
 
 
 var zoom = 0
@@ -903,20 +874,20 @@ func _input(_event):
     if _event is InputEventMouseButton:
         var event : InputEventMouseButton = _event
         var zoom_changed = false
-        if event.button_index == BUTTON_WHEEL_UP:
+        if event.button_index == MOUSE_BUTTON_WHEEL_UP:
             zoom += 1
             zoom_changed = true
-        elif event.button_index == BUTTON_WHEEL_DOWN:
+        elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
             zoom -= 1
             zoom_changed = true
         if zoom_changed:
             zoom = clamp(zoom, -16, 16)
-            $"3D/CameraHolder/Camera".translation.z = 3 * pow(2, -zoom/16.0 * 1.3)
+            $"3D/CameraHolder/Camera".position.z = 3 * pow(2, -zoom/16.0 * 1.3)
         
         if color_picking:
-            if event.button_index == BUTTON_RIGHT:
+            if event.button_index == MOUSE_BUTTON_RIGHT:
                 cancel_picking_color()
-            elif event.button_index == BUTTON_LEFT:
+            elif event.button_index == MOUSE_BUTTON_LEFT:
                 end_picking_color()
     if _event is InputEventKey:
         var event : InputEventKey = _event
@@ -927,18 +898,18 @@ func _input(_event):
         var event : InputEventMouseMotion = _event
         var sensitivity = 0.22 * 0.75
         var x = $"3D/CameraHolder".rotation_degrees.x
-        if (event.button_mask & BUTTON_MASK_MIDDLE):
-            if !event.shift:
+        if (event.button_mask & MOUSE_BUTTON_MASK_MIDDLE):
+            if !event.shift_pressed:
                 x -= event.relative.y * sensitivity
                 $"3D/CameraHolder".rotation_degrees.y -= event.relative.x * sensitivity
             else:
                 var d = $"3D/CameraHolder/Camera".global_transform.basis
                 var right = d.xform(Vector3.RIGHT)
                 var up = d.xform(Vector3.UP)
-                var whee = $"3D/CameraHolder/Camera".translation.z
+                var whee = $"3D/CameraHolder/Camera".position.z
                 var sens = 0.002
-                $"3D/CameraHolder".global_translation += up*event.relative.y * whee * sens
-                $"3D/CameraHolder".global_translation -= right*event.relative.x * whee * sens
+                $"3D/CameraHolder".global_position += up*event.relative.y * whee * sens
+                $"3D/CameraHolder".global_position -= right*event.relative.x * whee * sens
         x = clamp(x, -90, 90)
         $"3D/CameraHolder".rotation_degrees.x = x
 
@@ -957,11 +928,11 @@ func _process(delta : float):
     mat_3d.depth_flip_tangent = $Tabs/Config/CheckButton.pressed
     
     $"3D/WorldEnvironment".environment.ambient_light_sky_contribution = read_range($Tabs/Ambience/HBoxContainer/HSlider)
-    $"3D/WorldEnvironment".environment.background_energy = read_range($Tabs/Ambience/HBoxContainer2/HSlider)
+    $"3D/WorldEnvironment".environment.background_energy_multiplier = read_range($Tabs/Ambience/HBoxContainer2/HSlider)
     
     var which = $Tabs/Ambience/HBoxContainer3/OptionButton.selected
     if which > 0:
-        $"3D/WorldEnvironment".environment.background_energy *= 0.5
+        $"3D/WorldEnvironment".environment.background_energy_multiplier *= 0.5
     
     if $Tabs/Shape/CheckBox.pressed:
         $"3D/MeshHolder/Mesh".rotation.y += delta*0.1
@@ -981,7 +952,7 @@ func _process(delta : float):
         write_range($Tabs/Light/HBoxContainer2/HSlider, v/PI/2.0)
     
     if color_picking != "":
-        update()
+        queue_redraw()
     
     var current_tab = $Tabs.button_tabs[$Tabs.active_button]
     
@@ -1015,15 +986,14 @@ func _process(delta : float):
     else:
         next_texture = albedo
     
-    if current_preview_texture != next_texture:
+    if current_preview_texture != next_texture and next_texture:
         current_preview_texture = next_texture
-        var data : Image = next_texture.get_data()
-        print(data.get_format())
-        var tex = ImageTexture.new()
-        tex.create_from_image(data)
-        tex.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+        var data : Image = next_texture.get_image()
+        if data:
+            print(data.get_format())
+            var tex = ImageTexture.create_from_image(data)
         
-        $PanelContainer/TextureRect.texture = tex
+            $PanelContainer/TextureRect.texture = tex
 
     processing = false
 
@@ -1038,11 +1008,9 @@ func start_picking_color(type : String, which : int):
 func end_picking_color():
     var vp = get_viewport()
     var mouse_pos = vp.get_mouse_position()
-    var screen = vp.get_texture().get_data()
-    screen.lock()
+    var screen = vp.get_texture().get_image()
     mouse_pos.y = screen.get_size().y - mouse_pos.y
     var color = screen.get_pixelv(mouse_pos)
-    screen.unlock()
     
     var box = HBoxContainer.new()
     var icon = ColorRect.new()
@@ -1050,7 +1018,7 @@ func end_picking_color():
     var slider = HSlider.new()
     var button = TextureButton.new()
     icon.color = color
-    icon.rect_min_size = Vector2(16, 16)
+    icon.custom_minimum_size = Vector2(16, 16)
     
     if color_picking == "metal":
         label.text = "Metallicity:"
@@ -1067,12 +1035,12 @@ func end_picking_color():
     button.texture_pressed = preload("res://resources/x.png")
     
     if color_picking == "metal":
-        slider.connect("value_changed", self, "metallicity_update")
-        button.connect("pressed", self, "delete_color", [box, "metal"])
+        slider.connect("value_changed", self.metallicity_update)
+        button.connect("pressed", self.delete_color.bind(box, "metal"))
     elif color_picking == "roughness":
-        slider.connect("value_changed", self, "roughness_update")
+        slider.connect("value_changed", self.roughness_update)
         slider.add_to_group("RoughnessSliders")
-        button.connect("pressed", self, "delete_color", [box, "roughness"])
+        button.connect("pressed", self.delete_color.bind(box, "roughness"))
     
     box.add_child(icon)
     box.add_child(label)
@@ -1106,24 +1074,22 @@ func delete_color(which, type):
 func cancel_picking_color():
     color_picking = ""
     color_which = -1
-    update()
+    queue_redraw()
     Input.set_custom_mouse_cursor(null, Input.CURSOR_ARROW)
 
 func _draw():
     if color_picking != "":
         var vp = get_viewport()
         var mouse_pos = vp.get_mouse_position()
-        var screen = vp.get_texture().get_data()
-        screen.lock()
+        var screen = vp.get_texture().get_image()
         mouse_pos.y = screen.get_size().y - mouse_pos.y
         var color = screen.get_pixelv(mouse_pos)
-        screen.unlock()
         mouse_pos.y = screen.get_size().y - mouse_pos.y
         
-        var gray = color.gray()
-        var contrasted = Color.white
+        var gray = color.r/3.0 + color.g/3.0 + color.b/3.0
+        var contrasted = Color.WHITE
         if gray > 0.5:
-            contrasted = Color.black
+            contrasted = Color.BLACK
         
         draw_arc(mouse_pos + Vector2(0, -32), 13.3, 0.0, PI*2.0, 32, contrasted, 1.0, true)
         draw_arc(mouse_pos + Vector2(0, -32), 6.2, 0.0, PI*2.0, 32, color, 12.5, true)
@@ -1152,7 +1118,7 @@ func shape_size_update(_unused):
     $"3D/MeshHolder/Mesh".scale = Vector3(1,1,1)*read_range($Tabs/Shape/HBoxContainer2/HSlider)*100.0
 
 func set_mesh(which : String):
-    $"3D/MeshHolder/Mesh".translation.y = 0
+    $"3D/MeshHolder/Mesh".position.y = 0
     $"3D/MeshHolder/Mesh".rotation.x = 0
     $"3D/MeshHolder/Mesh".scale = Vector3(1, 1, 1)
     mat_3d.uv1_triplanar = false
@@ -1162,11 +1128,14 @@ func set_mesh(which : String):
     var mesh = null
     if which == "sphere":
         mesh = SphereMesh.new()
+        mesh.radius = 1.0
+        mesh.height = 2.0
         mesh.radial_segments = 256
         mesh.rings = 128
         set_uv_scale(Vector3(2, 1, 1))
     elif which == "cube":
-        mesh = CubeMesh.new()
+        mesh = BoxMesh.new()
+        mesh.size = Vector3(2, 2, 2)
         $"3D/MeshHolder/Mesh".scale *= 0.7
     elif which == "cylinder":
         mesh = preload("res://resources/cylinder_good_uvs.obj")
@@ -1181,12 +1150,12 @@ func set_mesh(which : String):
         set_uv_scale(Vector3(1, 1, 1))
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
     elif which == "plane":
-        mesh = CubeMesh.new()
+        mesh = BoxMesh.new()
         mesh.size.z = 0
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 90
-        $"3D/MeshHolder/Mesh".translation.y = -0.1
+        $"3D/MeshHolder/Mesh".position.y = -0.1
     elif which == "plane slanted":
-        mesh = CubeMesh.new()
+        mesh = BoxMesh.new()
         mesh.size.z = 0
         $"3D/MeshHolder/Mesh".rotation_degrees.x = 45
     $Tabs/Shape/HBoxContainer2/HSlider.value = 10 * $"3D/MeshHolder/Mesh".scale.x

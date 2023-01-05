@@ -1,6 +1,6 @@
 shader_type spatial;
 render_mode unshaded, ambient_light_disabled, blend_mix, shadows_disabled, specular_disabled;
-uniform sampler2D input : hint_albedo;
+uniform sampler2D input : source_color;
 
 uniform vec3 channel;
 uniform int octave;

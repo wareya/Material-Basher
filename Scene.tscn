@@ -1,1264 +1,964 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=23 format=3 uid="uid://d04f0b41fnkw5"]
 
-[ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
-[ext_resource path="res://resources/DefaultSky.tres" type="ProceduralSky" id=3]
-[ext_resource path="res://types/AllTabContainer.gd" type="Script" id=4]
-[ext_resource path="res://addons/native_dialogs/bin/native_dialog_save_file.gdns" type="Script" id=5]
+[ext_resource type="Script" path="res://MaterialBasher.gd" id="1"]
+[ext_resource type="Sky" uid="uid://dhmoreeoduq51" path="res://resources/DefaultSky.tres" id="3"]
+[ext_resource type="Script" path="res://types/AllTabContainer.gd" id="4"]
+[ext_resource type="Theme" uid="uid://b1ad07lqpxrtr" path="res://resources/Theme.tres" id="5_fyc28"]
 
-[sub_resource type="Gradient" id=1]
+[sub_resource type="FontVariation" id="FontVariation_yxdki"]
+variation_embolden = -0.2
+spacing_top = -3
+spacing_bottom = -3
+
+[sub_resource type="Theme" id="Theme_ashul"]
+default_font = SubResource("FontVariation_yxdki")
+default_font_size = 13
+
+[sub_resource type="Gradient" id="Gradient_lmqtn"]
 interpolation_mode = 2
-offsets = PoolRealArray( 0.150838, 0.603352, 0.748603, 0.871508, 1 )
-colors = PoolColorArray( 0.191849, 0.251301, 0.386719, 0.45098, 0.435294, 0.498039, 0.584314, 0.682353, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 )
+offsets = PackedFloat32Array(0, 0.571429, 0.748603, 0.871508, 1)
+colors = PackedColorArray(0.233625, 0.294718, 0.377804, 0.721569, 0.272289, 0.415642, 0.608618, 0.513726, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture2D" id=2]
-gradient = SubResource( 1 )
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_l45hm"]
+gradient = SubResource("Gradient_lmqtn")
 width = 16
 height = 16
 fill = 1
-fill_from = Vector2( 0.5, 0.5 )
-fill_to = Vector2( 0.5, 0 )
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
 
-[sub_resource type="StyleBoxTexture" id=3]
-texture = SubResource( 2 )
-region_rect = Rect2( 0, 0, 16, 16 )
-margin_left = 8.0
-margin_right = 8.0
-margin_top = 8.0
-margin_bottom = 8.0
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_c5i23"]
+texture = SubResource("GradientTexture2D_l45hm")
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 7.0
+margin_bottom = 7.0
+region_rect = Rect2(0, 0, 16, 16)
 
-[sub_resource type="Environment" id=5]
+[sub_resource type="Environment" id="5"]
 background_mode = 2
-background_sky = ExtResource( 3 )
-background_energy = 0.5
-ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
+sky = ExtResource("3")
+ambient_light_color = Color(0.501961, 0.501961, 0.501961, 1)
 
-[sub_resource type="SpatialMaterial" id=30]
+[sub_resource type="StandardMaterial3D" id="30"]
 
-[sub_resource type="SphereMesh" id=26]
+[sub_resource type="SphereMesh" id="26"]
+radius = 1.0
+height = 2.0
 radial_segments = 118
 rings = 64
 
-[sub_resource type="Gradient" id=20]
+[sub_resource type="Gradient" id="1"]
 interpolation_mode = 2
-offsets = PoolRealArray( 0.157303, 0.292135, 0.544944, 0.758427, 1 )
-colors = PoolColorArray( 0.254902, 0.396078, 0.709804, 0.462745, 0.202026, 0.376973, 0.646484, 0.34902, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0 )
+offsets = PackedFloat32Array(0.150838, 0.603352, 0.748603, 0.871508, 1)
+colors = PackedColorArray(0.191849, 0.251301, 0.386719, 0.45098, 0.435294, 0.498039, 0.584314, 0.682353, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture2D" id=21]
-flags = 5
-gradient = SubResource( 20 )
-width = 10
-height = 10
-fill = 1
-fill_from = Vector2( 0.5, 0.5 )
-fill_to = Vector2( 0.5, 0 )
-
-[sub_resource type="StyleBoxTexture" id=22]
-texture = SubResource( 21 )
-region_rect = Rect2( 0, 0, 10, 10 )
-margin_left = 5.0
-margin_right = 5.0
-margin_top = 5.0
-margin_bottom = 5.0
-
-[sub_resource type="Gradient" id=23]
-interpolation_mode = 2
-offsets = PoolRealArray( 0.150838, 0.353933, 0.544944, 0.758427, 1 )
-colors = PoolColorArray( 0.260649, 0.293519, 0.368652, 0.752941, 0.385893, 0.430838, 0.501465, 0.784314, 0.28125, 0.28125, 0.28125, 1, 0.761719, 0.761719, 0.761719, 1, 1, 1, 1, 0 )
-
-[sub_resource type="GradientTexture2D" id=24]
-flags = 5
-gradient = SubResource( 23 )
-width = 10
-height = 10
-fill = 1
-fill_from = Vector2( 0.5, 0.5 )
-fill_to = Vector2( 0.5, 0 )
-
-[sub_resource type="StyleBoxTexture" id=25]
-texture = SubResource( 24 )
-region_rect = Rect2( 0, 0, 10, 10 )
-margin_left = 5.0
-margin_right = 5.0
-margin_top = 5.0
-margin_bottom = 5.0
-
-[sub_resource type="Gradient" id=27]
-offsets = PoolRealArray( 0.146067, 0.292135, 0.848315, 1 )
-colors = PoolColorArray( 0.398926, 0.315762, 0.0701237, 0.596078, 0.791016, 0.632181, 0.216293, 0.607843, 1, 1, 1, 1, 1, 1, 1, 0 )
-
-[sub_resource type="GradientTexture2D" id=28]
-gradient = SubResource( 27 )
+[sub_resource type="GradientTexture2D" id="2"]
+gradient = SubResource("1")
 width = 16
 height = 16
 fill = 1
-fill_from = Vector2( 0.5, 0.5 )
-fill_to = Vector2( 0.5, 0 )
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
 
-[sub_resource type="StyleBoxTexture" id=29]
-texture = SubResource( 28 )
-region_rect = Rect2( 0, 0, 16, 16 )
-margin_left = 7.0
-margin_right = 7.0
-margin_top = 6.0
+[sub_resource type="StyleBoxTexture" id="3"]
+texture = SubResource("2")
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 8.0
 margin_bottom = 8.0
+region_rect = Rect2(0, 0, 16, 16)
 
-[sub_resource type="Environment" id=13]
+[sub_resource type="Gradient" id="20"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0.157303, 0.292135, 0.544944, 0.758427, 1)
+colors = PackedColorArray(0.254902, 0.396078, 0.709804, 0.462745, 0.202026, 0.376973, 0.646484, 0.34902, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0)
 
-[sub_resource type="World" id=14]
-environment = SubResource( 13 )
+[sub_resource type="GradientTexture2D" id="21"]
+gradient = SubResource("20")
+width = 10
+height = 10
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
 
-[sub_resource type="QuadMesh" id=17]
+[sub_resource type="StyleBoxTexture" id="22"]
+texture = SubResource("21")
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 5.0
+margin_bottom = 5.0
+region_rect = Rect2(0, 0, 10, 10)
+
+[sub_resource type="Gradient" id="23"]
+interpolation_mode = 2
+offsets = PackedFloat32Array(0.150838, 0.353933, 0.544944, 0.758427, 1)
+colors = PackedColorArray(0.260649, 0.293519, 0.368652, 0.752941, 0.385893, 0.430838, 0.501465, 0.784314, 0.28125, 0.28125, 0.28125, 1, 0.761719, 0.761719, 0.761719, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="24"]
+gradient = SubResource("23")
+width = 10
+height = 10
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="StyleBoxTexture" id="25"]
+texture = SubResource("24")
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 5.0
+margin_bottom = 5.0
+region_rect = Rect2(0, 0, 10, 10)
+
+[sub_resource type="QuadMesh" id="17"]
 
 [node name="Scene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 1 )
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_ashul")
+script = ExtResource("1")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 visible = false
 show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 640.0
-expand = true
+grow_horizontal = 2
+grow_vertical = 2
 stretch_mode = 6
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
-margin_left = 156.0
-margin_top = 13.0
-margin_right = 253.0
-margin_bottom = 110.0
-custom_styles/panel = SubResource( 3 )
-__meta__ = {
-"_edit_group_": true
-}
+layout_mode = 0
+offset_left = 168.0
+offset_top = 8.0
+offset_right = 272.0
+offset_bottom = 112.0
+theme_override_styles/panel = SubResource("StyleBoxTexture_c5i23")
+metadata/_edit_group_ = true
 
 [node name="TextureRect" type="TextureRect" parent="PanelContainer"]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 89.0
-margin_bottom = 89.0
-expand = true
+layout_mode = 2
+ignore_texture_size = true
 
-[node name="3D" type="Spatial" parent="."]
+[node name="3D" type="Node3D" parent="."]
 
-[node name="LightHolder" type="Spatial" parent="3D"]
+[node name="LightHolder" type="Node3D" parent="3D"]
 
-[node name="DirectionalLight" type="DirectionalLight" parent="3D/LightHolder"]
-transform = Transform( 1, 0, 0, 0, 0.5, 0.866026, 0, -0.866026, 0.5, 0, 2.92074, 3 )
+[node name="DirectionalLight" type="DirectionalLight3D" parent="3D/LightHolder"]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866026, 0, -0.866026, 0.5, 0, 2.92074, 3)
 light_energy = 1.4
 shadow_bias = 1.396
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="3D"]
-environment = SubResource( 5 )
+environment = SubResource("5")
 
-[node name="MeshHolder" type="Spatial" parent="3D"]
+[node name="MeshHolder" type="Node3D" parent="3D"]
 
-[node name="Mesh" type="MeshInstance" parent="3D/MeshHolder"]
-material_override = SubResource( 30 )
-mesh = SubResource( 26 )
+[node name="Mesh" type="MeshInstance3D" parent="3D/MeshHolder"]
+material_override = SubResource("30")
+mesh = SubResource("26")
 
-[node name="CameraHolder" type="Spatial" parent="3D"]
+[node name="CameraHolder" type="Node3D" parent="3D"]
 
-[node name="Camera" type="Camera" parent="3D/CameraHolder"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3 )
+[node name="Camera" type="Camera3D" parent="3D/CameraHolder"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
 current = true
 
 [node name="Tabs" type="Container" parent="."]
 show_behind_parent = true
-margin_left = 16.0
-margin_top = 121.0
-margin_right = 307.0
-margin_bottom = 486.0
-script = ExtResource( 4 )
-__meta__ = {
-"_edit_group_": true
-}
-panel_bg = SubResource( 3 )
-tab_bg = SubResource( 22 )
-tab_inactive_bg = SubResource( 25 )
+layout_mode = 0
+offset_left = 16.0
+offset_top = 120.0
+offset_right = 312.0
+offset_bottom = 592.0
+script = ExtResource("4")
+panel_bg = SubResource("3")
+tab_bg = SubResource("22")
+tab_inactive_bg = SubResource("25")
 
 [node name="Normal Map" type="VBoxContainer" parent="Tabs"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = 40.0
-margin_right = -8.0
-margin_bottom = -8.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Label" type="Label" parent="Tabs/Normal Map"]
-margin_right = 275.0
-margin_bottom = 14.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Normal Map Strength"
 
 [node name="Slider" type="HSlider" parent="Tabs/Normal Map"]
-margin_top = 18.0
-margin_right = 275.0
-margin_bottom = 34.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label2" type="Label" parent="Tabs/Normal Map"]
-margin_top = 38.0
-margin_right = 275.0
-margin_bottom = 52.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 text = "Frequency Distribution"
 
 [node name="Freqs" type="HBoxContainer" parent="Tabs/Normal Map"]
-margin_top = 56.0
-margin_right = 275.0
-margin_bottom = 196.0
-rect_min_size = Vector2( 0, 100 )
-custom_constants/separation = 9
+layout_mode = 2
 
 [node name="VSlider1" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_right = 16.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider2" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_left = 25.0
-margin_right = 41.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider3" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_left = 50.0
-margin_right = 66.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider4" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_left = 75.0
-margin_right = 91.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider5" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_left = 100.0
-margin_right = 116.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider6" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_left = 125.0
-margin_right = 141.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider7" type="VSlider" parent="Tabs/Normal Map/Freqs"]
-margin_left = 150.0
-margin_right = 166.0
-margin_bottom = 140.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="Presets" type="VBoxContainer" parent="Tabs/Normal Map/Freqs"]
-margin_left = 175.0
-margin_right = 275.0
-margin_bottom = 140.0
+layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
 
 [node name="Flat" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
-margin_right = 100.0
-margin_bottom = 20.0
+layout_mode = 2
 text = "Flat"
 
 [node name="Smooth" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
-margin_top = 24.0
-margin_right = 100.0
-margin_bottom = 44.0
+layout_mode = 2
 text = "Smooth"
 
 [node name="Rough" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
-margin_top = 48.0
-margin_right = 100.0
-margin_bottom = 68.0
+layout_mode = 2
 text = "Rough"
 
 [node name="Fuzzy" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
-margin_top = 72.0
-margin_right = 100.0
-margin_bottom = 92.0
+layout_mode = 2
 text = "Fuzzy"
 
 [node name="Mids" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
-margin_top = 96.0
-margin_right = 100.0
-margin_bottom = 116.0
+layout_mode = 2
 text = "Mids"
 
 [node name="Zero" type="Button" parent="Tabs/Normal Map/Freqs/Presets"]
-margin_top = 120.0
-margin_right = 100.0
-margin_bottom = 140.0
+layout_mode = 2
 text = "Zero"
 
 [node name="Label8" type="Label" parent="Tabs/Normal Map"]
-margin_top = 200.0
-margin_right = 275.0
-margin_bottom = 214.0
+layout_mode = 2
 text = "Microfacets"
 
 [node name="Slider6" type="HSlider" parent="Tabs/Normal Map"]
-margin_top = 218.0
-margin_right = 275.0
-margin_bottom = 234.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Label3" type="Label" parent="Tabs/Normal Map"]
-margin_top = 238.0
-margin_right = 275.0
-margin_bottom = 252.0
+layout_mode = 2
 text = "Darkpoint Value"
 
 [node name="Slider2" type="HSlider" parent="Tabs/Normal Map"]
-margin_top = 256.0
-margin_right = 275.0
-margin_bottom = 272.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label4" type="Label" parent="Tabs/Normal Map"]
-margin_top = 276.0
-margin_right = 275.0
-margin_bottom = 290.0
+layout_mode = 2
 text = "Midpoint Value"
 
 [node name="Slider3" type="HSlider" parent="Tabs/Normal Map"]
-margin_top = 294.0
-margin_right = 275.0
-margin_bottom = 310.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label5" type="Label" parent="Tabs/Normal Map"]
-margin_top = 314.0
-margin_right = 275.0
-margin_bottom = 328.0
+layout_mode = 2
 text = "Lightpoint Value"
 
 [node name="Slider4" type="HSlider" parent="Tabs/Normal Map"]
-margin_top = 332.0
-margin_right = 275.0
-margin_bottom = 348.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Label6" type="Label" parent="Tabs/Normal Map"]
-margin_top = 352.0
-margin_right = 275.0
-margin_bottom = 366.0
+layout_mode = 2
 text = "Midpoint Offset"
 
 [node name="Slider5" type="HSlider" parent="Tabs/Normal Map"]
-margin_top = 370.0
-margin_right = 275.0
-margin_bottom = 386.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label7" type="Label" parent="Tabs/Normal Map"]
-margin_top = 390.0
-margin_right = 275.0
-margin_bottom = 404.0
+layout_mode = 2
 text = "Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Normal Map"]
-margin_top = 408.0
-margin_right = 275.0
-margin_bottom = 428.0
-text = "Grey"
+layout_mode = 2
 flat = true
 
 [node name="Depth Map" type="VBoxContainer" parent="Tabs"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = 40.0
-margin_right = -8.0
-margin_bottom = -8.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Label" type="Label" parent="Tabs/Depth Map"]
-margin_right = 275.0
-margin_bottom = 14.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Depth Map Strength"
 
 [node name="Slider" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 18.0
-margin_right = 275.0
-margin_bottom = 34.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label2" type="Label" parent="Tabs/Depth Map"]
-margin_top = 38.0
-margin_right = 275.0
-margin_bottom = 52.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 text = "Frequency Distribution"
 
 [node name="Freqs" type="HBoxContainer" parent="Tabs/Depth Map"]
-margin_top = 56.0
-margin_right = 275.0
-margin_bottom = 172.0
-rect_min_size = Vector2( 0, 100 )
-custom_constants/separation = 9
+layout_mode = 2
 
 [node name="VSlider1" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_right = 16.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider2" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_left = 25.0
-margin_right = 41.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider3" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_left = 50.0
-margin_right = 66.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider4" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_left = 75.0
-margin_right = 91.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider5" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_left = 100.0
-margin_right = 116.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider6" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_left = 125.0
-margin_right = 141.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="VSlider7" type="VSlider" parent="Tabs/Depth Map/Freqs"]
-margin_left = 150.0
-margin_right = 166.0
-margin_bottom = 116.0
+layout_mode = 2
 min_value = -100.0
 value = 100.0
 
 [node name="Presets" type="VBoxContainer" parent="Tabs/Depth Map/Freqs"]
-margin_left = 175.0
-margin_right = 275.0
-margin_bottom = 116.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Flat" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
-margin_right = 100.0
-margin_bottom = 20.0
+layout_mode = 2
 text = "Flat"
 
 [node name="Smooth" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
-margin_top = 24.0
-margin_right = 100.0
-margin_bottom = 44.0
+layout_mode = 2
 text = "Smooth"
 
 [node name="Rough" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
-margin_top = 48.0
-margin_right = 100.0
-margin_bottom = 68.0
+layout_mode = 2
 text = "Rough"
 
 [node name="Fuzzy" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
-margin_top = 72.0
-margin_right = 100.0
-margin_bottom = 92.0
+layout_mode = 2
 text = "Fuzzy"
 
 [node name="Mids" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
-margin_top = 96.0
-margin_right = 100.0
-margin_bottom = 116.0
+layout_mode = 2
 text = "Mids"
 
 [node name="Zero" type="Button" parent="Tabs/Depth Map/Freqs/Presets"]
-margin_top = 96.0
-margin_right = 100.0
-margin_bottom = 116.0
+layout_mode = 2
 text = "Zero"
 
 [node name="Label9" type="Label" parent="Tabs/Depth Map"]
-margin_top = 176.0
-margin_right = 275.0
-margin_bottom = 190.0
+layout_mode = 2
 text = "Microfacets"
 
 [node name="Slider7" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 194.0
-margin_right = 275.0
-margin_bottom = 210.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label3" type="Label" parent="Tabs/Depth Map"]
-margin_top = 176.0
-margin_right = 275.0
-margin_bottom = 190.0
+layout_mode = 2
 text = "Darkpoint Value"
 
 [node name="Slider2" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 194.0
-margin_right = 275.0
-margin_bottom = 210.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label4" type="Label" parent="Tabs/Depth Map"]
-margin_top = 214.0
-margin_right = 275.0
-margin_bottom = 228.0
+layout_mode = 2
 text = "Midpoint Value"
 
 [node name="Slider3" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 232.0
-margin_right = 275.0
-margin_bottom = 248.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label5" type="Label" parent="Tabs/Depth Map"]
-margin_top = 252.0
-margin_right = 275.0
-margin_bottom = 266.0
+layout_mode = 2
 text = "Lightpoint Value"
 
 [node name="Slider4" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 270.0
-margin_right = 275.0
-margin_bottom = 286.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Label6" type="Label" parent="Tabs/Depth Map"]
-margin_top = 290.0
-margin_right = 275.0
-margin_bottom = 304.0
+layout_mode = 2
 text = "Midpoint Offset"
 
 [node name="Slider5" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 308.0
-margin_right = 275.0
-margin_bottom = 324.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label7" type="Label" parent="Tabs/Depth Map"]
-margin_top = 328.0
-margin_right = 275.0
-margin_bottom = 342.0
+layout_mode = 2
 text = "Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Depth Map"]
-margin_top = 346.0
-margin_right = 275.0
-margin_bottom = 366.0
+layout_mode = 2
 flat = true
 
 [node name="Label8" type="Label" parent="Tabs/Depth Map"]
-margin_right = 275.0
-margin_bottom = 14.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Depth Map Offset"
 
 [node name="Slider6" type="HSlider" parent="Tabs/Depth Map"]
-margin_top = 18.0
-margin_right = 275.0
-margin_bottom = 34.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Metal Map" type="VBoxContainer" parent="Tabs"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = 40.0
-margin_right = -8.0
-margin_bottom = -8.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Metal Map"]
-margin_left = -4.0
-margin_top = -16.0
-margin_right = 87.0
-margin_bottom = 24.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Mixing Bias"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 25.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Metal Map"]
-margin_left = -4.0
-margin_top = -16.0
-margin_right = 87.0
-margin_bottom = 24.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer2"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Contrast"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer2"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 50.0
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Metal Map"]
-margin_left = -4.0
-margin_top = -16.0
-margin_right = 87.0
-margin_bottom = 24.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer3"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Shrink/Expand"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer3"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 min_value = -4.0
 max_value = 4.0
 
 [node name="Button" type="Button" parent="Tabs/Metal Map"]
-margin_right = 12.0
-margin_bottom = 20.0
+layout_mode = 2
 text = "Add Color Mapping"
 
 [node name="Roughness Map" type="VBoxContainer" parent="Tabs"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = 40.0
-margin_right = -8.0
-margin_bottom = -8.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Roughness Map"]
-margin_left = -4.0
-margin_top = -16.0
-margin_right = 87.0
-margin_bottom = 24.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Mixing Bias"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 25.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Roughness Map"]
-margin_left = -4.0
-margin_top = -16.0
-margin_right = 87.0
-margin_bottom = 24.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer2"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Contrast"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer2"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 50.0
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Roughness Map"]
-margin_left = -8.0
-margin_top = -32.0
-margin_right = 97.0
-margin_bottom = 8.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer3"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Shrink/Expand"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer3"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 min_value = -4.0
 max_value = 4.0
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="Tabs/Roughness Map"]
-margin_left = -8.0
-margin_top = -32.0
-margin_right = 97.0
-margin_bottom = 8.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer4"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Blur"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer4"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 max_value = 4.0
 
 [node name="Button" type="Button" parent="Tabs/Roughness Map"]
-margin_right = 12.0
-margin_bottom = 20.0
+layout_mode = 2
 text = "Add Color Mapping"
 
 [node name="AO Map" type="VBoxContainer" parent="Tabs"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = 40.0
-margin_right = -8.0
-margin_bottom = 103.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Label11" type="Label" parent="Tabs/AO Map"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Note: AO generation uses the depth map."
 
 [node name="Label" type="Label" parent="Tabs/AO Map"]
-margin_right = 275.0
-margin_bottom = 14.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "AO Map Strength"
 
 [node name="Slider" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 18.0
-margin_right = 275.0
-margin_bottom = 34.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label2" type="Label" parent="Tabs/AO Map"]
-margin_top = 38.0
-margin_right = 275.0
-margin_bottom = 52.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "High Frequency"
 
 [node name="Slider2" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 56.0
-margin_right = 275.0
-margin_bottom = 72.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 90.0
 
 [node name="Label5" type="Label" parent="Tabs/AO Map"]
-margin_top = 76.0
-margin_right = 275.0
-margin_bottom = 90.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Mid Frequency"
 
 [node name="Slider5" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 94.0
-margin_right = 275.0
-margin_bottom = 110.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 70.0
 
 [node name="Label3" type="Label" parent="Tabs/AO Map"]
-margin_top = 114.0
-margin_right = 275.0
-margin_bottom = 128.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Low Frequency"
 
 [node name="Slider3" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 132.0
-margin_right = 275.0
-margin_bottom = 148.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 70.0
 
 [node name="Label4" type="Label" parent="Tabs/AO Map"]
-margin_top = 152.0
-margin_right = 275.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Frequency Balance"
 
 [node name="Slider4" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 170.0
-margin_right = 275.0
-margin_bottom = 186.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label6" type="Label" parent="Tabs/AO Map"]
-margin_top = 152.0
-margin_right = 275.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Exponent"
 
 [node name="Slider6" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 170.0
-margin_right = 275.0
-margin_bottom = 186.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 min_value = 1.0
 value = 50.0
 
 [node name="Label7" type="Label" parent="Tabs/AO Map"]
-margin_top = 152.0
-margin_right = 275.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Bias"
 
 [node name="Slider7" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 170.0
-margin_right = 275.0
-margin_bottom = 186.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label8" type="Label" parent="Tabs/AO Map"]
-margin_top = 152.0
-margin_right = 275.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Contrast"
 
 [node name="Slider8" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 170.0
-margin_right = 275.0
-margin_bottom = 186.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label9" type="Label" parent="Tabs/AO Map"]
-margin_top = 152.0
-margin_right = 275.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Fine Detail Limit"
 
 [node name="Slider9" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 170.0
-margin_right = 275.0
-margin_bottom = 186.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Label10" type="Label" parent="Tabs/AO Map"]
-margin_top = 152.0
-margin_right = 275.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "Rough Detail Limit"
 
 [node name="Slider10" type="HSlider" parent="Tabs/AO Map"]
-margin_top = 170.0
-margin_right = 275.0
-margin_bottom = 186.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Shading Remover" type="VBoxContainer" parent="Tabs"]
 visible = false
-margin_left = 8.0
-margin_top = 40.0
-margin_right = 48.0
-margin_bottom = 80.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Label12" type="Label" parent="Tabs/Shading Remover"]
-margin_right = 234.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Note: AO removal uses the AO map."
 
 [node name="Label" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 18.0
-margin_right = 234.0
-margin_bottom = 32.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "AO Removal"
 
 [node name="Slider" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 36.0
-margin_right = 234.0
-margin_bottom = 52.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 
 [node name="Label2" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 56.0
-margin_right = 234.0
-margin_bottom = 70.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "AO Removal Limit"
 
 [node name="Slider2" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 74.0
-margin_right = 234.0
-margin_bottom = 90.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 100.0
 
 [node name="Label3" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 94.0
-margin_right = 234.0
-margin_bottom = 108.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "AO Removal Gamma"
 
 [node name="Slider3" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 112.0
-margin_right = 234.0
-margin_bottom = 128.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 50.0
 
 [node name="Label4" type="Label" parent="Tabs/Shading Remover"]
-margin_top = 132.0
-margin_right = 234.0
-margin_bottom = 146.0
+layout_mode = 2
 size_flags_horizontal = 5
 text = "AO Removal Desaturation"
 
 [node name="Slider4" type="HSlider" parent="Tabs/Shading Remover"]
-margin_top = 150.0
-margin_right = 234.0
-margin_bottom = 166.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
 value = 25.0
 
 [node name="Ambience" type="VBoxContainer" parent="Tabs"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 24.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Ambience"]
-margin_right = 40.0
-margin_bottom = 40.0
+layout_mode = 2
 
 [node name="Label" type="Label" parent="Tabs/Ambience/HBoxContainer3"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Sky"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Ambience/HBoxContainer3"]
-margin_right = 29.0
-margin_bottom = 20.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Ambience"]
-margin_right = 91.0
-margin_bottom = 40.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Ambience/HBoxContainer"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Sky Light Mix"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Ambience/HBoxContainer"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Ambience"]
-margin_right = 91.0
-margin_bottom = 40.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Ambience/HBoxContainer2"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Sky Energy"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Ambience/HBoxContainer2"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 24.0
-margin_top = 24.0
-margin_right = 340.0
-margin_bottom = 436.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-color = Color( 0.501961, 0.501961, 0.501961, 1 )
+theme_override_constants/sv_height = 200
+color = Color(0.501961, 0.501961, 0.501961, 1)
 edit_alpha = false
-presets_enabled = false
+can_add_swatches = false
 presets_visible = false
 
 [node name="Light" type="VBoxContainer" parent="Tabs"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 24.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Light"]
-margin_right = 40.0
-margin_bottom = 40.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Light/HBoxContainer"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Light Angle"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Light/HBoxContainer"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 min_value = -180.0
 max_value = 180.0
 value = 30.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Light"]
-margin_right = 40.0
-margin_bottom = 40.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Light/HBoxContainer2"]
-margin_right = 40.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Light Rotation"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Light/HBoxContainer2"]
-margin_right = 16.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Light"]
-margin_right = 96.0
-margin_bottom = 24.0
-pressed = true
+layout_mode = 2
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 28.0
-margin_top = 28.0
-margin_right = 344.0
-margin_bottom = 440.0
-size_flags_horizontal = 3
+layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/sv_width = 200
+theme_override_constants/sv_height = 200
 edit_alpha = false
-presets_enabled = false
+picker_shape = 1
+can_add_swatches = false
 presets_visible = false
 
 [node name="Config" type="VBoxContainer" parent="Tabs"]
 visible = false
-margin_right = 40.0
-margin_bottom = 40.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="Label" type="Label" parent="Tabs/Config"]
-margin_right = 129.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Specular"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Config"]
-margin_top = 18.0
-margin_right = 129.0
-margin_bottom = 34.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 50.0
 
 [node name="Label4" type="Label" parent="Tabs/Config"]
-margin_top = 38.0
-margin_right = 129.0
-margin_bottom = 52.0
+layout_mode = 2
 text = "Roughness"
 
 [node name="HSlider4" type="HSlider" parent="Tabs/Config"]
-margin_top = 56.0
-margin_right = 129.0
-margin_bottom = 72.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 100.0
 
 [node name="Label2" type="Label" parent="Tabs/Config"]
-margin_top = 76.0
-margin_right = 129.0
-margin_bottom = 90.0
+layout_mode = 2
 text = "Normal Strength"
 
 [node name="HSlider2" type="HSlider" parent="Tabs/Config"]
-margin_top = 94.0
-margin_right = 129.0
-margin_bottom = 110.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 100.0
 
 [node name="Label3" type="Label" parent="Tabs/Config"]
-margin_top = 114.0
-margin_right = 129.0
-margin_bottom = 128.0
+layout_mode = 2
 text = "Depth Strength"
 
 [node name="HSlider3" type="HSlider" parent="Tabs/Config"]
-margin_top = 132.0
-margin_right = 129.0
-margin_bottom = 148.0
+layout_mode = 2
 size_flags_horizontal = 3
 value = 25.0
 
 [node name="CheckButton" type="CheckBox" parent="Tabs/Config"]
-margin_top = 152.0
-margin_right = 129.0
-margin_bottom = 176.0
+layout_mode = 2
 text = "Depth as height"
 
 [node name="Button" type="Button" parent="Tabs/Config"]
-margin_top = 180.0
-margin_right = 129.0
-margin_bottom = 200.0
+layout_mode = 2
 text = "Reset View"
 
 [node name="Label5" type="Label" parent="Tabs/Config"]
-margin_top = 204.0
-margin_right = 129.0
-margin_bottom = 422.0
+layout_mode = 2
 text = "
 Settings under this tab do not affect exported materials will look, only how they are previewed.
 
 Camera controls: middle click drag to rotate, shift middle click drag to pan, mouse wheel to zoom."
-autowrap = true
+autowrap_mode = 2
 
 [node name="Shape" type="VBoxContainer" parent="Tabs"]
 visible = false
-margin_right = 40.0
-margin_bottom = 40.0
+layout_mode = 2
+theme_override_constants/separation = 2
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Tabs/Shape"]
-margin_right = 240.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer"]
-margin_top = 1.0
-margin_right = 97.0
-margin_bottom = 15.0
+layout_mode = 2
 text = "Model Rotation"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer"]
-margin_left = 101.0
-margin_right = 240.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 step = 0.1
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="Tabs/Shape"]
-margin_top = 20.0
-margin_right = 240.0
-margin_bottom = 36.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer3"]
-margin_top = 1.0
-margin_right = 75.0
-margin_bottom = 15.0
+layout_mode = 2
 text = "Model Slant"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer3"]
-margin_left = 79.0
-margin_right = 240.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 min_value = -100.0
 step = 0.1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Shape"]
-margin_top = 40.0
-margin_right = 240.0
-margin_bottom = 56.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="Tabs/Shape/HBoxContainer2"]
-margin_top = 1.0
-margin_right = 77.0
-margin_bottom = 15.0
+layout_mode = 2
 text = "Model Scale"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Shape/HBoxContainer2"]
-margin_left = 81.0
-margin_right = 240.0
-margin_bottom = 16.0
+layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.1
 max_value = 1000.0
@@ -1267,584 +967,413 @@ value = 10.0
 exp_edit = true
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Shape"]
-margin_top = 60.0
-margin_right = 240.0
-margin_bottom = 84.0
-pressed = true
+layout_mode = 2
 text = "Automatically Rotate"
 
 [node name="Button" type="Button" parent="Tabs/Shape"]
-margin_top = 88.0
-margin_right = 240.0
-margin_bottom = 108.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Sphere"
 
 [node name="Button2" type="Button" parent="Tabs/Shape"]
-margin_top = 112.0
-margin_right = 240.0
-margin_bottom = 132.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Cube"
 
 [node name="Button3" type="Button" parent="Tabs/Shape"]
-margin_top = 136.0
-margin_right = 240.0
-margin_bottom = 156.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Cylinder"
 
 [node name="Button4" type="Button" parent="Tabs/Shape"]
-margin_top = 160.0
-margin_right = 240.0
-margin_bottom = 180.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Cylinder (Sideways)"
 
 [node name="Button5" type="Button" parent="Tabs/Shape"]
-margin_top = 184.0
-margin_right = 240.0
-margin_bottom = 204.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Plane"
 
 [node name="Button7" type="Button" parent="Tabs/Shape"]
-margin_top = 208.0
-margin_right = 240.0
-margin_bottom = 228.0
+layout_mode = 2
 size_flags_horizontal = 3
 text = "Plane (Slanted)"
 
 [node name="Label" type="Label" parent="Tabs/Shape"]
-margin_top = 232.0
-margin_right = 240.0
-margin_bottom = 246.0
+layout_mode = 2
 text = "Or, drag and drop a wavefront obj file."
 
 [node name="Export" type="VBoxContainer" parent="Tabs"]
 visible = false
-margin_right = 40.0
-margin_bottom = 40.0
+layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 2
 
 [node name="Button" type="Button" parent="Tabs/Export"]
-margin_right = 172.0
-margin_bottom = 20.0
+layout_mode = 2
 text = "Save Albedo"
 
 [node name="Button2" type="Button" parent="Tabs/Export"]
-margin_top = 24.0
-margin_right = 172.0
-margin_bottom = 44.0
+layout_mode = 2
 text = "Save Normal Map"
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Export"]
-margin_top = 48.0
-margin_right = 172.0
-margin_bottom = 72.0
+layout_mode = 2
 text = "Save DX-Style Normal"
 
 [node name="Button3" type="Button" parent="Tabs/Export"]
-margin_top = 76.0
-margin_right = 172.0
-margin_bottom = 96.0
+layout_mode = 2
 text = "Save PBR Map"
 
 [node name="GridContainer" type="GridContainer" parent="Tabs/Export"]
-margin_top = 100.0
-margin_right = 172.0
-margin_bottom = 196.0
+layout_mode = 2
 columns = 2
 
 [node name="Label" type="Label" parent="Tabs/Export/GridContainer"]
-margin_top = 3.0
-margin_right = 139.0
-margin_bottom = 17.0
+layout_mode = 2
 text = "Red Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Export/GridContainer"]
-margin_left = 143.0
-margin_right = 172.0
-margin_bottom = 20.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label2" type="Label" parent="Tabs/Export/GridContainer"]
-margin_top = 27.0
-margin_right = 139.0
-margin_bottom = 41.0
+layout_mode = 2
 text = "Green Channel"
 
 [node name="OptionButton2" type="OptionButton" parent="Tabs/Export/GridContainer"]
-margin_left = 143.0
-margin_top = 24.0
-margin_right = 172.0
-margin_bottom = 44.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Label3" type="Label" parent="Tabs/Export/GridContainer"]
-margin_top = 51.0
-margin_right = 139.0
-margin_bottom = 65.0
+layout_mode = 2
 text = "Blue Channel"
 
 [node name="OptionButton3" type="OptionButton" parent="Tabs/Export/GridContainer"]
-margin_left = 143.0
-margin_top = 48.0
-margin_right = 172.0
-margin_bottom = 68.0
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Export/GridContainer"]
-margin_top = 72.0
-margin_right = 139.0
-margin_bottom = 96.0
+layout_mode = 2
 text = "Invert Roughness"
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
 show_behind_parent = true
-margin_left = 22.0
-margin_top = 161.0
-margin_right = 329.0
-margin_bottom = 542.0
-custom_styles/panel = SubResource( 3 )
+layout_mode = 0
+offset_left = -112.0
+offset_bottom = 112.0
 
 [node name="TextureRect" type="TextureRect" parent="Panel"]
-margin_left = 8.0
-margin_top = 8.0
-margin_right = 299.0
-margin_bottom = 373.0
-expand = true
+layout_mode = 2
 
 [node name="ToggleUI" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 24.0
-margin_top = 21.0
-margin_right = 133.0
-margin_bottom = 41.0
+layout_mode = 0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = 144.0
+offset_bottom = 40.0
 text = "Toggle UI"
 
 [node name="ToggleMat" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 24.0
-margin_top = 52.0
-margin_right = 133.0
-margin_bottom = 72.0
+layout_mode = 0
+offset_left = 24.0
+offset_top = 48.0
+offset_right = 144.0
+offset_bottom = 72.0
 text = "Toggle Material"
 
 [node name="ToggleAlbedo" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 24.0
-margin_top = 82.0
-margin_right = 133.0
-margin_bottom = 102.0
+layout_mode = 0
+offset_left = 24.0
+offset_top = 80.0
+offset_right = 144.0
+offset_bottom = 104.0
+theme = ExtResource("5_fyc28")
 text = "Show Albedo"
 
 [node name="Warnings" type="Label" parent="."]
 show_behind_parent = true
+layout_mode = 1
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 344.0
-margin_top = -133.0
-margin_right = -12.0
-margin_bottom = -17.0
-custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
-custom_constants/shadow_offset_x = 1
-custom_constants/shadow_offset_y = 1
-custom_constants/shadow_as_outline = 1
-autowrap = true
+offset_top = -23.0
+grow_horizontal = 2
+grow_vertical = 0
 
 [node name="PopupDialog" type="PanelContainer" parent="."]
 visible = false
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 537.0
-margin_top = 336.0
-margin_right = -537.0
-margin_bottom = -348.0
-custom_styles/panel = SubResource( 29 )
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PopupDialog"]
-margin_left = 7.0
-margin_top = 6.0
-margin_right = 199.0
-margin_bottom = 61.0
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Label" type="Label" parent="PopupDialog/VBoxContainer"]
-margin_right = 192.0
-margin_bottom = 31.0
+layout_mode = 2
 text = "Albedo cannot be saved until an image has been loaded."
-autowrap = true
 
 [node name="CenterContainer" type="CenterContainer" parent="PopupDialog/VBoxContainer"]
-margin_top = 35.0
-margin_right = 192.0
-margin_bottom = 55.0
+layout_mode = 2
 
 [node name="Button" type="Button" parent="PopupDialog/VBoxContainer/CenterContainer"]
-margin_left = 80.0
-margin_right = 111.0
-margin_bottom = 20.0
+layout_mode = 2
 text = "OK"
 
 [node name="NativeDialogSaveFile" type="Node" parent="."]
-script = ExtResource( 5 )
-filters = PoolStringArray( "*.png ; PNG Image" )
 
-[node name="HelperNormal" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="HelperNormal" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-keep_3d_linear = true
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="HelperNormal"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="HelperNormal"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="HelperNormal"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="HelperNormal"]
+mesh = SubResource("17")
 
-[node name="HelperDistance" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="HelperDistance" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-keep_3d_linear = true
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="HelperDistance"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="HelperDistance"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="HelperDistance"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="HelperDistance"]
+mesh = SubResource("17")
 
-[node name="HelperUnlit" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="HelperUnlit" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-keep_3d_linear = true
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="HelperUnlit"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="HelperUnlit"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="HelperUnlit"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="HelperUnlit"]
+mesh = SubResource("17")
 
-[node name="HelperAO" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="HelperAO" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-keep_3d_linear = true
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="HelperAO"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="HelperAO"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="HelperAO"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="HelperAO"]
+mesh = SubResource("17")
 
-[node name="Helper1" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper1" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper1"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper1"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper1"]
+mesh = SubResource("17")
 
-[node name="Helper2" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper2" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper2"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper2"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper2"]
+mesh = SubResource("17")
 
-[node name="Helper3" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper3" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper3"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper3"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper3"]
+mesh = SubResource("17")
 
-[node name="Helper4" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper4" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+positional_shadow_atlas_size = 0
+positional_shadow_atlas_16_bits = false
+positional_shadow_atlas_quad_0 = 0
+positional_shadow_atlas_quad_1 = 0
+positional_shadow_atlas_quad_2 = 0
+positional_shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper4"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper4"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper4"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper4"]
+mesh = SubResource("17")
 
-[node name="Helper5" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper5" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper5"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper5"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper5"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper5"]
+mesh = SubResource("17")
 
-[node name="Helper6" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper6" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper6"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper6"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper6"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper6"]
+mesh = SubResource("17")
 
-[node name="Helper7" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper7" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper7"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper7"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper7"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper7"]
+mesh = SubResource("17")
 
-[node name="Helper8" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper8" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper8"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper8"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper8"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper8"]
+mesh = SubResource("17")
 
-[node name="Helper9" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper9" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper9"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper9"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper9"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper9"]
+mesh = SubResource("17")
 
-[node name="Helper10" type="Viewport" parent="."]
-size = Vector2( 256, 256 )
-own_world = true
-world = SubResource( 14 )
+[node name="Helper10" type="SubViewport" parent="."]
+own_world_3d = true
 transparent_bg = true
 handle_input_locally = false
-hdr = false
-usage = 3
-render_target_v_flip = true
-render_target_update_mode = 0
 gui_disable_input = true
 gui_snap_controls_to_pixels = false
-shadow_atlas_quad_0 = 0
-shadow_atlas_quad_1 = 0
-shadow_atlas_quad_2 = 0
-shadow_atlas_quad_3 = 0
+size = Vector2i(256, 256)
+render_target_update_mode = 0
 
-[node name="Camera" type="Camera" parent="Helper10"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
+[node name="Camera" type="Camera3D" parent="Helper10"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper10"]
-mesh = SubResource( 17 )
+[node name="Quad" type="MeshInstance3D" parent="Helper10"]
+mesh = SubResource("17")

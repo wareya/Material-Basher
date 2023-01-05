@@ -6,19 +6,19 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
-_global_script_classes=[ {
+_global_script_classes=[{
 "base": "Container",
-"class": "AllTabContainer",
-"language": "GDScript",
+"class": &"AllTabContainer",
+"language": &"GDScript",
 "path": "res://types/AllTabContainer.gd"
 }, {
-"base": "Reference",
-"class": "ObjLoader",
-"language": "GDScript",
+"base": "RefCounted",
+"class": &"ObjLoader",
+"language": &"GDScript",
 "path": "res://types/ObjLoader.gd"
-} ]
+}]
 _global_script_class_icons={
 "AllTabContainer": "",
 "ObjLoader": ""
@@ -28,6 +28,8 @@ _global_script_class_icons={
 
 config/name="Material Basher"
 run/main_scene="res://Scene.tscn"
+config/features=PackedStringArray("4.0")
+run/max_fps=120
 config/icon="res://resources/icon.png"
 
 [audio]
@@ -36,18 +38,18 @@ default_bus_layout="res://resources/default_bus_layout.tres"
 
 [debug]
 
-settings/fps/force_fps=120
 gdscript/warnings/return_value_discarded=false
+settings/fps/force_fps=120
 
 [display]
 
-window/size/width=1280
-window/size/height=720
-window/vsync/use_vsync=false
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/vsync/vsync_mode=0
 
 [editor_plugins]
 
-enabled=PoolStringArray( "res://addons/native_dialogs/plugin.cfg" )
+enabled=PackedStringArray()
 
 [gui]
 
@@ -55,7 +57,7 @@ common/drop_mouse_on_gui_input_disabled=true
 
 [network]
 
-limits/debugger_stdout/max_chars_per_second=204800
+limits/debugger_stdout/max_chars_per_second=2500
 
 [physics]
 
@@ -63,20 +65,5 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
-quality/intended_usage/framebuffer_allocation=3
-quality/directional_shadow/size=256
-quality/directional_shadow/size.mobile=256
-quality/shadow_atlas/size=256
-quality/shadow_atlas/size.mobile=256
-quality/shadow_atlas/quadrant_0_subdiv=0
-quality/shadow_atlas/quadrant_1_subdiv=0
-quality/shadow_atlas/quadrant_2_subdiv=0
-quality/shadow_atlas/quadrant_3_subdiv=0
-quality/shadows/filter_mode=0
-quality/depth_prepass/enable=false
-quality/skinning/force_software_skinning=true
-quality/subsurface_scattering/quality=0
-quality/subsurface_scattering/scale=0
-quality/subsurface_scattering/weight_samples=false
-quality/filters/msaa=2
+driver/depth_prepass/enable=false
 environment/default_environment="res://resources/default_env.tres"

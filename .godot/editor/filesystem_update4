@@ -1,0 +1,11 @@
+res://Scene.tscn
+res://resources/Theme.tres
+res://types/AllTabContainer.gd
+res://resources/DefaultSky.tres
+res://MaterialBasher.gd
+res://shaders/NormalGenerator.gdshader
+res://shaders/OctaveExtractor.gdshader
+res://shaders/AOGenerator.gdshader
+res://shaders/AORemover.gdshader
+res://shaders/MetallicityGenerator.gdshader
+res://resources/UnshadedPlain.material
