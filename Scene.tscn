@@ -1054,10 +1054,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 36.0
-margin_top = 36.0
-margin_right = 352.0
-margin_bottom = 448.0
+margin_left = 40.0
+margin_top = 40.0
+margin_right = 356.0
+margin_bottom = 452.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1114,10 +1114,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 40.0
-margin_top = 40.0
-margin_right = 356.0
-margin_bottom = 452.0
+margin_left = 44.0
+margin_top = 44.0
+margin_right = 360.0
+margin_bottom = 456.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
@@ -1613,7 +1613,7 @@ mesh = SubResource( 17 )
 [node name="WorldEnvironment" type="WorldEnvironment" parent="HelperAO"]
 environment = SubResource( 31 )
 
-[node name="Helper1" type="Viewport" parent="."]
+[node name="HelperOctaveAlbedo" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
 world = SubResource( 14 )
@@ -1630,18 +1630,18 @@ shadow_atlas_quad_1 = 0
 shadow_atlas_quad_2 = 0
 shadow_atlas_quad_3 = 0
 
-[node name="Camera" type="Camera" parent="Helper1"]
+[node name="Camera" type="Camera" parent="HelperOctaveAlbedo"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper1"]
+[node name="Quad" type="MeshInstance" parent="HelperOctaveAlbedo"]
 mesh = SubResource( 17 )
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper1"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HelperOctaveAlbedo"]
 environment = SubResource( 31 )
 
-[node name="Helper8" type="Viewport" parent="."]
+[node name="HelperOctaveDepth" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
 world = SubResource( 14 )
@@ -1658,13 +1658,13 @@ shadow_atlas_quad_1 = 0
 shadow_atlas_quad_2 = 0
 shadow_atlas_quad_3 = 0
 
-[node name="Camera" type="Camera" parent="Helper8"]
+[node name="Camera" type="Camera" parent="HelperOctaveDepth"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5 )
 current = true
 fov = 90.0
 
-[node name="Quad" type="MeshInstance" parent="Helper8"]
+[node name="Quad" type="MeshInstance" parent="HelperOctaveDepth"]
 mesh = SubResource( 17 )
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper8"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HelperOctaveDepth"]
 environment = SubResource( 31 )

@@ -403,7 +403,7 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
     
     #var viewports = []
     for i in 7:
-        var path = "Helper1"
+        var path = "HelperOctaveAlbedo"
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
         viewport.size = size
@@ -445,15 +445,12 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
         mat.set_shader_param("octave_"+str(i), texture)
         mat2.set_shader_param("input", null)
         
-    $Helper1.size = Vector2(2, 2)
-    force_draw_subviewports([$Helper1])
+    $HelperOctaveAlbedo.size = Vector2(2, 2)
+    force_draw_subviewports([$HelperOctaveAlbedo])
     
-    
-    #force_draw_subviewports(viewports)
-        
     
     var end = OS.get_ticks_usec()
-    print("update time... ", (end-start)/1000.0, "ms")
+    print("normal/depth update time... ", (end-start)/1000.0, "ms")
     
     $HelperNormal.keep_3d_linear = true
     mat.set_shader_param("albedo", albedo)
@@ -629,7 +626,7 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     
     var i = 0
     for freq in [freq_high, freq_high*freq_mid, freq_high*freq_mid*freq_low]:
-        var path = "Helper8"
+        var path = "HelperOctaveDepth"
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
         if viewport.size != size:
@@ -663,8 +660,8 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
         
         i += 1
     
-    $Helper8.size = Vector2(2, 2)
-    force_draw_subviewports([$Helper8])
+    $HelperOctaveDepth.size = Vector2(2, 2)
+    force_draw_subviewports([$HelperOctaveDepth])
     
     var end = OS.get_ticks_usec()
     print("ao update time... ", (end-start)/1000.0, "ms")
@@ -761,7 +758,7 @@ func create_unlit_albedo_image(albedo : Texture, ao : Texture, normal_image : Im
     var img = $HelperUnlit.get_texture().get_data()
     
     var end = OS.get_ticks_usec()
-    print("update time... ", (end-start)/1000.0, "ms")
+    print("shading removal update time... ", (end-start)/1000.0, "ms")
     
     # free up vram
     mat.set_shader_param("albedo", null)
