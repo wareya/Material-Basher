@@ -691,6 +691,8 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     
     force_draw_subviewports([$HelperAO])
     var img = $HelperAO.get_texture().get_data()
+    # extra contrast
+    ao_image.srgb_to_linear()
     
     for j in 3:
         mat.set_shader_param("octave_"+str(j), null)
@@ -802,7 +804,7 @@ func light_remover_slider_changed(_unused : float):
     
     mat_3d.albedo_texture = albedo_display
     if !indirect_update:
-        var n2 = albedo.duplicate(true)
+        var n2 = albedo_display.duplicate(true)
         mat_texture.set_shader_param("image", n2)
 
 func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness):
@@ -1033,6 +1035,8 @@ func _process(delta : float):
         next_texture = roughness
     elif ao and current_tab == $"Tabs/AO Map":
         next_texture = ao
+    elif ao and current_tab == $"Tabs/Shading Remover":
+        next_texture = albedo_display
     else:
         next_texture = albedo
     
