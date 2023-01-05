@@ -403,7 +403,7 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
     
     #var viewports = []
     for i in 7:
-        var path = "Helper"+str(i+1)
+        var path = "Helper1"
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
         viewport.size = size
@@ -427,7 +427,6 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
             quad.material_override = mat2
         var mat2 = quad.material_override
         
-        #viewport.keep_3d_linear = true
         viewport.keep_3d_linear = false
         viewport.hdr = false
         
@@ -439,22 +438,15 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
         mat2.set_shader_param("microfacets", microfacets)
         mat2.set_shader_param("raw_mip_ratio", -1.0)
         
-        #viewports.push_back(viewport)
-        #var img = viewport.get_texture()
-        #img.flags |= Texture.FLAG_FILTER
-        #img.flags |= Texture.FLAG_REPEAT
-        #mat.set_shader_param("octave_"+str(i), img)
-        
         force_draw_subviewports([viewport])
         var img : Image = viewport.get_texture().get_data()
         var texture = ImageTexture.new()
         texture.create_from_image(img)
-        #print(texture.flags)
         mat.set_shader_param("octave_"+str(i), texture)
-        
-        viewport.size = Vector2(2, 2)
         mat2.set_shader_param("input", null)
-        force_draw_subviewports([viewport])
+        
+    $Helper1.size = Vector2(2, 2)
+    force_draw_subviewports([$Helper1])
     
     
     #force_draw_subviewports(viewports)
@@ -635,10 +627,9 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     
     var start = OS.get_ticks_usec()
     
-    var subviewports = []
     var i = 0
     for freq in [freq_high, freq_high*freq_mid, freq_high*freq_mid*freq_low]:
-        var path = "Helper"+str(i+8)
+        var path = "Helper8"
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
         if viewport.size != size:
@@ -662,18 +653,21 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
         mat2.set_shader_param("microfacets", 0.0)
         mat2.set_shader_param("raw_mip_ratio", freq)
         
-        subviewports.push_back(viewport)
+        force_draw_subviewports([viewport])
+        var img : Image = viewport.get_texture().get_data()
+        var texture = ImageTexture.new()
+        texture.create_from_image(img)
+        mat.set_shader_param("octave_"+str(i), texture)
         
-        var octave = viewport.get_texture()
-        octave.flags |= Texture.FLAG_FILTER
-        octave.flags |= Texture.FLAG_REPEAT
-        mat.set_shader_param("octave_"+str(i), octave)
+        mat2.set_shader_param("input", null)
+        
         i += 1
     
-    force_draw_subviewports(subviewports)
+    $Helper8.size = Vector2(2, 2)
+    force_draw_subviewports([$Helper8])
     
     var end = OS.get_ticks_usec()
-    print("update time... ", (end-start)/1000.0, "ms")
+    print("ao update time... ", (end-start)/1000.0, "ms")
     
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("freq_balance", freq_balance)
