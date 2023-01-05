@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://resources/DefaultSky.tres" type="ProceduralSky" id=3]
@@ -108,6 +108,8 @@ margin_bottom = 8.0
 environment = SubResource( 13 )
 
 [sub_resource type="QuadMesh" id=17]
+
+[sub_resource type="Environment" id=31]
 
 [node name="Scene" type="Control"]
 anchor_right = 1.0
@@ -1052,10 +1054,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 28.0
-margin_top = 28.0
-margin_right = 344.0
-margin_bottom = 440.0
+margin_left = 36.0
+margin_top = 36.0
+margin_right = 352.0
+margin_bottom = 448.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1112,10 +1114,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 32.0
-margin_top = 32.0
-margin_right = 348.0
-margin_bottom = 444.0
+margin_left = 40.0
+margin_top = 40.0
+margin_right = 356.0
+margin_bottom = 452.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
@@ -1521,6 +1523,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="HelperNormal"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HelperNormal"]
+environment = SubResource( 31 )
+
 [node name="HelperDistance" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1546,6 +1551,9 @@ fov = 90.0
 
 [node name="Quad" type="MeshInstance" parent="HelperDistance"]
 mesh = SubResource( 17 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HelperDistance"]
+environment = SubResource( 31 )
 
 [node name="HelperUnlit" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
@@ -1573,6 +1581,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="HelperUnlit"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HelperUnlit"]
+environment = SubResource( 31 )
+
 [node name="HelperAO" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1599,6 +1610,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="HelperAO"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="HelperAO"]
+environment = SubResource( 31 )
+
 [node name="Helper1" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1623,6 +1637,9 @@ fov = 90.0
 
 [node name="Quad" type="MeshInstance" parent="Helper1"]
 mesh = SubResource( 17 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper1"]
+environment = SubResource( 31 )
 
 [node name="Helper2" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
@@ -1649,6 +1666,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="Helper2"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper2"]
+environment = SubResource( 31 )
+
 [node name="Helper3" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1673,6 +1693,9 @@ fov = 90.0
 
 [node name="Quad" type="MeshInstance" parent="Helper3"]
 mesh = SubResource( 17 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper3"]
+environment = SubResource( 31 )
 
 [node name="Helper4" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
@@ -1699,6 +1722,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="Helper4"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper4"]
+environment = SubResource( 31 )
+
 [node name="Helper5" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1723,6 +1749,9 @@ fov = 90.0
 
 [node name="Quad" type="MeshInstance" parent="Helper5"]
 mesh = SubResource( 17 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper5"]
+environment = SubResource( 31 )
 
 [node name="Helper6" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
@@ -1749,6 +1778,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="Helper6"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper6"]
+environment = SubResource( 31 )
+
 [node name="Helper7" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1773,6 +1805,9 @@ fov = 90.0
 
 [node name="Quad" type="MeshInstance" parent="Helper7"]
 mesh = SubResource( 17 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper7"]
+environment = SubResource( 31 )
 
 [node name="Helper8" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
@@ -1799,6 +1834,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="Helper8"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper8"]
+environment = SubResource( 31 )
+
 [node name="Helper9" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1824,6 +1862,9 @@ fov = 90.0
 [node name="Quad" type="MeshInstance" parent="Helper9"]
 mesh = SubResource( 17 )
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper9"]
+environment = SubResource( 31 )
+
 [node name="Helper10" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
@@ -1848,3 +1889,6 @@ fov = 90.0
 
 [node name="Quad" type="MeshInstance" parent="Helper10"]
 mesh = SubResource( 17 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Helper10"]
+environment = SubResource( 31 )
