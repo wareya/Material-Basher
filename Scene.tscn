@@ -388,6 +388,12 @@ margin_bottom = 428.0
 text = "Grey"
 flat = true
 
+[node name="CheckBox" type="CheckBox" parent="Tabs/Normal Map"]
+margin_top = 432.0
+margin_right = 275.0
+margin_bottom = 456.0
+text = "Earlier Midpoint Adjustment"
+
 [node name="Depth Map" type="VBoxContainer" parent="Tabs"]
 visible = false
 anchor_right = 1.0
@@ -594,6 +600,12 @@ margin_top = 346.0
 margin_right = 275.0
 margin_bottom = 366.0
 flat = true
+
+[node name="CheckBox" type="CheckBox" parent="Tabs/Depth Map"]
+margin_top = 460.0
+margin_right = 275.0
+margin_bottom = 484.0
+text = "Earlier Midpoint Adjustment"
 
 [node name="Label8" type="Label" parent="Tabs/Depth Map"]
 margin_right = 275.0
@@ -1054,10 +1066,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 40.0
-margin_top = 40.0
-margin_right = 356.0
-margin_bottom = 452.0
+margin_left = 44.0
+margin_top = 44.0
+margin_right = 360.0
+margin_bottom = 456.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1114,10 +1126,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 44.0
-margin_top = 44.0
-margin_right = 360.0
-margin_bottom = 456.0
+margin_left = 48.0
+margin_top = 48.0
+margin_right = 364.0
+margin_bottom = 460.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false

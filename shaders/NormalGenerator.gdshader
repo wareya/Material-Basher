@@ -31,6 +31,8 @@ uniform float generate_normal;
 
 uniform float microfacets;
 
+uniform bool early_adjust;
+
 void vertex() {
     UV = UV;
 }
@@ -126,12 +128,24 @@ void fragment() {
             amp *= 2.0;
         else if (i == 1)
             amp *= 1.5;
-        vec4 data = samples[i]*abs(amp);
-        mapped_midpoint += map_to_points(image_midpoint*abs(amp))*sign(amp);
-        x1 += map_to_points(data.x)*sign(amp);
-        x2 += map_to_points(data.y)*sign(amp);
-        y1 += map_to_points(data.z)*sign(amp);
-        y2 += map_to_points(data.w)*sign(amp);
+        if (early_adjust)
+        {
+            vec4 data = samples[i];
+            mapped_midpoint += map_to_points(image_midpoint)*abs(amp);
+            x1 += map_to_points(data.x)*abs(amp);
+            x2 += map_to_points(data.y)*abs(amp);
+            y1 += map_to_points(data.z)*abs(amp);
+            y2 += map_to_points(data.w)*abs(amp);
+        }
+        else
+        {
+            vec4 data = samples[i]*abs(amp);
+            mapped_midpoint += map_to_points(image_midpoint*abs(amp))*sign(amp);
+            x1 += map_to_points(data.x)*sign(amp);
+            x2 += map_to_points(data.y)*sign(amp);
+            y1 += map_to_points(data.z)*sign(amp);
+            y2 += map_to_points(data.w)*sign(amp);
+        }
         energy += abs(amp);
     }
     

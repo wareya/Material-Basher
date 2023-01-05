@@ -98,6 +98,9 @@ func _ready():
             if child is Button:
                 child.connect("pressed", self, "%s_freq_preset" % [type], [child.name.to_lower()])
     
+    $"Tabs/Depth Map/OptionButton" .connect("pressed", self, "depth_slider_changed",  [0.0])
+    $"Tabs/Normal Map/OptionButton".connect("pressed", self, "normal_slider_changed", [0.0])
+    
     
     $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
@@ -388,7 +391,7 @@ func min_v2(a : Vector2, b : Vector2):
         b.x = floor(b.y*a.x/a.y)
     return Vector2(min(a.x, b.x), min(a.y, b.y))
 
-func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal):
+func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal, early_adjust):
     var size = albedo.get_size()
     
     $HelperNormal.keep_3d_linear = true
@@ -462,6 +465,7 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
     mat.set_shader_param("depth_offset", depth_offset)
     mat.set_shader_param("microfacets", microfacets)
     mat.set_shader_param("generate_normal", generate_normal)
+    mat.set_shader_param("early_adjust", early_adjust)
     
     var parent = get_node("Tabs/%s Map" % [["Depth"], ["Normal"]][int(generate_normal)])
     
@@ -521,10 +525,11 @@ func normal_slider_changed(_unused : float):
     var midpoint_offset = read_range($"Tabs/Normal Map/Slider5")
     var lightpoint = read_range($"Tabs/Normal Map/Slider4")
     var microfacets = read_range($"Tabs/Normal Map/Slider6")
+    var early_adjust = $"Tabs/Normal Map/CheckBox".pressed
     
     var depth_offset = 0.0
     
-    normal_image = create_normal_texture(albedo, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0)
+    normal_image = create_normal_texture(albedo, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0, early_adjust)
     #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
@@ -556,7 +561,9 @@ func depth_slider_changed(_unused : float):
     
     var depth_offset = read_range($"Tabs/Depth Map/Slider6")
     
-    depth_image = create_normal_texture(albedo, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 0.0)
+    var early_adjust = $"Tabs/Depth Map/CheckBox".pressed
+    
+    depth_image = create_normal_texture(albedo, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 0.0, early_adjust)
     #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
