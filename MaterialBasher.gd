@@ -388,18 +388,8 @@ func min_v2(a : Vector2, b : Vector2):
         b.x = floor(b.y*a.x/a.y)
     return Vector2(min(a.x, b.x), min(a.y, b.y))
 
-var ref_image = null
-var ref_tex = null
-func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal):
-    var tex_is_new = false
-    if ref_image != image or ref_tex == null:
-        tex_is_new = true
-        ref_image = image
-        ref_tex = ImageTexture.new()
-        ref_tex.create_from_image(image)
-    ref_tex.flags |= Texture.FLAG_REPEAT
-    
-    var size = image.get_size()
+func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal):
+    var size = albedo.get_size()
     
     $HelperNormal.keep_3d_linear = true
     if $HelperNormal/Quad.material_override == null:
@@ -411,6 +401,7 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     
     var start = OS.get_ticks_usec()
     
+    #var viewports = []
     for i in 7:
         var path = "Helper"+str(i+1)
         var viewport : Viewport = get_node(path)
@@ -436,30 +427,44 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
             quad.material_override = mat2
         var mat2 = quad.material_override
         
-        viewport.keep_3d_linear = true
+        #viewport.keep_3d_linear = true
+        viewport.keep_3d_linear = false
         viewport.hdr = false
         
         if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
             mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
         
-        mat2.set_shader_param("input", ref_tex)
+        mat2.set_shader_param("input", albedo)
         mat2.set_shader_param("octave", i)
         mat2.set_shader_param("microfacets", microfacets)
         mat2.set_shader_param("raw_mip_ratio", -1.0)
         
-        force_draw_subviewports([viewport])
+        #viewports.push_back(viewport)
+        #var img = viewport.get_texture()
+        #img.flags |= Texture.FLAG_FILTER
+        #img.flags |= Texture.FLAG_REPEAT
+        #mat.set_shader_param("octave_"+str(i), img)
         
-        var img = viewport.get_texture()
-        img.flags |= Texture.FLAG_FILTER
-        img.flags |= Texture.FLAG_REPEAT
-        mat.set_shader_param("octave_"+str(i), img)
+        force_draw_subviewports([viewport])
+        var img : Image = viewport.get_texture().get_data()
+        var texture = ImageTexture.new()
+        texture.create_from_image(img)
+        #print(texture.flags)
+        mat.set_shader_param("octave_"+str(i), texture)
+        
+        viewport.size = Vector2(2, 2)
+        mat2.set_shader_param("input", null)
+        force_draw_subviewports([viewport])
     
+    
+    #force_draw_subviewports(viewports)
+        
     
     var end = OS.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
     $HelperNormal.keep_3d_linear = true
-    mat.set_shader_param("albedo", ref_tex)
+    mat.set_shader_param("albedo", albedo)
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("darkpoint", darkpoint)
     mat.set_shader_param("midpoint", midpoint)
@@ -492,9 +497,9 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
     $HelperNormal/Quad.force_update_transform()
     
     force_draw_subviewports([$HelperNormal])
-    
     var img = $HelperNormal.get_texture().get_data()
     
+    # free up vram
     for i in 7:
         mat.set_shader_param("octave_"+str(i), null)
     $HelperNormal.size = Vector2(2, 2)
@@ -530,7 +535,7 @@ func normal_slider_changed(_unused : float):
     
     var depth_offset = 0.0
     
-    normal_image = create_normal_texture(albedo_image, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0)
+    normal_image = create_normal_texture(albedo, strength*10.0, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 1.0)
     #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
@@ -562,7 +567,7 @@ func depth_slider_changed(_unused : float):
     
     var depth_offset = read_range($"Tabs/Depth Map/Slider6")
     
-    depth_image = create_normal_texture(albedo_image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 0.0)
+    depth_image = create_normal_texture(albedo, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, 0.0)
     #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
@@ -618,17 +623,8 @@ func force_draw_subviewports(viewports : Array):
         var old_update_mode = old_update_modes[i]
         viewport.render_target_update_mode = old_update_mode
 
-var ao_ref_image = null
-var ao_ref_tex = null
-func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, bias, contrast, fine_limit, rough_limit):
-    var tex_is_new = false
-    if ao_ref_image != image or ao_ref_tex == null:
-        tex_is_new = true
-        ao_ref_image = image
-        ao_ref_tex = ImageTexture.new()
-        ao_ref_tex.create_from_image(image)
-    
-    var size = image.get_size()
+func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, bias, contrast, fine_limit, rough_limit):
+    var size = depth.get_size()
     
     $HelperAO.keep_3d_linear = true
     if $HelperAO/Quad.material_override == null:
@@ -655,14 +651,13 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
             quad.material_override = mat2
         var mat2 = quad.material_override
         
-        viewport.keep_3d_linear = true
+        viewport.keep_3d_linear = false
         viewport.hdr = true
         
-        if mat2.shader != preload("res://shaders/OctaveExtractor.gdshader"):
-            mat2.shader = preload("res://shaders/OctaveExtractor.gdshader")
+        if mat2.shader != preload("res://shaders/OctaveExtractorLinear.gdshader"):
+            mat2.shader = preload("res://shaders/OctaveExtractorLinear.gdshader")
         
-        if tex_is_new:
-            mat2.set_shader_param("input", ao_ref_tex)
+        mat2.set_shader_param("input", depth)
         mat2.set_shader_param("octave", 0)
         mat2.set_shader_param("microfacets", 0.0)
         mat2.set_shader_param("raw_mip_ratio", freq)
@@ -693,9 +688,16 @@ func create_ao_texture(image : Image, strength, freq_high, freq_mid, freq_low, f
     $HelperAO/Quad.force_update_transform()
     
     force_draw_subviewports([$HelperAO])
-    mat.shader = null
+    var img = $HelperAO.get_texture().get_data()
     
-    return $HelperAO.get_texture().get_data()
+    for j in 3:
+        mat.set_shader_param("octave_"+str(j), null)
+    
+    # free up vram
+    $HelperAO.size = Vector2(2, 2)
+    force_draw_subviewports([$HelperAO])
+    
+    return img
 
 
 func ao_option_picked(_unused : int):
@@ -720,7 +722,7 @@ func ao_slider_changed(_unused : float):
     
     strength = max(0.00000001, strength*strength*100.0)
     
-    ao_image = create_ao_texture(depth_image, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
+    ao_image = create_ao_texture(depth, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
     
     ao = ImageTexture.new()
     ao.create_from_image(ao_image)
@@ -739,21 +741,7 @@ func ao_slider_changed(_unused : float):
     if !no_recurse:
         light_remover_slider_changed(0.0)
 
-var albedo_ref_image = null
-var albedo_ref_tex = null
-var albedo_ref_ao_image = null
-var albedo_ref_ao_tex = null
-func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_image : Image, depth_image, ao_strength, ao_limit, ao_gamma, ao_desat):
-    if albedo_ref_image != albedo_image or albedo_ref_tex == null:
-        albedo_ref_image = albedo_image
-        albedo_ref_tex = ImageTexture.new()
-        albedo_ref_tex.create_from_image(albedo_image)
-    
-    if albedo_ref_ao_image != ao_image or albedo_ref_ao_tex == null:
-        albedo_ref_ao_image = ao_image
-        albedo_ref_ao_tex = ImageTexture.new()
-        albedo_ref_ao_tex.create_from_image(ao_image)
-    
+func create_unlit_albedo_image(albedo : Texture, ao : Texture, normal_image : Image, depth_image, ao_strength, ao_limit, ao_gamma, ao_desat):
     var start = OS.get_ticks_usec()
     
     $HelperUnlit.keep_3d_linear = false
@@ -763,8 +751,8 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     if mat.shader != preload("res://shaders/AORemover.gdshader"):
         mat.shader = preload("res://shaders/AORemover.gdshader")
     
-    mat.set_shader_param("albedo", albedo_ref_tex)
-    mat.set_shader_param("ao", albedo_ref_ao_tex)
+    mat.set_shader_param("albedo", albedo)
+    mat.set_shader_param("ao", ao)
     mat.set_shader_param("ao_strength", ao_strength)
     mat.set_shader_param("ao_limit", ao_limit)
     mat.set_shader_param("ao_gamma", ao_gamma)
@@ -776,10 +764,18 @@ func create_unlit_albedo_image(albedo_image : Image, ao_image : Image, normal_im
     $HelperUnlit/Quad.force_update_transform()
     
     force_draw_subviewports([$HelperUnlit])
+    var img = $HelperUnlit.get_texture().get_data()
+    
     var end = OS.get_ticks_usec()
     print("update time... ", (end-start)/1000.0, "ms")
     
-    return $HelperUnlit.get_texture().get_data()
+    # free up vram
+    mat.set_shader_param("albedo", null)
+    mat.set_shader_param("ao", null)
+    $HelperUnlit.size = Vector2(2, 2)
+    force_draw_subviewports([$HelperUnlit])
+    
+    return img
 
 func light_remover_slider_changed(_unused : float):
     if albedo_image == null:
@@ -796,7 +792,7 @@ func light_remover_slider_changed(_unused : float):
     
     ao_strength = ao_strength*ao_strength*16.0
     
-    albedo_image_display = create_unlit_albedo_image(albedo_image, ao_image, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
+    albedo_image_display = create_unlit_albedo_image(albedo, ao, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
     
     albedo = ImageTexture.new()
     albedo.create_from_image(albedo_image_display)
@@ -807,12 +803,8 @@ func light_remover_slider_changed(_unused : float):
         var n2 = albedo.duplicate(true)
         mat_texture.set_shader_param("image", n2)
 
-func create_metal_texture(image : Image, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness):
+func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness):
     mixing_bias = mixing_bias*mixing_bias
-    if ref_image != image or ref_tex == null:
-        ref_image = image
-        ref_tex = ImageTexture.new()
-        ref_tex.create_from_image(image)
     
     if colors.size() == 0:
         if is_roughness:
@@ -820,14 +812,14 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
         else:
             colors = [Color(0, 0, 0, 0)]
     
-    var img = Image.new()
-    img.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
-    img.lock()
+    var color_img = Image.new()
+    color_img.create(colors.size(), 1, false, Image.FORMAT_RGBA8)
+    color_img.lock()
     for i in colors.size():
-        img.set_pixel(i, 0, colors[i])
-    img.unlock()
+        color_img.set_pixel(i, 0, colors[i])
+    color_img.unlock()
     var color_tex = ImageTexture.new()
-    color_tex.create_from_image(img)
+    color_tex.create_from_image(color_img)
     
     $HelperDistance.keep_3d_linear = true
     if $HelperDistance/Quad.material_override == null:
@@ -837,7 +829,7 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     if mat.shader != preload("res://shaders/MetallicityGenerator.gdshader"):
         mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
     
-    mat.set_shader_param("albedo", ref_tex)
+    mat.set_shader_param("albedo", albedo)
     mat.set_shader_param("colors", color_tex)
     mat.set_shader_param("mixing_bias", mixing_bias)
     mat.set_shader_param("contrast", contrast)
@@ -845,15 +837,20 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     mat.set_shader_param("blur_radius", blur_radius)
     mat.set_shader_param("is_roughness", is_roughness)
     
-    var size = image.get_size()
+    var size = albedo.get_size()
     $HelperDistance.size = size
     $HelperDistance/Quad.scale.x = size.x / size.y
     $HelperDistance/Quad.force_update_transform()
     
     force_draw_subviewports([$HelperDistance])
-    mat.shader = null
+    var img = $HelperDistance.get_texture().get_data()
     
-    return $HelperDistance.get_texture().get_data()
+    # free up vram
+    mat.set_shader_param("albedo", null)
+    $HelperDistance.size = Vector2(2, 2)
+    force_draw_subviewports([$HelperDistance])
+    
+    return img
 
 
 func metal_slider_changed(_unused : float):
@@ -874,7 +871,7 @@ func metal_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    metal_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius, false)
+    metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false)
     
     metal = ImageTexture.new()
     metal.create_from_image(metal_image)
@@ -906,7 +903,7 @@ func roughness_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    roughness_image = create_metal_texture(albedo_image, colors, mixing_bias, contrast, shrink_radius, blur_radius, true)
+    roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true)
     
     roughness = ImageTexture.new()
     roughness.create_from_image(roughness_image)
@@ -1040,7 +1037,7 @@ func _process(delta : float):
     if current_preview_texture != next_texture:
         current_preview_texture = next_texture
         var data : Image = next_texture.get_data()
-        print(data.get_format())
+        #print(data.get_format())
         var tex = ImageTexture.new()
         tex.create_from_image(data)
         tex.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER

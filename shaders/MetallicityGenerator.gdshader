@@ -1,6 +1,5 @@
 shader_type spatial;
 render_mode unshaded, ambient_light_disabled, blend_mix, shadows_disabled, specular_disabled;
-uniform sampler2D height : hint_albedo;
 uniform sampler2D albedo : hint_albedo;
 uniform sampler2D colors : hint_albedo;
 uniform float mixing_bias;
