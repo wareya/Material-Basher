@@ -98,8 +98,8 @@ func _ready():
             if child is Button:
                 child.connect("pressed", self, "%s_freq_preset" % [type], [child.name.to_lower()])
     
-    $"Tabs/Depth Map/OptionButton" .connect("pressed", self, "depth_slider_changed",  [0.0])
-    $"Tabs/Normal Map/OptionButton".connect("pressed", self, "normal_slider_changed", [0.0])
+    $"Tabs/Depth Map/CheckBox" .connect("pressed", self, "depth_slider_changed",  [0.0])
+    $"Tabs/Normal Map/CheckBox".connect("pressed", self, "normal_slider_changed", [0.0])
     
     
     $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")

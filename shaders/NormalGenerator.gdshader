@@ -55,7 +55,7 @@ float octave_to_mip_level(int octave) {
     return mip_level;
 }
 
-const float stride = 0.5;
+const float stride = 0.25;
 vec4 get_mip_level(sampler2D tex, vec2 uv, int octave) {
     float mip_level = octave_to_mip_level(octave);
     if (generate_normal > 0.5)
