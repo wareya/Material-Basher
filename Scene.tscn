@@ -1052,10 +1052,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 24.0
-margin_top = 24.0
-margin_right = 340.0
-margin_bottom = 436.0
+margin_left = 28.0
+margin_top = 28.0
+margin_right = 344.0
+margin_bottom = 440.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1112,10 +1112,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 28.0
-margin_top = 28.0
-margin_right = 344.0
-margin_bottom = 440.0
+margin_left = 32.0
+margin_top = 32.0
+margin_right = 348.0
+margin_bottom = 444.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false

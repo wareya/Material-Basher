@@ -381,6 +381,13 @@ func write_range(_range : Range, val : float):
     _range.value = _range.max_value*val
 
 
+func min_v2(a : Vector2, b : Vector2):
+    if a.x > a.y:
+        b.y = floor(b.x*a.y/a.x)
+    else:
+        b.x = floor(b.y*a.x/a.y)
+    return Vector2(min(a.x, b.x), min(a.y, b.y))
+
 var ref_image = null
 var ref_tex = null
 func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal):
@@ -390,12 +397,14 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         ref_image = image
         ref_tex = ImageTexture.new()
         ref_tex.create_from_image(image)
+    ref_tex.flags |= Texture.FLAG_REPEAT
     
     var size = image.get_size()
     
     $HelperNormal.keep_3d_linear = true
     if $HelperNormal/Quad.material_override == null:
         $HelperNormal/Quad.material_override = ShaderMaterial.new()
+    
     var mat = $HelperNormal/Quad.material_override
     if mat.shader != preload("res://shaders/NormalGenerator.gdshader"):
         mat.shader = preload("res://shaders/NormalGenerator.gdshader")
@@ -406,8 +415,19 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         var path = "Helper"+str(i+1)
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
-        if viewport.size != size:
-            viewport.size = size
+        viewport.size = size
+        if i == 0:
+            viewport.size = min_v2(viewport.size, Vector2(32, 32))
+        elif i == 1:
+            viewport.size = min_v2(viewport.size, Vector2(64, 64))
+        elif i == 2:
+            viewport.size = min_v2(viewport.size, Vector2(128, 128))
+        elif i == 3:
+            viewport.size = min_v2(viewport.size, Vector2(256, 256))
+        elif i == 4:
+            viewport.size = min_v2(viewport.size, Vector2(512, 512))
+        elif i == 5:
+            viewport.size = min_v2(viewport.size, Vector2(1024, 1024))
         quad.scale.x = size.x / size.y
         quad.force_update_transform()
         
@@ -429,8 +449,10 @@ func create_normal_texture(image : Image, strength, darkpoint, midpoint, midpoin
         
         force_draw_subviewports([viewport])
         
-        var img = ImageTexture.new()
-        mat.set_shader_param("octave_"+str(i), viewport.get_texture())
+        var img = viewport.get_texture()
+        img.flags |= Texture.FLAG_FILTER
+        img.flags |= Texture.FLAG_REPEAT
+        mat.set_shader_param("octave_"+str(i), img)
     
     
     var end = OS.get_ticks_usec()
@@ -811,10 +833,10 @@ func create_metal_texture(image : Image, colors : Array, mixing_bias : float, co
     if $HelperDistance/Quad.material_override == null:
         $HelperDistance/Quad.material_override = ShaderMaterial.new()
     var mat = $HelperDistance/Quad.material_override
-    if mat.shader != preload("res://shaders/AORemover.gdshader"):
-        mat.shader = preload("res://shaders/AORemover.gdshader")
     
-    mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
+    if mat.shader != preload("res://shaders/MetallicityGenerator.gdshader"):
+        mat.shader = preload("res://shaders/MetallicityGenerator.gdshader")
+    
     mat.set_shader_param("albedo", ref_tex)
     mat.set_shader_param("colors", color_tex)
     mat.set_shader_param("mixing_bias", mixing_bias)
