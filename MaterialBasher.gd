@@ -166,9 +166,25 @@ func _ready():
 var NativeDialog = preload("res://addons/native_dialogs/native_dialogs.gd")
 
 func save_albedo():
-    save_image(albedo_image_display, "albedo.png", "Albedo", "Albedo cannot be saved until an image has been loaded.")
+    var fname_parts = loaded_fname.split(".")
+    if fname_parts.size() >= 2:
+        #fname_parts[-2] = fname_parts[-2] + "_albedo"
+        fname_parts[-1] = "png"
+    else:
+        fname_parts[-1] += ".png"
+    var fname = fname_parts.join(".")
+    
+    save_image(albedo_image_display, fname, "Albedo", "Albedo cannot be saved until an image has been loaded.")
 
 func save_normal():
+    var fname_parts = loaded_fname.split(".")
+    if fname_parts.size() >= 2:
+        fname_parts[-2] = fname_parts[-2] + "_n"
+        fname_parts[-1] = "png"
+    else:
+        fname_parts[-1] += ".png"
+    var fname = fname_parts.join(".")
+    
     var save_image : Image = normal_image
     if $Tabs/Export/CheckBox.pressed:
         save_image = normal_image.duplicate()
@@ -182,7 +198,7 @@ func save_normal():
                 g = 1.0-g
                 save_image.set_pixel(x, y, Color(r, g, b))
         save_image.unlock()
-    save_image(save_image, "normal.png", "Normal", "Normal cannot be saved until an albedo has been loaded.")
+    save_image(save_image, fname, "Normal", "Normal cannot be saved until an albedo has been loaded.")
 
 func pbr_pick_image(selection):
     if selection == 0:
@@ -195,6 +211,14 @@ func pbr_pick_image(selection):
         return depth_image
 
 func save_pbr():
+    var fname_parts = loaded_fname.split(".")
+    if fname_parts.size() >= 2:
+        fname_parts[-2] = fname_parts[-2] + "_spec"
+        fname_parts[-1] = "png"
+    else:
+        fname_parts[-1] += ".png"
+    var fname = fname_parts.join(".")
+    
     var size = albedo_image.get_size()
     var image = Image.new()
     image.create(size.x, size.y, false, Image.FORMAT_RGB8)
@@ -225,7 +249,7 @@ func save_pbr():
                 if blue == roughness_image:
                     b = 1.0 - b
             image.set_pixel(x, y, Color(r, g, b))
-    save_image(image, "pbr.png", "PBR", "")
+    save_image(image, fname, "PBR", "")
     
     image.unlock()
     red.unlock()
@@ -233,6 +257,53 @@ func save_pbr():
         green.unlock()
     if blue != green and blue != red:
         blue.unlock()
+
+func save_tga(image : Image, fname : String):
+    var bytes = PoolByteArray()
+    bytes.append(0) # id field length (no id field)
+    bytes.append(0) # color map type (none)
+    
+    bytes.append(2) # uncompressed rgb
+    
+    bytes.append(0) # color map stuff (blank)
+    bytes.append(0) # color map stuff (blank)
+    bytes.append(0) # color map stuff (blank)
+    bytes.append(0) # color map stuff (blank)
+    bytes.append(0) # color map stuff (blank)
+    
+    bytes.append(0) # x origin
+    bytes.append(0) # x origin
+    bytes.append(0) # y origin
+    bytes.append(0) # y origin
+    
+    var w = image.get_width()
+    var h = image.get_height()
+    
+    bytes.append(w & 0xFF)
+    bytes.append((w>>8) & 0xFF)
+    
+    bytes.append(h & 0xFF)
+    bytes.append((h>>8) & 0xFF)
+    
+    bytes.append(32)
+    
+    bytes.append(8)
+    
+    image.lock()
+    for y in h:
+        for x in w:
+            var color = image.get_pixel(x, h-y-1)
+            bytes.append(color.b8)
+            bytes.append(color.g8)
+            bytes.append(color.r8)
+            bytes.append(color.a8)
+    image.unlock()
+    
+    var f = File.new()
+    f.open(fname, File.WRITE)
+    
+    f.store_buffer(bytes)
+    f.close()
 
 func save_image(image : Image, default_fname : String, name_caps : String, error_text : String):
     if image == null:
@@ -247,8 +318,15 @@ func save_image(image : Image, default_fname : String, name_caps : String, error
     $NativeDialogSaveFile.initial_path = default_fname
     $NativeDialogSaveFile.title = "Save %s Image" % [name_caps]
     $NativeDialogSaveFile.show()
+    
     var fname = yield($NativeDialogSaveFile, "file_selected")
-    image.save_png(fname)
+    if !fname.ends_with(".tga") and !fname.ends_with(".png"):
+        fname += ".png"
+    
+    if fname.ends_with(".tga"):
+        save_tga(image, fname)
+    elif fname.ends_with(".png"):
+        image.save_png(fname)
         
 
 func reset_view():
@@ -290,25 +368,27 @@ func toggle_ui():
     $ToggleAlbedo.visible = $Tabs.visible
     $TextureRect.visible = $Tabs.visible and albedo_shown
 
+var loaded_fname : String
 func files_dropped(files : PoolStringArray, _screen : int):
     var fname : String = files[0]
+    
     var file = File.new()
     file.open(fname, File.READ)
     var buffer = file.get_buffer(file.get_len())
     
     var image = Image.new()
     fname = fname.to_lower()
-    if fname.ends_with("bmp"):
+    if fname.ends_with(".bmp"):
         image.load_bmp_from_buffer(buffer)
-    elif fname.ends_with("png"):
+    elif fname.ends_with(".png"):
         image.load_png_from_buffer(buffer)
-    elif fname.ends_with("jpg") or fname.ends_with("jpeg"):
+    elif fname.ends_with(".jpg") or fname.ends_with(".jpeg"):
         image.load_jpg_from_buffer(buffer)
-    elif fname.ends_with("tga"):
+    elif fname.ends_with(".tga"):
         image.load_tga_from_buffer(buffer)
-    elif fname.ends_with("webp"):
+    elif fname.ends_with(".webp"):
         image.load_webp_from_buffer(buffer)
-    elif fname.ends_with("obj"):
+    elif fname.ends_with(".obj"):
         var f = File.new()
         f.open(fname, File.READ)
         var text = f.get_as_text()
@@ -321,6 +401,8 @@ func files_dropped(files : PoolStringArray, _screen : int):
         return
     else:
         return
+    
+    loaded_fname = fname
     
     albedo_image = image
     albedo = ImageTexture.new()

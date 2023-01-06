@@ -1553,7 +1553,7 @@ text = "OK"
 
 [node name="NativeDialogSaveFile" type="Node" parent="."]
 script = ExtResource( 5 )
-filters = PoolStringArray( "*.png ; PNG Image" )
+filters = PoolStringArray( "*.png *.tga ; Supported Images (PNG, TGA)" )
 
 [node name="HelperNormal" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
