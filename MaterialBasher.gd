@@ -692,7 +692,7 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     force_draw_subviewports([$HelperAO])
     var img = $HelperAO.get_texture().get_data()
     # extra contrast
-    ao_image.srgb_to_linear()
+    img.srgb_to_linear()
     
     for j in 3:
         mat.set_shader_param("octave_"+str(j), null)
