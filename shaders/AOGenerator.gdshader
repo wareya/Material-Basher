@@ -26,13 +26,12 @@ void fragment() {
     float mid  = texture(octave_1, UV).r;
     float low  = texture(octave_2, UV).r;
     
-    float real_bias = bias-0.5;
     
-    float raw_ao_fine  = min( fine_limit, fine-mid);
-    float raw_ao_broad = min(rough_limit, mid -low);
+    float raw_ao_fine  = clamp(fine-mid, -fine_limit, fine_limit);
+    float raw_ao_broad = clamp(mid -low, -rough_limit, rough_limit);
     
-    float ao_fine  = 1.0 - max(0, raw_ao_fine  - real_bias)*strength;
-    float ao_broad = 1.0 - max(0, raw_ao_broad - real_bias)*strength;
+    float ao_fine  = 1.0 - max(0, raw_ao_fine  - bias)*strength;
+    float ao_broad = 1.0 - max(0, raw_ao_broad - bias)*strength;
     
     float f = mix(ao_fine, ao_broad, freq_balance);
     
