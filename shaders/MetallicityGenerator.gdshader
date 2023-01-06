@@ -10,6 +10,8 @@ uniform int shrink_radius;
 uniform int blur_radius;
 uniform bool is_roughness;
 
+uniform float supersample;
+
 vec3 toLinear(vec3 sRGB)
 {
     bvec3 cutoff = lessThan(sRGB, vec3(0.04045));
@@ -43,8 +45,8 @@ float get_metallicity(vec2 uv) {
         vec4 data = texelFetch(colors, ivec2(i, 0), 0);
         vec3 color = toSrgb(data.rgb);
         float metal = data.a;
-        float weight = length(color - albedo_color);
-        weight = 1.0/(pow(weight, mixing_exponent) + mixing_bias/10.0 + 0.0000001);
+        float weight = length(color - albedo_color) + mixing_bias/10.0*mixing_exponent + 0.0000001;
+        weight = pow(1.0/weight, mixing_exponent);
         metallicity += metal*weight;
         energy += weight;
         mean += metal;
@@ -57,7 +59,7 @@ float get_metallicity(vec2 uv) {
         contrast_adjusted = 1.0 + (contrast_adjusted-1.0)*8.0;
     metallicity = (metallicity - mean) * contrast_adjusted + mean;
     
-    return metallicity;
+    return clamp(metallicity, 0.0, 1.0);
 }
 
 float get_expanded(vec2 uv) {
@@ -71,7 +73,22 @@ float get_expanded(vec2 uv) {
         {
             if(sqrt(float(x*x + y*y)) > float(radius))
                 continue;
-            float metal = get_metallicity(uv + vec2(ivec2(x, y))*px);
+            
+            float metal = 0.0;
+            if (supersample > 0.0)
+            {
+                for(int _y = -1; _y <= 1; _y += 1)
+                {
+                    for(int _x = -1; _x <= 1; _x += 1)
+                    {
+                        metal += get_metallicity(uv + vec2(ivec2(x, y))*px + vec2(ivec2(_x, _y))*px*supersample);
+                    }
+                }
+                metal /= 9.0;
+            }
+            else
+                metal = get_metallicity(uv + vec2(ivec2(x, y))*px);
+            
             if (expand)
                 metallicity = max(metallicity, metal);
             else

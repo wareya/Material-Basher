@@ -646,6 +646,7 @@ text = "Mixing Bias"
 margin_right = 16.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
+value = 25.0
 
 [node name="HBoxContainer4" type="HBoxContainer" parent="Tabs/Metal Map"]
 margin_left = -4.0
@@ -702,6 +703,11 @@ size_flags_horizontal = 3
 min_value = -4.0
 max_value = 4.0
 
+[node name="CheckBox" type="CheckBox" parent="Tabs/Metal Map"]
+margin_right = 111.0
+margin_bottom = 24.0
+text = "Supersample"
+
 [node name="Button" type="Button" parent="Tabs/Metal Map"]
 margin_right = 12.0
 margin_bottom = 20.0
@@ -732,6 +738,7 @@ text = "Mixing Bias"
 margin_right = 16.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
+value = 25.0
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="Tabs/Roughness Map"]
 margin_left = -4.0
@@ -805,6 +812,11 @@ margin_right = 16.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
 max_value = 4.0
+
+[node name="CheckBox" type="CheckBox" parent="Tabs/Roughness Map"]
+margin_right = 111.0
+margin_bottom = 24.0
+text = "Supersample"
 
 [node name="Button" type="Button" parent="Tabs/Roughness Map"]
 margin_right = 12.0

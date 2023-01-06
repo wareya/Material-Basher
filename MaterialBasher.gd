@@ -107,12 +107,14 @@ func _ready():
     $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer4/HSlider".connect("value_changed", self, "metal_slider_changed")
+    $"Tabs/Metal Map/CheckBox".connect("pressed", self, "metal_slider_changed", [0.0])
     
     $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/HBoxContainer5/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/CheckBox".connect("pressed", self, "roughness_slider_changed", [0.0])
     
     $"Tabs/AO Map/Slider".connect("value_changed", self, "ao_slider_changed")
     $"Tabs/AO Map/Slider2".connect("value_changed", self, "ao_slider_changed")
@@ -809,7 +811,7 @@ func light_remover_slider_changed(_unused : float):
         var n2 = albedo_display.duplicate(true)
         mat_texture.set_shader_param("image", n2)
 
-func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness, mixing_exponent : float):
+func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness, mixing_exponent : float, supersample):
     mixing_bias = mixing_bias*mixing_bias
     
     if colors.size() == 0:
@@ -843,6 +845,7 @@ func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float,
     mat.set_shader_param("shrink_radius", shrink_radius)
     mat.set_shader_param("blur_radius", blur_radius)
     mat.set_shader_param("is_roughness", is_roughness)
+    mat.set_shader_param("supersample", supersample)
     
     var size = albedo.get_size()
     $HelperDistance.size = size
@@ -871,6 +874,7 @@ func metal_slider_changed(_unused : float):
     var contrast = read_range($"Tabs/Metal Map/HBoxContainer2/HSlider")
     var shrink_radius = $"Tabs/Metal Map/HBoxContainer3/HSlider".value
     var blur_radius = 0
+    var supersample = 0.333 if $"Tabs/Metal Map/CheckBox".pressed else 0.0
     
     mixing_exponent *= mixing_exponent
     
@@ -881,7 +885,7 @@ func metal_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false, mixing_exponent)
+    metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false, mixing_exponent, supersample)
     
     metal = ImageTexture.new()
     metal.create_from_image(metal_image)
@@ -902,10 +906,11 @@ func roughness_slider_changed(_unused : float):
         return
     
     var mixing_bias = read_range($"Tabs/Roughness Map/HBoxContainer/HSlider")
-    var mixing_exponent = read_range($"Tabs/Metal Map/HBoxContainer4/HSlider")*4.0
+    var mixing_exponent = read_range($"Tabs/Roughness Map/HBoxContainer5/HSlider")*4.0
     var contrast = read_range($"Tabs/Roughness Map/HBoxContainer2/HSlider")
     var shrink_radius = $"Tabs/Roughness Map/HBoxContainer3/HSlider".value
     var blur_radius = $"Tabs/Roughness Map/HBoxContainer4/HSlider".value
+    var supersample = 0.333 if $"Tabs/Roughness Map/CheckBox".pressed else 0.0
     
     mixing_exponent *= mixing_exponent
     
@@ -916,7 +921,7 @@ func roughness_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true, mixing_exponent)
+    roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true, mixing_exponent, supersample)
     
     roughness = ImageTexture.new()
     roughness.create_from_image(roughness_image)
