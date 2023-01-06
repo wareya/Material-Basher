@@ -106,6 +106,13 @@ func _ready():
     $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self, "metal_slider_changed")
+    $"Tabs/Metal Map/HBoxContainer4/HSlider".connect("value_changed", self, "metal_slider_changed")
+    
+    $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self, "roughness_slider_changed")
+    $"Tabs/Roughness Map/HBoxContainer5/HSlider".connect("value_changed", self, "roughness_slider_changed")
     
     $"Tabs/AO Map/Slider".connect("value_changed", self, "ao_slider_changed")
     $"Tabs/AO Map/Slider2".connect("value_changed", self, "ao_slider_changed")
@@ -122,11 +129,6 @@ func _ready():
     $"Tabs/Shading Remover/Slider2".connect("value_changed", self, "light_remover_slider_changed")
     $"Tabs/Shading Remover/Slider3".connect("value_changed", self, "light_remover_slider_changed")
     $"Tabs/Shading Remover/Slider4".connect("value_changed", self, "light_remover_slider_changed")
-    
-    $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self, "roughness_slider_changed")
     
     $ToggleMat.connect("pressed", self, "toggle_mat")
     $ToggleAlbedo.connect("pressed", self, "show_albedo")
@@ -807,7 +809,7 @@ func light_remover_slider_changed(_unused : float):
         var n2 = albedo_display.duplicate(true)
         mat_texture.set_shader_param("image", n2)
 
-func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness):
+func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float, contrast : float, shrink_radius : int, blur_radius, is_roughness, mixing_exponent : float):
     mixing_bias = mixing_bias*mixing_bias
     
     if colors.size() == 0:
@@ -836,6 +838,7 @@ func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float,
     mat.set_shader_param("albedo", albedo)
     mat.set_shader_param("colors", color_tex)
     mat.set_shader_param("mixing_bias", mixing_bias)
+    mat.set_shader_param("mixing_exponent", mixing_exponent)
     mat.set_shader_param("contrast", contrast)
     mat.set_shader_param("shrink_radius", shrink_radius)
     mat.set_shader_param("blur_radius", blur_radius)
@@ -864,9 +867,12 @@ func metal_slider_changed(_unused : float):
         return
     
     var mixing_bias = read_range($"Tabs/Metal Map/HBoxContainer/HSlider")
+    var mixing_exponent = read_range($"Tabs/Metal Map/HBoxContainer4/HSlider")*4.0
     var contrast = read_range($"Tabs/Metal Map/HBoxContainer2/HSlider")
     var shrink_radius = $"Tabs/Metal Map/HBoxContainer3/HSlider".value
     var blur_radius = 0
+    
+    mixing_exponent *= mixing_exponent
     
     var colors = []
     for c in $"Tabs/Metal Map".get_children():
@@ -875,7 +881,7 @@ func metal_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false)
+    metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false, mixing_exponent)
     
     metal = ImageTexture.new()
     metal.create_from_image(metal_image)
@@ -896,9 +902,12 @@ func roughness_slider_changed(_unused : float):
         return
     
     var mixing_bias = read_range($"Tabs/Roughness Map/HBoxContainer/HSlider")
+    var mixing_exponent = read_range($"Tabs/Metal Map/HBoxContainer4/HSlider")*4.0
     var contrast = read_range($"Tabs/Roughness Map/HBoxContainer2/HSlider")
     var shrink_radius = $"Tabs/Roughness Map/HBoxContainer3/HSlider".value
     var blur_radius = $"Tabs/Roughness Map/HBoxContainer4/HSlider".value
+    
+    mixing_exponent *= mixing_exponent
     
     var colors = []
     for c in $"Tabs/Roughness Map".get_children():
@@ -907,7 +916,7 @@ func roughness_slider_changed(_unused : float):
             var slider : Range = c.get_child(2)
             colors.push_back(Color(color.r, color.g, color.b, read_range(slider)))
     
-    roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true)
+    roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true, mixing_exponent)
     
     roughness = ImageTexture.new()
     roughness.create_from_image(roughness_image)

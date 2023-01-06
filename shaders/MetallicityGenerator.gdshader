@@ -3,18 +3,36 @@ render_mode unshaded, ambient_light_disabled, blend_mix, shadows_disabled, specu
 uniform sampler2D albedo : hint_albedo;
 uniform sampler2D colors : hint_albedo;
 uniform float mixing_bias;
+uniform float mixing_exponent;
 uniform float contrast;
 uniform float bias;
 uniform int shrink_radius;
 uniform int blur_radius;
 uniform bool is_roughness;
 
+vec3 toLinear(vec3 sRGB)
+{
+    bvec3 cutoff = lessThan(sRGB, vec3(0.04045));
+    vec3 higher = pow((sRGB + vec3(0.055))/vec3(1.055), vec3(2.4));
+    vec3 lower = sRGB/vec3(12.92);
+
+    return mix(higher, lower, cutoff);
+}
+vec3 toSrgb(vec3 linearRGB)
+{
+    bvec3 cutoff = lessThan(linearRGB, vec3(0.0031308));
+    vec3 higher = vec3(1.055)*pow(linearRGB, vec3(1.0/2.4)) - vec3(0.055);
+    vec3 lower = linearRGB * vec3(12.92);
+
+    return mix(higher, lower, cutoff);
+}
+
 void vertex() {
     UV = UV;
 }
 
 float get_metallicity(vec2 uv) {
-    vec3 albedo_color = texture(albedo, uv).rgb;
+    vec3 albedo_color = toSrgb(texture(albedo, uv).rgb);
     int color_count = textureSize(colors, 0).x;
     
     float mean = 0.0;
@@ -23,10 +41,10 @@ float get_metallicity(vec2 uv) {
     for(int i = 0; i < color_count; i++)
     {
         vec4 data = texelFetch(colors, ivec2(i, 0), 0);
-        vec3 color = data.rgb;
+        vec3 color = toSrgb(data.rgb);
         float metal = data.a;
         float weight = length(color - albedo_color);
-        weight = 1.0/(weight*weight + mixing_bias/10.0 + 0.000001);
+        weight = 1.0/(pow(weight, mixing_exponent) + mixing_bias/10.0 + 0.0000001);
         metallicity += metal*weight;
         energy += weight;
         mean += metal;

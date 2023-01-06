@@ -646,6 +646,23 @@ text = "Mixing Bias"
 margin_right = 16.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="Tabs/Metal Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 89.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Metal Map/HBoxContainer4"]
+margin_right = 40.0
+margin_bottom = 14.0
+text = "Mixing Exponent"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Metal Map/HBoxContainer4"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
 value = 25.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Metal Map"]
@@ -712,6 +729,23 @@ margin_bottom = 14.0
 text = "Mixing Bias"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer"]
+margin_right = 16.0
+margin_bottom = 16.0
+size_flags_horizontal = 3
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="Tabs/Roughness Map"]
+margin_left = -4.0
+margin_top = -16.0
+margin_right = 121.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="Tabs/Roughness Map/HBoxContainer5"]
+margin_right = 105.0
+margin_bottom = 14.0
+text = "Mixing Exponent"
+
+[node name="HSlider" type="HSlider" parent="Tabs/Roughness Map/HBoxContainer5"]
 margin_right = 16.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
@@ -1066,10 +1100,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 44.0
-margin_top = 44.0
-margin_right = 360.0
-margin_bottom = 456.0
+margin_left = 48.0
+margin_top = 48.0
+margin_right = 364.0
+margin_bottom = 460.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1126,10 +1160,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 48.0
-margin_top = 48.0
-margin_right = 364.0
-margin_bottom = 460.0
+margin_left = 52.0
+margin_top = 52.0
+margin_right = 368.0
+margin_bottom = 464.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
