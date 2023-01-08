@@ -23,6 +23,8 @@ var albedo_display : ImageTexture
 var mat_3d = SpatialMaterial.new()
 var mat_texture = preload("res://resources/UnshadedPlain.material")
 
+var wrapping_enabled = false
+
 func set_uv_scale(scale : Vector3):
     mat_3d.flags_transparent = true
     mat_3d.uv1_scale = scale
@@ -421,6 +423,7 @@ func files_dropped(files : PoolStringArray, _screen : int):
     metal_slider_changed(0.0)
     roughness_slider_changed(0.0)
     ao_slider_changed(0.0)
+    light_remover_slider_changed(0.0)
     no_recurse = false
 
 var no_recurse
