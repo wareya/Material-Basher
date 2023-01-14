@@ -32,10 +32,12 @@ func set_uv_scale(scale : Vector3):
     mat_texture.set_shader_param("uv1_offset", mat_3d.uv1_offset)
 
 func config_reset_to_default():
+    $Tabs/Config/OptionButton.selected = 0
+    $Tabs/Config/OptionButton.emit_signal("item_selected", 0)
     $Tabs/Config/HSlider.value = 50
     $Tabs/Config/HSlider4.value = 100
     $Tabs/Config/HSlider2.value = 100
-    $Tabs/Config/HSlider2.value = 25
+    $Tabs/Config/HSlider3.value = 25
     $Tabs/Config/CheckButton.pressed = false
 
 onready var _option_connections = {
@@ -167,6 +169,7 @@ func _ready():
     $Tabs/Shape/Button7.connect("pressed", self, "set_mesh", ["plane slanted"])
     
     $Tabs/Config/Button.connect("pressed", self, "reset_view")
+    $Tabs/Config/Button2.connect("pressed", self, "config_reset_to_default")
     
     $Tabs/Config/OptionButton.connect("item_selected", self, "set_diffuse_mode")
 

@@ -189,7 +189,6 @@ tab_bg = SubResource( 22 )
 tab_inactive_bg = SubResource( 25 )
 
 [node name="Normal Map" type="VBoxContainer" parent="Tabs"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0
@@ -1121,10 +1120,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 64.0
-margin_top = 64.0
-margin_right = 380.0
-margin_bottom = 476.0
+margin_left = 68.0
+margin_top = 68.0
+margin_right = 384.0
+margin_bottom = 480.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1181,10 +1180,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 68.0
-margin_top = 68.0
-margin_right = 384.0
-margin_bottom = 480.0
+margin_left = 72.0
+margin_top = 72.0
+margin_right = 388.0
+margin_bottom = 484.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
@@ -1192,6 +1191,7 @@ presets_enabled = false
 presets_visible = false
 
 [node name="Config" type="VBoxContainer" parent="Tabs"]
+visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 
@@ -1269,10 +1269,16 @@ margin_right = 138.0
 margin_bottom = 242.0
 text = "Reset View"
 
-[node name="Label5" type="Label" parent="Tabs/Config"]
+[node name="Button2" type="Button" parent="Tabs/Config"]
 margin_top = 246.0
 margin_right = 138.0
-margin_bottom = 464.0
+margin_bottom = 266.0
+text = "Reset Settings"
+
+[node name="Label5" type="Label" parent="Tabs/Config"]
+margin_top = 270.0
+margin_right = 138.0
+margin_bottom = 488.0
 text = "
 Settings under this tab do not affect exported materials will look, only how they are previewed.
 
@@ -1319,7 +1325,8 @@ margin_left = 79.0
 margin_right = 240.0
 margin_bottom = 16.0
 size_flags_horizontal = 3
-min_value = -100.0
+min_value = -90.0
+max_value = 90.0
 step = 0.1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="Tabs/Shape"]
