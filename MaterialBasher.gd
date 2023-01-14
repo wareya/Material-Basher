@@ -23,7 +23,14 @@ var albedo_display : ImageTexture
 var mat_3d = SpatialMaterial.new()
 var mat_texture = preload("res://resources/UnshadedPlain.material")
 
-var wrapping_enabled = false
+var base_flags_noaniso = ( Texture.FLAG_MIPMAPS
+                         | Texture.FLAG_FILTER
+                         )
+var base_flags = ( Texture.FLAG_MIPMAPS
+                 | Texture.FLAG_FILTER
+                 | Texture.FLAG_ANISOTROPIC_FILTER
+                 )
+var wrapping_flag = Texture.FLAG_REPEAT
 
 func set_uv_scale(scale : Vector3):
     mat_3d.flags_transparent = true
@@ -423,14 +430,17 @@ func files_dropped(files : PoolStringArray, _screen : int):
     
     albedo_image = image
     albedo = ImageTexture.new()
-    albedo.create_from_image(albedo_image)
+    albedo.create_from_image(albedo_image, base_flags_noaniso | wrapping_flag)
     
     albedo_image_display = albedo_image.duplicate()
     albedo_display = ImageTexture.new()
-    albedo_display.create_from_image(albedo_image_display, 15)
+    albedo_display.create_from_image(albedo_image_display, base_flags | wrapping_flag)
     
     mat_3d.albedo_texture = albedo_display
     
+    update_everything()
+
+func update_everything():
     no_recurse = true
     normal_slider_changed(0.0)
     depth_slider_changed(0.0)
@@ -566,11 +576,12 @@ func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midp
         mat2.set_shader_param("octave", i)
         mat2.set_shader_param("microfacets", microfacets)
         mat2.set_shader_param("raw_mip_ratio", -1.0)
+        mat2.set_shader_param("nowrap", wrapping_flag == 0)
         
         force_draw_subviewports([viewport])
         var img : Image = viewport.get_texture().get_data()
         var texture = ImageTexture.new()
-        texture.create_from_image(img)
+        texture.create_from_image(img, base_flags_noaniso | wrapping_flag)
         mat.set_shader_param("octave_"+str(i), texture)
         mat2.set_shader_param("input", null)
         
@@ -659,7 +670,7 @@ func normal_slider_changed(_unused : float):
     #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
-    normal.create_from_image(normal_image, 15)
+    normal.create_from_image(normal_image, base_flags | wrapping_flag)
     
     mat_3d.normal_enabled = true
     mat_3d.normal_texture = normal
@@ -692,7 +703,7 @@ func depth_slider_changed(_unused : float):
     #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
-    depth.create_from_image(depth_image, 15)
+    depth.create_from_image(depth_image, base_flags | wrapping_flag)
     
     mat_3d.depth_enabled = true
     mat_3d.depth_deep_parallax = true
@@ -769,11 +780,12 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
         mat2.set_shader_param("octave", 0)
         mat2.set_shader_param("microfacets", 0.0)
         mat2.set_shader_param("raw_mip_ratio", freq)
+        mat2.set_shader_param("nowrap", wrapping_flag == 0)
         
         force_draw_subviewports([viewport])
         var img : Image = viewport.get_texture().get_data()
         var texture = ImageTexture.new()
-        texture.create_from_image(img)
+        texture.create_from_image(img, base_flags_noaniso | wrapping_flag)
         mat.set_shader_param("octave_"+str(i), texture)
         
         mat2.set_shader_param("input", null)
@@ -789,7 +801,7 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     mat.set_shader_param("strength", strength)
     mat.set_shader_param("freq_balance", freq_balance)
     mat.set_shader_param("exponent", exponent)
-    mat.set_shader_param("bias", (bias-0.5)*16.0)
+    mat.set_shader_param("bias", (bias-0.5)*4.0)
     mat.set_shader_param("contrast", contrast)
     mat.set_shader_param("fine_limit", fine_limit)
     mat.set_shader_param("rough_limit", rough_limit)
@@ -835,7 +847,7 @@ func ao_slider_changed(_unused : float):
     ao_image = create_ao_texture(depth, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
     
     ao = ImageTexture.new()
-    ao.create_from_image(ao_image, 15)
+    ao.create_from_image(ao_image, base_flags | wrapping_flag)
     
     mat_3d.ao_enabled = true
     mat_3d.ao_texture = ao
@@ -903,7 +915,7 @@ func light_remover_slider_changed(_unused : float):
     albedo_image_display = create_unlit_albedo_image(albedo, ao, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
     
     albedo_display = ImageTexture.new()
-    albedo_display.create_from_image(albedo_image_display, 15)
+    albedo_display.create_from_image(albedo_image_display, base_flags | wrapping_flag)
     
     mat_3d.albedo_texture = albedo_display
     if !indirect_update:
@@ -926,7 +938,7 @@ func create_metal_texture(albedo : Texture, colors : Array, mixing_bias : float,
         color_img.set_pixel(i, 0, colors[i])
     color_img.unlock()
     var color_tex = ImageTexture.new()
-    color_tex.create_from_image(color_img)
+    color_tex.create_from_image(color_img, base_flags_noaniso | wrapping_flag)
     
     $HelperDistance.keep_3d_linear = true
     if $HelperDistance/Quad.material_override == null:
@@ -987,7 +999,7 @@ func metal_slider_changed(_unused : float):
     metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false, mixing_exponent, supersample)
     
     metal = ImageTexture.new()
-    metal.create_from_image(metal_image, 15)
+    metal.create_from_image(metal_image, base_flags | wrapping_flag)
     
     mat_3d.metallic = 1.0
     mat_3d.metallic_texture = metal
@@ -1023,7 +1035,7 @@ func roughness_slider_changed(_unused : float):
     roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true, mixing_exponent, supersample)
     
     roughness = ImageTexture.new()
-    roughness.create_from_image(roughness_image, 15)
+    roughness.create_from_image(roughness_image, base_flags | wrapping_flag)
     
     mat_3d.roughness = 1.0
     mat_3d.roughness_texture = roughness
@@ -1082,6 +1094,12 @@ func _input(_event):
 var processing = false
 var current_preview_texture = null
 func _process(delta : float):
+    
+    var wrapping_prev = wrapping_flag
+    wrapping_flag = 0 if $Tabs/Config/CheckBox.pressed else Texture.FLAG_REPEAT
+    if wrapping_prev != wrapping_flag:
+        update_everything()
+    
     indirect_update = false
     processing = true
     
@@ -1160,8 +1178,7 @@ func _process(delta : float):
         var data : Image = next_texture.get_data()
         #print(data.get_format())
         var tex = ImageTexture.new()
-        tex.create_from_image(data, 15)
-        tex.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+        tex.create_from_image(data, base_flags | wrapping_flag)
         
         mat_texture.set_shader_param("image", tex)
         

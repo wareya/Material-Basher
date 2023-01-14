@@ -1195,6 +1195,23 @@ visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 
+[node name="CheckBox" type="CheckBox" parent="Tabs/Config"]
+margin_top = 270.0
+margin_right = 24.0
+margin_bottom = 294.0
+text = "Disable Texture Wrapping"
+
+[node name="Label5" type="Label" parent="Tabs/Config"]
+margin_top = 270.0
+margin_right = 138.0
+margin_bottom = 488.0
+text = "The below settings do not affect exported materials will look, only how they are previewed."
+autowrap = true
+
+[node name="Spacer" type="ColorRect" parent="Tabs/Config"]
+
+[node name="Spacer2" type="ColorRect" parent="Tabs/Config"]
+
 [node name="Label6" type="Label" parent="Tabs/Config"]
 margin_right = 138.0
 margin_bottom = 14.0
@@ -1275,14 +1292,11 @@ margin_right = 138.0
 margin_bottom = 266.0
 text = "Reset Settings"
 
-[node name="Label5" type="Label" parent="Tabs/Config"]
-margin_top = 270.0
-margin_right = 138.0
-margin_bottom = 488.0
-text = "
-Settings under this tab do not affect exported materials will look, only how they are previewed.
-
-Camera controls: middle click drag to rotate, shift middle click drag to pan, mouse wheel to zoom."
+[node name="Label7" type="Label" parent="Tabs/Config"]
+margin_top = 246.0
+margin_right = 40.0
+margin_bottom = 260.0
+text = "Camera controls: middle click drag to rotate, shift middle click drag to pan, mouse wheel to zoom."
 autowrap = true
 
 [node name="Shape" type="VBoxContainer" parent="Tabs"]

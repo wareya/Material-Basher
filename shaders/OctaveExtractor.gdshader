@@ -6,6 +6,7 @@ uniform vec3 channel;
 uniform int octave;
 uniform float raw_mip_ratio;
 uniform float microfacets;
+uniform bool nowrap;
 
 void vertex() {
     UV = UV;
@@ -34,8 +35,16 @@ vec4 bicubic(vec4 a, vec4 b, vec4 c, vec4 d, float i) {
 vec4 texelFetchSafe(sampler2D tex, ivec2 uv, int mip_level) {
     ivec2 s = textureSize(tex, mip_level);
     //uv += s/2;
-    uv.x = ((uv.x % s.x) + s.x) % s.x;
-    uv.y = ((uv.y % s.y) + s.y) % s.y;
+    if(nowrap)
+    {
+        uv.x = clamp(uv.x, 0, s.x-1);
+        uv.y = clamp(uv.y, 0, s.y-1);
+    }
+    else
+    {
+        uv.x = ((uv.x % s.x) + s.x) % s.x;
+        uv.y = ((uv.y % s.y) + s.y) % s.y;
+    }
     return texelFetch(tex, uv, mip_level);
 }
 
