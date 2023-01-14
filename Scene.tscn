@@ -1,6 +1,7 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
+[ext_resource path="res://addons/native_dialogs/bin/native_dialog_save_file.gdns" type="Script" id=2]
 [ext_resource path="res://resources/DefaultSky.tres" type="ProceduralSky" id=3]
 [ext_resource path="res://types/AllTabContainer.gd" type="Script" id=4]
 
@@ -32,6 +33,19 @@ background_energy = 0.5
 ambient_light_color = Color( 0.501961, 0.501961, 0.501961, 1 )
 
 [sub_resource type="SpatialMaterial" id=30]
+normal_enabled = true
+normal_scale = 1.0
+ao_enabled = true
+ao_light_affect = 0.0
+ao_on_uv2 = false
+ao_texture_channel = 0
+depth_enabled = true
+depth_scale = 0.05
+depth_deep_parallax = true
+depth_min_layers = 8
+depth_max_layers = 32
+depth_flip_tangent = false
+depth_flip_binormal = false
 
 [sub_resource type="SphereMesh" id=26]
 radial_segments = 118
@@ -100,11 +114,6 @@ margin_left = 7.0
 margin_right = 7.0
 margin_top = 6.0
 margin_bottom = 8.0
-
-[sub_resource type="Environment" id=13]
-
-[sub_resource type="World" id=14]
-environment = SubResource( 13 )
 
 [sub_resource type="QuadMesh" id=17]
 
@@ -180,6 +189,7 @@ tab_bg = SubResource( 22 )
 tab_inactive_bg = SubResource( 25 )
 
 [node name="Normal Map" type="VBoxContainer" parent="Tabs"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 8.0
@@ -309,7 +319,7 @@ text = "Zero"
 margin_top = 200.0
 margin_right = 275.0
 margin_bottom = 214.0
-text = "Microfacets"
+text = "Microdetails"
 
 [node name="Slider6" type="HSlider" parent="Tabs/Normal Map"]
 margin_top = 218.0
@@ -524,7 +534,7 @@ text = "Zero"
 margin_top = 176.0
 margin_right = 275.0
 margin_bottom = 190.0
-text = "Microfacets"
+text = "Microdetails"
 
 [node name="Slider7" type="HSlider" parent="Tabs/Depth Map"]
 margin_top = 194.0
@@ -1111,10 +1121,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 52.0
-margin_top = 52.0
-margin_right = 368.0
-margin_bottom = 464.0
+margin_left = 64.0
+margin_top = 64.0
+margin_right = 380.0
+margin_bottom = 476.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1171,10 +1181,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 56.0
-margin_top = 56.0
-margin_right = 372.0
-margin_bottom = 468.0
+margin_left = 68.0
+margin_top = 68.0
+margin_right = 384.0
+margin_bottom = 480.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
@@ -1182,77 +1192,87 @@ presets_enabled = false
 presets_visible = false
 
 [node name="Config" type="VBoxContainer" parent="Tabs"]
-visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 
-[node name="Label" type="Label" parent="Tabs/Config"]
-margin_right = 129.0
+[node name="Label6" type="Label" parent="Tabs/Config"]
+margin_right = 138.0
 margin_bottom = 14.0
-text = "Specular"
+text = "Diffuse Shading Mode"
+
+[node name="OptionButton" type="OptionButton" parent="Tabs/Config"]
+margin_top = 18.0
+margin_right = 138.0
+margin_bottom = 38.0
+
+[node name="Label" type="Label" parent="Tabs/Config"]
+margin_top = 42.0
+margin_right = 138.0
+margin_bottom = 56.0
+text = "Specular F0"
 
 [node name="HSlider" type="HSlider" parent="Tabs/Config"]
-margin_top = 18.0
-margin_right = 129.0
-margin_bottom = 34.0
+margin_top = 60.0
+margin_right = 138.0
+margin_bottom = 76.0
 size_flags_horizontal = 3
 value = 50.0
 
 [node name="Label4" type="Label" parent="Tabs/Config"]
-margin_top = 38.0
-margin_right = 129.0
-margin_bottom = 52.0
+margin_top = 80.0
+margin_right = 138.0
+margin_bottom = 94.0
 text = "Roughness"
 
 [node name="HSlider4" type="HSlider" parent="Tabs/Config"]
-margin_top = 56.0
-margin_right = 129.0
-margin_bottom = 72.0
+margin_top = 98.0
+margin_right = 138.0
+margin_bottom = 114.0
 size_flags_horizontal = 3
 value = 100.0
 
 [node name="Label2" type="Label" parent="Tabs/Config"]
-margin_top = 76.0
-margin_right = 129.0
-margin_bottom = 90.0
+margin_top = 118.0
+margin_right = 138.0
+margin_bottom = 132.0
 text = "Normal Strength"
 
 [node name="HSlider2" type="HSlider" parent="Tabs/Config"]
-margin_top = 94.0
-margin_right = 129.0
-margin_bottom = 110.0
+margin_top = 136.0
+margin_right = 138.0
+margin_bottom = 152.0
 size_flags_horizontal = 3
 value = 100.0
 
 [node name="Label3" type="Label" parent="Tabs/Config"]
-margin_top = 114.0
-margin_right = 129.0
-margin_bottom = 128.0
+margin_top = 156.0
+margin_right = 138.0
+margin_bottom = 170.0
 text = "Depth Strength"
 
 [node name="HSlider3" type="HSlider" parent="Tabs/Config"]
-margin_top = 132.0
-margin_right = 129.0
-margin_bottom = 148.0
+margin_top = 174.0
+margin_right = 138.0
+margin_bottom = 190.0
 size_flags_horizontal = 3
 value = 25.0
 
 [node name="CheckButton" type="CheckBox" parent="Tabs/Config"]
-margin_top = 152.0
-margin_right = 129.0
-margin_bottom = 176.0
+margin_top = 194.0
+margin_right = 138.0
+margin_bottom = 218.0
 text = "Depth as height"
 
 [node name="Button" type="Button" parent="Tabs/Config"]
-margin_top = 180.0
-margin_right = 129.0
-margin_bottom = 200.0
+margin_top = 222.0
+margin_right = 138.0
+margin_bottom = 242.0
 text = "Reset View"
 
 [node name="Label5" type="Label" parent="Tabs/Config"]
-margin_top = 204.0
-margin_right = 129.0
-margin_bottom = 422.0
+margin_top = 246.0
+margin_right = 138.0
+margin_bottom = 464.0
 text = "
 Settings under this tab do not affect exported materials will look, only how they are previewed.
 
@@ -1553,7 +1573,6 @@ text = "OK"
 [node name="HelperNormal" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
-world = SubResource( 14 )
 transparent_bg = true
 handle_input_locally = false
 hdr = false
@@ -1582,7 +1601,6 @@ environment = SubResource( 31 )
 [node name="HelperDistance" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
-world = SubResource( 14 )
 transparent_bg = true
 handle_input_locally = false
 hdr = false
@@ -1611,7 +1629,6 @@ environment = SubResource( 31 )
 [node name="HelperUnlit" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
-world = SubResource( 14 )
 transparent_bg = true
 handle_input_locally = false
 hdr = false
@@ -1640,7 +1657,6 @@ environment = SubResource( 31 )
 [node name="HelperAO" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
-world = SubResource( 14 )
 transparent_bg = true
 handle_input_locally = false
 hdr = false
@@ -1669,7 +1685,6 @@ environment = SubResource( 31 )
 [node name="HelperOctaveAlbedo" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
-world = SubResource( 14 )
 transparent_bg = true
 handle_input_locally = false
 hdr = false
@@ -1697,7 +1712,6 @@ environment = SubResource( 31 )
 [node name="HelperOctaveDepth" type="Viewport" parent="."]
 size = Vector2( 256, 256 )
 own_world = true
-world = SubResource( 14 )
 transparent_bg = true
 handle_input_locally = false
 hdr = false
@@ -1721,3 +1735,6 @@ mesh = SubResource( 17 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="HelperOctaveDepth"]
 environment = SubResource( 31 )
+
+[node name="NativeDialogSaveFile" type="Node" parent="."]
+script = ExtResource( 2 )

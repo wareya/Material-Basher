@@ -31,6 +31,52 @@ func set_uv_scale(scale : Vector3):
     mat_texture.set_shader_param("uv1_scale", mat_3d.uv1_scale)
     mat_texture.set_shader_param("uv1_offset", mat_3d.uv1_offset)
 
+func config_reset_to_default():
+    $Tabs/Config/HSlider.value = 50
+    $Tabs/Config/HSlider4.value = 100
+    $Tabs/Config/HSlider2.value = 100
+    $Tabs/Config/HSlider2.value = 25
+    $Tabs/Config/CheckButton.pressed = false
+
+onready var _option_connections = {
+    $"Tabs/Ambience"   : "sky_option_picked",
+    $"Tabs/Normal Map" : "normal_option_picked",
+    $"Tabs/Depth Map"  : "depth_option_picked",
+}
+onready var _button_connections = {
+    $"Tabs/Normal Map" : "normal_freq_preset",
+    $"Tabs/Depth Map" : "depth_freq_preset",
+}
+onready var _range_connections = {
+    $"Tabs/Normal Map" : "normal_slider_changed",
+    $"Tabs/Depth Map" : "depth_slider_changed",
+    $"Tabs/Metal Map" : "metal_slider_changed",
+    $"Tabs/Roughness Map" : "roughness_slider_changed",
+    $"Tabs/AO Map" : "ao_slider_changed",
+    $"Tabs/Shading Remover" : "light_remover_slider_changed",
+}
+
+func visit_controls(node : Node):
+    if node is OptionButton:
+        for page in _option_connections.keys():
+            if page.is_a_parent_of(node):
+                node.connect("item_selected", self, _option_connections[page][0])
+    elif node is Button and node.get_class() == "Button":
+        for page in _button_connections.keys():
+            if page.is_a_parent_of(node):
+                var fn = _button_connections[page]
+                node.connect("pressed", self, fn, [node.name.to_lower().split(" ")[0]])
+                break
+    elif node is Range:
+        for page in _range_connections.keys():
+            if page.is_a_parent_of(node):
+                var fn = _range_connections[page]
+                node.connect("value_changed", self, fn)
+                break
+    
+    for child in node.get_children():
+        visit_controls(child)
+
 func _ready():
     # TODO: settings for diffuse/specular model etc
     # TODO: normal lighting removal
@@ -38,12 +84,12 @@ func _ready():
     # TODO: depth vs height vs displacement setting
     # TODO: save/load parameters to json
     
-    
-    $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog, "hide")
-    
-    
+    # first-time model setup
+    set_uv_scale(Vector3(2, 1, 1))
+    $"3D/MeshHolder/Mesh".material_override = mat_3d
     $"3D/MeshHolder/Mesh".global_rotation.y += 1.5
     
+    # finish building controls
     
     $"Tabs/Normal Map/OptionButton".add_item("Grey")
     $"Tabs/Normal Map/OptionButton".add_item("Red")
@@ -51,20 +97,15 @@ func _ready():
     $"Tabs/Normal Map/OptionButton".add_item("Blue")
     $"Tabs/Normal Map/OptionButton".add_item("Yellow")
     
-    
     $"Tabs/Depth Map/OptionButton".add_item("Grey")
     $"Tabs/Depth Map/OptionButton".add_item("Red")
     $"Tabs/Depth Map/OptionButton".add_item("Green")
     $"Tabs/Depth Map/OptionButton".add_item("Blue")
     $"Tabs/Depth Map/OptionButton".add_item("Yellow")
     
-    
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Procedural")
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Office")
     $Tabs/Ambience/HBoxContainer3/OptionButton.add_item("Sunset")
-    
-    $Tabs/Ambience/HBoxContainer3/OptionButton.connect("item_selected", self, "sky_option_picked")
-    
     
     for button in $Tabs/Export/GridContainer.get_children():
         if not button is OptionButton:
@@ -73,66 +114,32 @@ func _ready():
         button.add_item("Roughness")
         button.add_item("AO")
         button.add_item("Depth")
-    
     $Tabs/Export/GridContainer/OptionButton.selected = 0
     $Tabs/Export/GridContainer/OptionButton2.selected = 1
     $Tabs/Export/GridContainer/OptionButton3.selected = 2
+    
+    $Tabs/Config/OptionButton.add_item("Burley")
+    $Tabs/Config/OptionButton.add_item("Lambert")
+    $Tabs/Config/OptionButton.add_item("Lambert Wrap")
+    $Tabs/Config/OptionButton.add_item("Oren Nayar")
+    $Tabs/Config/OptionButton.selected = 0
+    
+    # connect generic control signals
+    
+    visit_controls(self)
+    
+    # non-generic control signals
+    
+    $PopupDialog/VBoxContainer/CenterContainer/Button.connect("pressed", $PopupDialog, "hide")
     
     $Tabs/Export/Button.connect("pressed", self, "save_albedo")
     $Tabs/Export/Button2.connect("pressed", self, "save_normal")
     $Tabs/Export/Button3.connect("pressed", self, "save_pbr")
     
-    
-    for _type in ["normal", "depth"]:
-        var type : String = _type
-        var parent = get_node("Tabs/%s Map" % [type.capitalize()])
-        var slider_change = "%s_slider_changed" % [type]
-        
-        for child in parent.get_children():
-            if child is Range:
-                child.connect("value_changed", self, slider_change)
-        for child in parent.get_node("Freqs").get_children():
-            if child is Range:
-                child.connect("value_changed", self, slider_change)
-        
-        parent.get_node("OptionButton").connect("item_selected", self, "%s_option_picked" % type)
-        
-        for child in parent.get_node("Freqs/Presets").get_children():
-            if child is Button:
-                child.connect("pressed", self, "%s_freq_preset" % [type], [child.name.to_lower()])
-    
     $"Tabs/Depth Map/CheckBox" .connect("pressed", self, "depth_slider_changed",  [0.0])
     $"Tabs/Normal Map/CheckBox".connect("pressed", self, "normal_slider_changed", [0.0])
-    
-    
-    $"Tabs/Metal Map/HBoxContainer/HSlider".connect("value_changed", self, "metal_slider_changed")
-    $"Tabs/Metal Map/HBoxContainer2/HSlider".connect("value_changed", self, "metal_slider_changed")
-    $"Tabs/Metal Map/HBoxContainer3/HSlider".connect("value_changed", self, "metal_slider_changed")
-    $"Tabs/Metal Map/HBoxContainer4/HSlider".connect("value_changed", self, "metal_slider_changed")
     $"Tabs/Metal Map/CheckBox".connect("pressed", self, "metal_slider_changed", [0.0])
-    
-    $"Tabs/Roughness Map/HBoxContainer/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer2/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer3/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer4/HSlider".connect("value_changed", self, "roughness_slider_changed")
-    $"Tabs/Roughness Map/HBoxContainer5/HSlider".connect("value_changed", self, "roughness_slider_changed")
     $"Tabs/Roughness Map/CheckBox".connect("pressed", self, "roughness_slider_changed", [0.0])
-    
-    $"Tabs/AO Map/Slider".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider2".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider3".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider4".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider5".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider6".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider7".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider8".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider9".connect("value_changed", self, "ao_slider_changed")
-    $"Tabs/AO Map/Slider10".connect("value_changed", self, "ao_slider_changed")
-    
-    $"Tabs/Shading Remover/Slider".connect("value_changed", self, "light_remover_slider_changed")
-    $"Tabs/Shading Remover/Slider2".connect("value_changed", self, "light_remover_slider_changed")
-    $"Tabs/Shading Remover/Slider3".connect("value_changed", self, "light_remover_slider_changed")
-    $"Tabs/Shading Remover/Slider4".connect("value_changed", self, "light_remover_slider_changed")
     
     $ToggleMat.connect("pressed", self, "toggle_mat")
     $ToggleAlbedo.connect("pressed", self, "show_albedo")
@@ -149,10 +156,6 @@ func _ready():
     $Tabs/Shape/HBoxContainer3/HSlider.connect("value_changed", self, "shape_slant_update")
     $Tabs/Shape/HBoxContainer2/HSlider.connect("value_changed", self, "shape_size_update")
     
-    set_uv_scale(Vector3(2, 1, 1))
-    
-    $"3D/MeshHolder/Mesh".material_override = mat_3d
-    
     $"Tabs/Metal Map/Button".connect("pressed", self, "start_picking_color", ["metal", -1])
     $"Tabs/Roughness Map/Button".connect("pressed", self, "start_picking_color", ["roughness", -1])
     
@@ -164,6 +167,11 @@ func _ready():
     $Tabs/Shape/Button7.connect("pressed", self, "set_mesh", ["plane slanted"])
     
     $Tabs/Config/Button.connect("pressed", self, "reset_view")
+    
+    $Tabs/Config/OptionButton.connect("item_selected", self, "set_diffuse_mode")
+
+func set_diffuse_mode(which : int):
+    mat_3d.params_diffuse_mode = which
 
 var NativeDialog = preload("res://addons/native_dialogs/native_dialogs.gd")
 
@@ -317,11 +325,15 @@ func save_image(image : Image, default_fname : String, name_caps : String, error
     if fo:
         fo.release_focus()
     
+    $NativeDialogSaveFile.filters = PoolStringArray(["*.png, *.tga; Supported Images"])
     $NativeDialogSaveFile.initial_path = default_fname
     $NativeDialogSaveFile.title = "Save %s Image" % [name_caps]
     $NativeDialogSaveFile.show()
     
     var fname = yield($NativeDialogSaveFile, "file_selected")
+    if fname == "":
+        return
+    
     if !fname.ends_with(".tga") and !fname.ends_with(".png"):
         fname += ".png"
     
@@ -476,13 +488,32 @@ func read_range(_range : Range) -> float:
 func write_range(_range : Range, val : float):
     _range.value = _range.max_value*val
 
-
 func min_v2(a : Vector2, b : Vector2):
     if a.x > a.y:
         b.y = floor(b.x*a.y/a.x)
     else:
         b.x = floor(b.y*a.x/a.y)
     return Vector2(min(a.x, b.x), min(a.y, b.y))
+
+func force_draw_subviewports(viewports : Array):
+    var old_update_modes = []
+    for _viewport in viewports:
+        var viewport : Viewport = _viewport
+        old_update_modes.push_back(viewport.render_target_update_mode)
+        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+    
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
+    
+    disable_limiter()
+    VisualServer.force_draw(false, 0.0)
+    reset_limiter()
+    
+    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
+    
+    for i in viewports.size():
+        var viewport = viewports[i]
+        var old_update_mode = old_update_modes[i]
+        viewport.render_target_update_mode = old_update_mode
 
 func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal, early_adjust):
     var size = albedo.get_size()
@@ -692,26 +723,6 @@ func reset_limiter():
     if disabled <= 0:
         Engine.target_fps = fps_default
 
-func force_draw_subviewports(viewports : Array):
-    var old_update_modes = []
-    for _viewport in viewports:
-        var viewport : Viewport = _viewport
-        old_update_modes.push_back(viewport.render_target_update_mode)
-        viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
-    
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_DISABLED
-    
-    disable_limiter()
-    VisualServer.force_draw(false, 0.0)
-    reset_limiter()
-    
-    get_tree().get_root().render_target_update_mode = Viewport.UPDATE_ALWAYS
-    
-    for i in viewports.size():
-        var viewport = viewports[i]
-        var old_update_mode = old_update_modes[i]
-        viewport.render_target_update_mode = old_update_mode
-
 func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, bias, contrast, fine_limit, rough_limit):
     var size = depth.get_size()
     
@@ -833,7 +844,7 @@ func ao_slider_changed(_unused : float):
     if !no_recurse:
         light_remover_slider_changed(0.0)
 
-func create_unlit_albedo_image(albedo : Texture, ao : Texture, normal_image : Image, depth_image, ao_strength, ao_limit, ao_gamma, ao_desat):
+func create_unlit_albedo_image(albedo : Texture, ao : Texture, _normal_image : Image, _depth_image, ao_strength, ao_limit, ao_gamma, ao_desat):
     var start = OS.get_ticks_usec()
     
     $HelperUnlit.keep_3d_linear = false
@@ -1123,6 +1134,7 @@ func _process(delta : float):
         $"Warnings".text += "Warning: Unless you're creating materials for a raytracer, exactly zero roughness is ill-advised, because it will hide point light reflections.\n"
     
     var next_texture = null
+    var confirmed = true
     if normal and current_tab == $"Tabs/Normal Map":
         next_texture = normal
     elif depth and current_tab == $"Tabs/Depth Map":
@@ -1137,6 +1149,7 @@ func _process(delta : float):
         next_texture = albedo_display
     else:
         next_texture = albedo
+        confirmed = false
     
     if current_preview_texture != next_texture:
         current_preview_texture = next_texture
@@ -1145,6 +1158,8 @@ func _process(delta : float):
         var tex = ImageTexture.new()
         tex.create_from_image(data)
         tex.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+        
+        mat_texture.set_shader_param("image", tex)
         
         $PanelContainer/TextureRect.texture = tex
 

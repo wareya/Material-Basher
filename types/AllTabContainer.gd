@@ -39,7 +39,7 @@ func _button_pressed(which):
             continue
         child.visible = child == button_tabs[active_button]
 
-func _process(delta):
+func _process(_delta):
     for _button in button_tabs.keys():
         var button : Button = _button
         if button == active_button:
@@ -64,13 +64,13 @@ func _notification(what):
     var margin_bottom = panel_bg.get_margin(MARGIN_BOTTOM)
     
     if what == NOTIFICATION_SORT_CHILDREN:
-        var width = rect_size.x
+        #var width = rect_size.x
         for _child in get_children():
             var child : Node = _child
             if child in button_tabs or child == panel:
                 continue
-            if child.visible:
-                width = child.rect_size.x
+            #if child.visible:
+            #    width = child.rect_size.x
         
         var cursor_x = 0
         var cursor_y = 0
@@ -80,7 +80,7 @@ func _notification(what):
             var button : Button = _button
             var size = button.get_minimum_size()
             row_height = max(size.y, row_height)
-            var over_size = false
+            #var over_size = false
             var done_wrap = false
             if size.x + cursor_x > rect_size.x and cursor_x > 0:
                 cursor_y += row_height

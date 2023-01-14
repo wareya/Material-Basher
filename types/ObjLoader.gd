@@ -6,9 +6,9 @@ static func parse_obj(text : String):
     var normals = []
     var faces = []
     
-    var n = 0
+    #var n = 0
     for line in text.split("\n"):
-        n += 1
+        #n += 1
         line = line.split("#")[0]
         var data : Array = Array((line as String).split(" ", false))
         for i in data.size():

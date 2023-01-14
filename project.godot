@@ -37,6 +37,7 @@ default_bus_layout="res://resources/default_bus_layout.tres"
 [debug]
 
 settings/fps/force_fps=120
+gdscript/warnings/shadowed_variable=false
 gdscript/warnings/return_value_discarded=false
 
 [display]
