@@ -32,30 +32,37 @@ vec4 bicubic(vec4 a, vec4 b, vec4 c, vec4 d, float i) {
     return a*a_w + b*b_w + c*c_w + d*d_w;
 }
 
-vec4 texelFetchSafe(sampler2D tex, ivec2 uv, int mip_level) {
-    ivec2 s = textureSize(tex, mip_level);
+vec4 texelFetchSafe(sampler2D tex, ivec2 uv, ivec2 s, int mip_level) {
     //uv += s/2;
-    if(nowrap)
-    {
-        uv.x = clamp(uv.x, 0, s.x-1);
-        uv.y = clamp(uv.y, 0, s.y-1);
-    }
-    else
-    {
-        uv.x = ((uv.x % s.x) + s.x) % s.x;
-        uv.y = ((uv.y % s.y) + s.y) % s.y;
-    }
+    uv.x = ((uv.x % s.x) + s.x) % s.x;
+    uv.y = ((uv.y % s.y) + s.y) % s.y;
+    return texelFetch(tex, uv, mip_level);
+}
+vec4 texelFetchSafeClamp(sampler2D tex, ivec2 uv, ivec2 s, int mip_level) {
+    uv.x = clamp(uv.x, 0, s.x-1);
+    uv.y = clamp(uv.y, 0, s.y-1);
     return texelFetch(tex, uv, mip_level);
 }
 
-vec4 bicubic_stride(sampler2D tex, ivec2 b, ivec2 c, int mip_level, float i) {
-    vec4 h_a = texelFetchSafe(tex, b + (b-c), mip_level);
-    vec4 h_b = texelFetchSafe(tex, b        , mip_level);
-    vec4 h_c = texelFetchSafe(tex, c        , mip_level);
-    vec4 h_d = texelFetchSafe(tex, c + (c-b), mip_level);
-    
-    return bicubic(h_a, h_b, h_c, h_d, i);
-    //return h_b;// bicubic(h_a, h_b, h_c, h_d, i);
+vec4 bicubic_stride(sampler2D tex, ivec2 b, ivec2 c, ivec2 s, int mip_level, float i) {
+    if(!nowrap)
+    {
+        vec4 h_a = texelFetchSafe(tex, b + (b-c), s, mip_level);
+        vec4 h_b = texelFetchSafe(tex, b        , s, mip_level);
+        vec4 h_c = texelFetchSafe(tex, c        , s, mip_level);
+        vec4 h_d = texelFetchSafe(tex, c + (c-b), s, mip_level);
+        
+        return bicubic(h_a, h_b, h_c, h_d, i);
+    }
+    else
+    {
+        vec4 h_a = texelFetchSafeClamp(tex, b + (b-c), s, mip_level);
+        vec4 h_b = texelFetchSafeClamp(tex, b        , s, mip_level);
+        vec4 h_c = texelFetchSafeClamp(tex, c        , s, mip_level);
+        vec4 h_d = texelFetchSafeClamp(tex, c + (c-b), s, mip_level);
+        
+        return bicubic(h_a, h_b, h_c, h_d, i);
+    }
 }
 
 vec4 sample_bicubic(sampler2D tex, vec2 uv, int mip_level) {
@@ -67,10 +74,11 @@ vec4 sample_bicubic(sampler2D tex, vec2 uv, int mip_level) {
     float x_i = (uv.x/px.x - float(uv_start.x));
     float y_i = (uv.y/px.y - float(uv_start.y));
     
-    vec4 a = bicubic_stride(tex, uv_start + ivec2(0, -1), uv_start + ivec2(1, -1), mip_level, x_i);
-    vec4 b = bicubic_stride(tex, uv_start + ivec2(0,  0), uv_start + ivec2(1,  0), mip_level, x_i);
-    vec4 c = bicubic_stride(tex, uv_start + ivec2(0,  1), uv_start + ivec2(1,  1), mip_level, x_i);
-    vec4 d = bicubic_stride(tex, uv_start + ivec2(0,  2), uv_start + ivec2(1,  2), mip_level, x_i);
+    ivec2 s = textureSize(tex, mip_level);
+    vec4 a = bicubic_stride(tex, uv_start + ivec2(0, -1), uv_start + ivec2(1, -1), s, mip_level, x_i);
+    vec4 b = bicubic_stride(tex, uv_start + ivec2(0,  0), uv_start + ivec2(1,  0), s, mip_level, x_i);
+    vec4 c = bicubic_stride(tex, uv_start + ivec2(0,  1), uv_start + ivec2(1,  1), s, mip_level, x_i);
+    vec4 d = bicubic_stride(tex, uv_start + ivec2(0,  2), uv_start + ivec2(1,  2), s, mip_level, x_i);
     
     vec4 done = bicubic(a, b, c, d, y_i);
     
@@ -86,15 +94,33 @@ vec4 sample_smoothstepped(sampler2D tex, vec2 uv, int mip_level) {
     float x_i = (uv.x/px.x - float(uv_start.x));
     float y_i = (uv.y/px.y - float(uv_start.y));
     
-    vec4 a = texelFetchSafe(tex, uv_start + ivec2(0, 0), mip_level);
-    vec4 b = texelFetchSafe(tex, uv_start + ivec2(1, 0), mip_level);
-    vec4 c = texelFetchSafe(tex, uv_start + ivec2(0, 1), mip_level);
-    vec4 d = texelFetchSafe(tex, uv_start + ivec2(1, 1), mip_level);
+    ivec2 s = textureSize(tex, mip_level);
     
-    vec4 a_b = mix(a, b, x_i);
-    vec4 c_d = mix(c, d, x_i);
+    if(!nowrap)
+    {
+        vec4 a = texelFetchSafe(tex, uv_start + ivec2(0, 0), s, mip_level);
+        vec4 b = texelFetchSafe(tex, uv_start + ivec2(1, 0), s, mip_level);
+        vec4 c = texelFetchSafe(tex, uv_start + ivec2(0, 1), s, mip_level);
+        vec4 d = texelFetchSafe(tex, uv_start + ivec2(1, 1), s, mip_level);
+        
+        vec4 a_b = mix(a, b, x_i);
+        vec4 c_d = mix(c, d, x_i);
+        
+        return mix(a_b, c_d, y_i);
+    }
+    else
+    {
+        vec4 a = texelFetchSafeClamp(tex, uv_start + ivec2(0, 0), s, mip_level);
+        vec4 b = texelFetchSafeClamp(tex, uv_start + ivec2(1, 0), s, mip_level);
+        vec4 c = texelFetchSafeClamp(tex, uv_start + ivec2(0, 1), s, mip_level);
+        vec4 d = texelFetchSafeClamp(tex, uv_start + ivec2(1, 1), s, mip_level);
+        
+        vec4 a_b = mix(a, b, x_i);
+        vec4 c_d = mix(c, d, x_i);
+        
+        return mix(a_b, c_d, y_i);
+    }
     
-    return mix(a_b, c_d, y_i);
 }
 
 vec4 sample_bicubic_super_blurry(sampler2D tex, vec2 uv, int mip_level) {
