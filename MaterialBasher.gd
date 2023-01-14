@@ -427,8 +427,7 @@ func files_dropped(files : PoolStringArray, _screen : int):
     
     albedo_image_display = albedo_image.duplicate()
     albedo_display = ImageTexture.new()
-    albedo_display.create_from_image(albedo_image_display)
-    albedo_display.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    albedo_display.create_from_image(albedo_image_display, 15)
     
     mat_3d.albedo_texture = albedo_display
     
@@ -660,8 +659,7 @@ func normal_slider_changed(_unused : float):
     #normal_image.convert(Image.FORMAT_RGBA8)
     
     normal = ImageTexture.new()
-    normal.create_from_image(normal_image)
-    normal.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    normal.create_from_image(normal_image, 15)
     
     mat_3d.normal_enabled = true
     mat_3d.normal_texture = normal
@@ -694,9 +692,7 @@ func depth_slider_changed(_unused : float):
     #depth_image.convert(Image.FORMAT_RGBA8)
     
     depth = ImageTexture.new()
-    depth.create_from_image(depth_image)
-    depth.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
-    depth.flags |= ImageTexture.FLAG_FILTER
+    depth.create_from_image(depth_image, 15)
     
     mat_3d.depth_enabled = true
     mat_3d.depth_deep_parallax = true
@@ -839,9 +835,7 @@ func ao_slider_changed(_unused : float):
     ao_image = create_ao_texture(depth, strength, freq_high, freq_mid, freq_low, freq_balance, exponent, lerp(comparison_bias, 0.5, 0.95), contrast, fine_limit/strength*2.0, rough_limit/strength*2.0)
     
     ao = ImageTexture.new()
-    ao.create_from_image(ao_image)
-    ao.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
-    ao.flags |= ImageTexture.FLAG_FILTER
+    ao.create_from_image(ao_image, 15)
     
     mat_3d.ao_enabled = true
     mat_3d.ao_texture = ao
@@ -909,8 +903,7 @@ func light_remover_slider_changed(_unused : float):
     albedo_image_display = create_unlit_albedo_image(albedo, ao, normal_image, depth_image, ao_strength, ao_limit, ao_gamma*ao_gamma*4.0, ao_desat*4.0)
     
     albedo_display = ImageTexture.new()
-    albedo_display.create_from_image(albedo_image_display)
-    albedo_display.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
+    albedo_display.create_from_image(albedo_image_display, 15)
     
     mat_3d.albedo_texture = albedo_display
     if !indirect_update:
@@ -994,7 +987,7 @@ func metal_slider_changed(_unused : float):
     metal_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, false, mixing_exponent, supersample)
     
     metal = ImageTexture.new()
-    metal.create_from_image(metal_image)
+    metal.create_from_image(metal_image, 15)
     
     mat_3d.metallic = 1.0
     mat_3d.metallic_texture = metal
@@ -1030,7 +1023,7 @@ func roughness_slider_changed(_unused : float):
     roughness_image = create_metal_texture(albedo, colors, mixing_bias, contrast, shrink_radius, blur_radius, true, mixing_exponent, supersample)
     
     roughness = ImageTexture.new()
-    roughness.create_from_image(roughness_image)
+    roughness.create_from_image(roughness_image, 15)
     
     mat_3d.roughness = 1.0
     mat_3d.roughness_texture = roughness
@@ -1167,13 +1160,13 @@ func _process(delta : float):
         var data : Image = next_texture.get_data()
         #print(data.get_format())
         var tex = ImageTexture.new()
-        tex.create_from_image(data)
+        tex.create_from_image(data, 15)
         tex.flags |= ImageTexture.FLAG_ANISOTROPIC_FILTER
         
         mat_texture.set_shader_param("image", tex)
         
         $PanelContainer/TextureRect.texture = tex
-
+    
     processing = false
 
 var color_picking = ""

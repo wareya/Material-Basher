@@ -76,6 +76,7 @@ quality/shadow_atlas/quadrant_2_subdiv=0
 quality/shadow_atlas/quadrant_3_subdiv=0
 quality/shadows/filter_mode=0
 quality/depth_prepass/enable=false
+quality/filters/anisotropic_filter_level=8
 quality/skinning/force_software_skinning=true
 quality/subsurface_scattering/quality=0
 quality/subsurface_scattering/scale=0
