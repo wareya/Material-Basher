@@ -1,8 +1,8 @@
 shader_type spatial;
 render_mode unshaded, ambient_light_disabled, blend_mix, shadows_disabled, specular_disabled;
-uniform sampler2D octave_0 : hint_albedo;
-uniform sampler2D octave_1 : hint_albedo;
-uniform sampler2D octave_2 : hint_albedo;
+uniform sampler2D octave_0 : hint_white;
+uniform sampler2D octave_1 : hint_white;
+uniform sampler2D octave_2 : hint_white;
 
 uniform float strength;
 
@@ -37,14 +37,11 @@ void fragment() {
     
     f = (f-1.0)*contrast*2.0+1.0;
     
-    float real_exponent = clamp(1.0-exponent, 0.01, 0.99)*2.0;
+    float real_exponent = clamp(1.0-exponent, 0.0, 1.0)*2.0;
     if (real_exponent > 1.0)
-    {
-        real_exponent = 2.0-real_exponent;
-        f = 1.0-pow(1.0-f, real_exponent);
-    }
+        f = pow(f, pow(2.0, (real_exponent-1.0)*2.0));
     else
-        f = pow(f, real_exponent);
+        f = 1.0-pow(1.0-f, pow(2.0, (1.0-real_exponent)*6.0));
     
     ALBEDO = vec3(f);
 }

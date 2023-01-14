@@ -736,13 +736,23 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     var start = OS.get_ticks_usec()
     
     var i = 0
+    var freq_a = freq_high
+    var freq_b = freq_high*freq_mid
+    var freq_c = freq_high*freq_mid*freq_low
     for freq in [freq_high, freq_high*freq_mid, freq_high*freq_mid*freq_low]:
         var path = "HelperOctaveDepth"
         var viewport : Viewport = get_node(path)
         var quad = viewport.get_node("Quad")
-        if viewport.size != size:
+        
+        viewport.size = size
+        if freq == freq_c:
+            viewport.size = size*0.25
+        if freq == freq_b:
+            viewport.size = size*0.5
+        if freq == freq_a:
             viewport.size = size
-        quad.scale.x = size.x / size.y
+        
+        quad.scale.x = viewport.size.x / viewport.size.y
         quad.force_update_transform()
         
         if quad.material_override == null:
@@ -750,7 +760,7 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
             quad.material_override = mat2
         var mat2 = quad.material_override
         
-        viewport.keep_3d_linear = false
+        viewport.keep_3d_linear = true
         viewport.hdr = true
         
         if mat2.shader != preload("res://shaders/OctaveExtractorLinear.gdshader"):
@@ -791,8 +801,6 @@ func create_ao_texture(depth : Texture, strength, freq_high, freq_mid, freq_low,
     
     force_draw_subviewports([$HelperAO])
     var img = $HelperAO.get_texture().get_data()
-    # extra contrast
-    img.srgb_to_linear()
     
     for j in 3:
         mat.set_shader_param("octave_"+str(j), null)
