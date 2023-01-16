@@ -45,7 +45,8 @@ func config_reset_to_default():
     $Tabs/Config/HSlider4.value = 100
     $Tabs/Config/HSlider2.value = 100
     $Tabs/Config/HSlider3.value = 25
-    $Tabs/Config/CheckButton.pressed = false
+    #$Tabs/Config/CheckButton.pressed = false
+
 
 onready var _option_connections = {
     $"Tabs/Ambience"   : "sky_option_picked",
@@ -65,15 +66,16 @@ onready var _range_connections = {
     $"Tabs/Shading Remover" : "light_remover_slider_changed",
 }
 
-func visit_controls(node : Node):
+func visit_controls_setup(node : Node):
     if node is OptionButton:
         for page in _option_connections.keys():
             if page.is_a_parent_of(node):
-                node.connect("item_selected", self, _option_connections[page][0])
+                node.connect("item_selected", self, _option_connections[page])
     elif node is Button and node.get_class() == "Button":
         for page in _button_connections.keys():
             if page.is_a_parent_of(node):
                 var fn = _button_connections[page]
+                # freq presets
                 node.connect("pressed", self, fn, [node.name.to_lower().split(" ")[0]])
                 break
     elif node is Range:
@@ -84,7 +86,53 @@ func visit_controls(node : Node):
                 break
     
     for child in node.get_children():
-        visit_controls(child)
+        visit_controls_setup(child)
+
+func visit_controls_save(node : Node, save_data : Dictionary):
+    var path = node.get_path()
+    if node is OptionButton:
+        save_data[path] = node.selected
+    elif node is Button and node.get_class() == "Button":
+        save_data[path] = node.pressed
+    elif node is Range:
+        save_data[path] = node.value
+    elif node is CheckBox:
+        save_data[path] = node.pressed
+    
+    for child in node.get_children():
+        visit_controls_save(child, save_data)
+
+func save_controls():
+    var save = {}
+    visit_controls_save($Tabs, save)
+    
+    write_dict_as_json(save, "material_basher_settings.json")
+    
+func write_dict_as_json(data : Dictionary, default_fname : String):
+    var fo : Control = get_focus_owner()
+    if fo:
+        fo.release_focus()
+    
+    $NativeDialogSaveFile.filters = PoolStringArray(["*.json; JSON File"])
+    $NativeDialogSaveFile.initial_path = default_fname
+    $NativeDialogSaveFile.title = "Save Settings"
+    $NativeDialogSaveFile.show()
+    
+    var fname = yield($NativeDialogSaveFile, "file_selected")
+    if fname == "":
+        return
+    
+    if !fname.ends_with(".json"):
+        fname += ".json"
+    
+    var json = JSON.print(data)
+    
+    print(json)
+    
+    #var file = File.new()
+    #file.open(fname, File.WRITE)
+    #file.store_string(json)
+    #file.close()
 
 func _ready():
     # TODO: settings for diffuse/specular model etc
@@ -135,7 +183,7 @@ func _ready():
     
     # connect generic control signals
     
-    visit_controls(self)
+    visit_controls_setup(self)
     
     # non-generic control signals
     
@@ -530,6 +578,7 @@ func force_draw_subviewports(viewports : Array):
 func create_normal_texture(albedo : Texture, strength, darkpoint, midpoint, midpoint_offset, lightpoint, depth_offset, microfacets, generate_normal, early_adjust):
     var size = albedo.get_size()
     
+    $HelperNormal.hdr = false#!generate_normal
     $HelperNormal.keep_3d_linear = true
     if $HelperNormal/Quad.material_override == null:
         $HelperNormal/Quad.material_override = ShaderMaterial.new()
@@ -1107,8 +1156,13 @@ func _process(delta : float):
     mat_3d.roughness = read_range($"Tabs/Config/HSlider4")
     mat_3d.normal_scale = read_range($"Tabs/Config/HSlider2")
     mat_3d.depth_scale = read_range($"Tabs/Config/HSlider3") * 0.05 * 4.0
-    mat_3d.depth_flip_binormal = $Tabs/Config/CheckButton.pressed
-    mat_3d.depth_flip_tangent = $Tabs/Config/CheckButton.pressed
+    mat_3d.depth_min_layers = 16
+    mat_3d.depth_max_layers = 32
+    mat_3d.depth_deep_parallax = true
+    mat_3d.depth_flip_binormal = false
+    mat_3d.depth_flip_tangent = false
+    #mat_3d.depth_flip_binormal = $Tabs/Config/CheckButton.pressed
+    #mat_3d.depth_flip_tangent = $Tabs/Config/CheckButton.pressed
     
     $"3D/WorldEnvironment".environment.ambient_light_sky_contribution = read_range($Tabs/Ambience/HBoxContainer/HSlider)
     $"3D/WorldEnvironment".environment.background_energy = read_range($Tabs/Ambience/HBoxContainer2/HSlider)
@@ -1155,12 +1209,14 @@ func _process(delta : float):
     if zero_roughness_found:
         $"Warnings".text += "Warning: Unless you're creating materials for a raytracer, exactly zero roughness is ill-advised, because it will hide point light reflections.\n"
     
+    var offset = false
     var next_texture = null
     var confirmed = true
     if normal and current_tab == $"Tabs/Normal Map":
         next_texture = normal
     elif depth and current_tab == $"Tabs/Depth Map":
         next_texture = depth
+        offset = true
     elif metal and current_tab == $"Tabs/Metal Map":
         next_texture = metal
     elif roughness and current_tab == $"Tabs/Roughness Map":
@@ -1181,7 +1237,9 @@ func _process(delta : float):
         tex.create_from_image(data, base_flags | wrapping_flag)
         
         mat_texture.set_shader_param("image", tex)
+        mat_texture.set_shader_param("offset", false)
         
+        $PanelContainer/TextureRect.material.set_shader_param("offset", false)
         $PanelContainer/TextureRect.texture = tex
     
     processing = false
@@ -1194,15 +1252,7 @@ func start_picking_color(type : String, which : int):
     color_picking = type
     color_which = which
 
-func end_picking_color():
-    var vp = get_viewport()
-    var mouse_pos = vp.get_mouse_position()
-    var screen = vp.get_texture().get_data()
-    screen.lock()
-    mouse_pos.y = screen.get_size().y - mouse_pos.y
-    var color = screen.get_pixelv(mouse_pos)
-    screen.unlock()
-    
+func add_colored_slider(color : Color, type : String):
     var box = HBoxContainer.new()
     var icon = ColorRect.new()
     var label = Label.new()
@@ -1211,9 +1261,9 @@ func end_picking_color():
     icon.color = color
     icon.rect_min_size = Vector2(16, 16)
     
-    if color_picking == "metal":
+    if type == "metal":
         label.text = "Metallicity:"
-    elif color_picking == "roughness":
+    elif type == "roughness":
         label.text = "Roughness:"
     
     slider.max_value = 100
@@ -1225,10 +1275,11 @@ func end_picking_color():
     button.texture_focused = preload("res://resources/x.png")
     button.texture_pressed = preload("res://resources/x.png")
     
-    if color_picking == "metal":
+    if type == "metal":
         slider.connect("value_changed", self, "metallicity_update")
+        slider.add_to_group("MetalSliders")
         button.connect("pressed", self, "delete_color", [box, "metal"])
-    elif color_picking == "roughness":
+    elif type == "roughness":
         slider.connect("value_changed", self, "roughness_update")
         slider.add_to_group("RoughnessSliders")
         button.connect("pressed", self, "delete_color", [box, "roughness"])
@@ -1238,12 +1289,25 @@ func end_picking_color():
     box.add_child(slider)
     box.add_child(button)
     
-    if color_picking == "metal":
+    if type == "metal":
         $"Tabs/Metal Map".add_child(box)
         metal_slider_changed(0.0)
-    elif color_picking == "roughness":
+    elif type == "roughness":
         $"Tabs/Roughness Map".add_child(box)
-        roughness_slider_changed(0.0)
+        slider.value = 1.0
+        roughness_slider_changed(1.0)
+    pass
+
+func end_picking_color():
+    var vp = get_viewport()
+    var mouse_pos = vp.get_mouse_position()
+    var screen = vp.get_texture().get_data()
+    screen.lock()
+    mouse_pos.y = screen.get_size().y - mouse_pos.y
+    var color = screen.get_pixelv(mouse_pos)
+    screen.unlock()
+    
+    add_colored_slider(color, color_picking)
     
     cancel_picking_color()
 

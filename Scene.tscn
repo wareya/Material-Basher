@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://addons/native_dialogs/bin/native_dialog_save_file.gdns" type="Script" id=2]
@@ -25,6 +25,22 @@ margin_left = 8.0
 margin_right = 8.0
 margin_top = 8.0
 margin_bottom = 8.0
+
+[sub_resource type="Shader" id=32]
+code = "shader_type canvas_item;
+uniform bool offset;
+
+void fragment() {
+    vec3 c = texture(TEXTURE, UV.xy).rgb;
+    if (offset)
+        c = c*0.5 + vec3(0.5);
+    COLOR.rgb = c;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=33]
+shader = SubResource( 32 )
+shader_param/offset = null
 
 [sub_resource type="Environment" id=5]
 background_mode = 2
@@ -144,6 +160,7 @@ __meta__ = {
 }
 
 [node name="TextureRect" type="TextureRect" parent="PanelContainer"]
+material = SubResource( 33 )
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 89.0
@@ -1120,10 +1137,10 @@ size_flags_horizontal = 3
 value = 50.0
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Ambience"]
-margin_left = 68.0
-margin_top = 68.0
-margin_right = 384.0
-margin_bottom = 480.0
+margin_left = 76.0
+margin_top = 76.0
+margin_right = 392.0
+margin_bottom = 488.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0.501961, 0.501961, 0.501961, 1 )
@@ -1180,10 +1197,10 @@ pressed = true
 text = "Automatically Rotate"
 
 [node name="ColorPicker" type="ColorPicker" parent="Tabs/Light"]
-margin_left = 72.0
-margin_top = 72.0
-margin_right = 388.0
-margin_bottom = 484.0
+margin_left = 80.0
+margin_top = 80.0
+margin_right = 396.0
+margin_bottom = 492.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 edit_alpha = false
@@ -1273,12 +1290,6 @@ margin_right = 138.0
 margin_bottom = 190.0
 size_flags_horizontal = 3
 value = 25.0
-
-[node name="CheckButton" type="CheckBox" parent="Tabs/Config"]
-margin_top = 194.0
-margin_right = 138.0
-margin_bottom = 218.0
-text = "Depth as height"
 
 [node name="Button" type="Button" parent="Tabs/Config"]
 margin_top = 222.0
@@ -1500,6 +1511,14 @@ margin_right = 139.0
 margin_bottom = 96.0
 text = "Invert Roughness"
 
+[node name="Save" type="Button" parent="Tabs/Export"]
+show_behind_parent = true
+margin_left = 10.0
+margin_top = -118.0
+margin_right = 119.0
+margin_bottom = -98.0
+text = "Save Setup As JSON"
+
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
 show_behind_parent = true
@@ -1518,25 +1537,25 @@ expand = true
 
 [node name="ToggleUI" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 24.0
+margin_left = 26.0
 margin_top = 21.0
-margin_right = 133.0
+margin_right = 135.0
 margin_bottom = 41.0
 text = "Toggle UI"
 
 [node name="ToggleMat" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 24.0
+margin_left = 26.0
 margin_top = 52.0
-margin_right = 133.0
+margin_right = 135.0
 margin_bottom = 72.0
 text = "Toggle Material"
 
 [node name="ToggleAlbedo" type="Button" parent="."]
 show_behind_parent = true
-margin_left = 24.0
+margin_left = 26.0
 margin_top = 82.0
-margin_right = 133.0
+margin_right = 135.0
 margin_bottom = 102.0
 text = "Show Albedo"
 
