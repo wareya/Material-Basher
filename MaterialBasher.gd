@@ -135,11 +135,13 @@ func write_dict_as_json(data : Dictionary, default_fname : String):
     #file.close()
 
 func _ready():
-    # TODO: settings for diffuse/specular model etc
     # TODO: normal lighting removal
     # TODO: gradient removal
-    # TODO: depth vs height vs displacement setting
     # TODO: save/load parameters to json
+    
+    # DONE:
+    # TODO: settings for diffuse/specular model etc
+    # TODO: depth vs height vs displacement setting
     
     # first-time model setup
     set_uv_scale(Vector3(2, 1, 1))
@@ -171,6 +173,19 @@ func _ready():
         button.add_item("Roughness")
         button.add_item("AO")
         button.add_item("Depth")
+    
+    for button in [$Tabs/Export/GridContainer2/OptionButton, $Tabs/Export/GridContainer4/OptionButton]:
+        button.add_item("Nothing")
+        button.add_item("Depth")
+        button.add_item("AO")
+        button.add_item("Roughness")
+        button.add_item("Metallicity")
+    
+    $Tabs/Export/GridContainer3/OptionButton.add_item("Depth")
+    $Tabs/Export/GridContainer3/OptionButton.add_item("Inverted Depth")
+    $Tabs/Export/GridContainer3/OptionButton.add_item("Displacement")
+    $Tabs/Export/GridContainer3/OptionButton.add_item("Inverted Displacement")
+    
     $Tabs/Export/GridContainer/OptionButton.selected = 0
     $Tabs/Export/GridContainer/OptionButton2.selected = 1
     $Tabs/Export/GridContainer/OptionButton3.selected = 2
@@ -233,28 +248,62 @@ func set_diffuse_mode(which : int):
 
 var NativeDialog = preload("res://addons/native_dialogs/native_dialogs.gd")
 
+func apply_source_to_alpha(image : Image, source_type : int):
+    var size = image.get_size()
+    var other = pbr_pick_image(source_type)
+    image.lock()
+    other.lock()
+    for y in size.y:
+        for x in size.x:
+            var a = other.get_pixel(x, y).r
+            if other == roughness_image and $Tabs/Export/GridContainer/CheckBox.pressed:
+                a = 1.0 - a
+            if other == depth_image:
+                var setting = $Tabs/Export/GridContainer3/OptionButton.selected
+                if setting == 1:
+                    a = 1.0 - a
+                elif setting == 2:
+                    a = 0.5 - a*0.5
+                elif setting == 3:
+                    a = 0.5 + a*0.5
+            var c = image.get_pixel(x, y)
+            c.a = a
+            image.set_pixel(x, y, c)
+    other.unlock()
+    image.unlock()
+
 func save_albedo():
     var fname_parts = loaded_fname.split(".")
+    var extension = ".tga" if loaded_fname.ends_with(".tga") else ".png"
     if fname_parts.size() >= 2:
         #fname_parts[-2] = fname_parts[-2] + "_albedo"
-        fname_parts[-1] = "png"
+        extension.erase(0, 1)
+        fname_parts[-1] = extension
     else:
-        fname_parts[-1] += ".png"
+        fname_parts[-1] += extension
     var fname = fname_parts.join(".")
     
-    save_image(albedo_image_display, fname, "Albedo", "Albedo cannot be saved until an image has been loaded.")
+    var save_image : Image = albedo_image_display
+    var alpha_source = [-1, 3, 2, 1, 0][$Tabs/Export/GridContainer4/OptionButton.selected]
+    if save_image and alpha_source >= 0:
+        save_image = save_image.duplicate()
+        apply_source_to_alpha(save_image, alpha_source)
+    
+    save_image(save_image, fname, "Albedo", "Albedo cannot be saved until an image has been loaded.")
 
 func save_normal():
     var fname_parts = loaded_fname.split(".")
+    var extension = ".tga" if loaded_fname.ends_with(".tga") else ".png"
     if fname_parts.size() >= 2:
         fname_parts[-2] = fname_parts[-2] + "_n"
-        fname_parts[-1] = "png"
+        extension.erase(0, 1)
+        fname_parts[-1] = extension
     else:
-        fname_parts[-1] += ".png"
+        fname_parts[-1] += extension
     var fname = fname_parts.join(".")
     
     var save_image : Image = normal_image
-    if $Tabs/Export/CheckBox.pressed:
+    if $Tabs/Export/CheckBox.pressed: # DX-style normal
         save_image = normal_image.duplicate()
         var size = save_image.get_size()
         save_image.lock()
@@ -266,6 +315,14 @@ func save_normal():
                 g = 1.0-g
                 save_image.set_pixel(x, y, Color(r, g, b))
         save_image.unlock()
+    
+    var alpha_source = [-1, 3, 2, 1, 0][$Tabs/Export/GridContainer2/OptionButton.selected]
+    if save_image and alpha_source >= 0:
+        if save_image == normal_image:
+            save_image = save_image.duplicate()
+        print("alpoha...")
+        apply_source_to_alpha(save_image, alpha_source)
+    
     save_image(save_image, fname, "Normal", "Normal cannot be saved until an albedo has been loaded.")
 
 func pbr_pick_image(selection):
@@ -280,11 +337,13 @@ func pbr_pick_image(selection):
 
 func save_pbr():
     var fname_parts = loaded_fname.split(".")
+    var extension = ".tga" if loaded_fname.ends_with(".tga") else ".png"
     if fname_parts.size() >= 2:
         fname_parts[-2] = fname_parts[-2] + "_spec"
-        fname_parts[-1] = "png"
+        extension.erase(0, 1)
+        fname_parts[-1] = extension
     else:
-        fname_parts[-1] += ".png"
+        fname_parts[-1] += extension
     var fname = fname_parts.join(".")
     
     var size = albedo_image.get_size()
@@ -306,17 +365,20 @@ func save_pbr():
         blue.lock()
     for y in size.y:
         for x in size.x:
-            var r = red.get_pixel(x, y).r
-            var g = green.get_pixel(x, y).r
-            var b = blue.get_pixel(x, y).r
-            if $Tabs/Export/GridContainer/CheckBox.pressed:
-                if red == roughness_image:
-                    r = 1.0 - r
-                if green == roughness_image:
-                    g = 1.0 - g
-                if blue == roughness_image:
-                    b = 1.0 - b
-            image.set_pixel(x, y, Color(r, g, b))
+            var color = Color.white
+            for source in [red, green, blue]:
+                var c = source.get_pixel(x, y).r
+                if source == roughness_image and $Tabs/Export/GridContainer/CheckBox.pressed:
+                    c = 1.0 - c
+                
+                if source == red:
+                    color.r = c
+                elif source == green:
+                    color.g = c
+                elif source == blue:
+                    color.b = c
+            
+            image.set_pixel(x, y, color)
     save_image(image, fname, "PBR", "")
     
     image.unlock()
@@ -378,28 +440,31 @@ func save_image(image : Image, default_fname : String, name_caps : String, error
         $PopupDialog/VBoxContainer/Label.text = error_text
         $PopupDialog.show()
         return
-    
+        
     var fo : Control = get_focus_owner()
     if fo:
         fo.release_focus()
     
-    $NativeDialogSaveFile.filters = PoolStringArray(["*.png, *.tga; Supported Images"])
+    $NativeDialogSaveFile.filters = PoolStringArray(["*.png, *.tga ; Supported Images (.png, .tga)"])
     $NativeDialogSaveFile.initial_path = default_fname
     $NativeDialogSaveFile.title = "Save %s Image" % [name_caps]
-    $NativeDialogSaveFile.show()
     
+    $NativeDialogSaveFile.show()
     var fname = yield($NativeDialogSaveFile, "file_selected")
     if fname == "":
         return
     
     if !fname.ends_with(".tga") and !fname.ends_with(".png"):
-        fname += ".png"
+        if loaded_fname.ends_with(".tga"):
+            fname += ".tga"
+        else:
+            fname += ".png"
     
     if fname.ends_with(".tga"):
         save_tga(image, fname)
     elif fname.ends_with(".png"):
         image.save_png(fname)
-        
+    
 
 func reset_view():
     $"3D/CameraHolder".global_translation = Vector3()
@@ -755,7 +820,7 @@ func depth_slider_changed(_unused : float):
     depth.create_from_image(depth_image, base_flags | wrapping_flag)
     
     mat_3d.depth_enabled = true
-    mat_3d.depth_deep_parallax = true
+    mat_3d.depth_deep_parallax = $Tabs/Config/CheckBox2.pressed
     mat_3d.depth_texture = depth
     
     if !indirect_update:
@@ -1158,7 +1223,7 @@ func _process(delta : float):
     mat_3d.depth_scale = read_range($"Tabs/Config/HSlider3") * 0.05 * 4.0
     mat_3d.depth_min_layers = 16
     mat_3d.depth_max_layers = 32
-    mat_3d.depth_deep_parallax = true
+    mat_3d.depth_deep_parallax = $Tabs/Config/CheckBox2.pressed
     mat_3d.depth_flip_binormal = false
     mat_3d.depth_flip_tangent = false
     #mat_3d.depth_flip_binormal = $Tabs/Config/CheckButton.pressed
@@ -1252,6 +1317,8 @@ func start_picking_color(type : String, which : int):
     color_picking = type
     color_which = which
 
+var color_sliders = {}
+
 func add_colored_slider(color : Color, type : String):
     var box = HBoxContainer.new()
     var icon = ColorRect.new()
@@ -1283,6 +1350,8 @@ func add_colored_slider(color : Color, type : String):
         slider.connect("value_changed", self, "roughness_update")
         slider.add_to_group("RoughnessSliders")
         button.connect("pressed", self, "delete_color", [box, "roughness"])
+    
+    color_sliders[slider] = color
     
     box.add_child(icon)
     box.add_child(label)
@@ -1318,6 +1387,8 @@ func roughness_update(_unused):
     roughness_slider_changed(0.0)
 
 func delete_color(which, type):
+    if which in color_sliders:
+        color_sliders.erase(which)
     which.queue_free()
     if type == "metal":
         $"Tabs/Metal Map".remove_child(which)
