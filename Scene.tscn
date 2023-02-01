@@ -1,9 +1,10 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=27 format=2]
 
 [ext_resource path="res://MaterialBasher.gd" type="Script" id=1]
 [ext_resource path="res://addons/native_dialogs/bin/native_dialog_save_file.gdns" type="Script" id=2]
 [ext_resource path="res://resources/DefaultSky.tres" type="ProceduralSky" id=3]
 [ext_resource path="res://types/AllTabContainer.gd" type="Script" id=4]
+[ext_resource path="res://addons/native_dialogs/bin/native_dialog_open_file.gdns" type="Script" id=5]
 
 [sub_resource type="Gradient" id=1]
 interpolation_mode = 2
@@ -1456,42 +1457,48 @@ margin_bottom = 40.0
 size_flags_horizontal = 3
 
 [node name="GridContainer3" type="GridContainer" parent="Tabs/Export"]
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 20.0
 columns = 2
 
 [node name="Label" type="Label" parent="Tabs/Export/GridContainer3"]
 margin_top = 3.0
-margin_right = 84.0
+margin_right = 81.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 text = "Depth Mode"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Export/GridContainer3"]
-margin_left = 88.0
-margin_right = 172.0
+margin_left = 85.0
+margin_right = 166.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
 
+[node name="CheckBox2" type="CheckBox" parent="Tabs/Export"]
+margin_top = 24.0
+margin_right = 166.0
+margin_bottom = 48.0
+text = "Invert Roughness"
+
 [node name="Spacer2" type="TextureRect" parent="Tabs/Export"]
 modulate = Color( 1, 1, 1, 0.501961 )
-margin_top = 24.0
-margin_right = 172.0
-margin_bottom = 27.0
+margin_top = 52.0
+margin_right = 166.0
+margin_bottom = 55.0
 rect_min_size = Vector2( 0, 3 )
 texture = SubResource( 35 )
 expand = true
 
 [node name="Button" type="Button" parent="Tabs/Export"]
-margin_top = 31.0
-margin_right = 172.0
-margin_bottom = 51.0
+margin_top = 59.0
+margin_right = 166.0
+margin_bottom = 79.0
 text = "Save Albedo"
 
 [node name="GridContainer4" type="GridContainer" parent="Tabs/Export"]
-margin_top = 55.0
-margin_right = 172.0
-margin_bottom = 75.0
+margin_top = 83.0
+margin_right = 166.0
+margin_bottom = 103.0
 columns = 2
 
 [node name="Label" type="Label" parent="Tabs/Export/GridContainer4"]
@@ -1503,29 +1510,29 @@ text = "Alpha Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Export/GridContainer4"]
 margin_left = 95.0
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
 
 [node name="Spacer" type="TextureRect" parent="Tabs/Export"]
 modulate = Color( 1, 1, 1, 0.501961 )
-margin_top = 79.0
-margin_right = 172.0
-margin_bottom = 82.0
+margin_top = 107.0
+margin_right = 166.0
+margin_bottom = 110.0
 rect_min_size = Vector2( 0, 3 )
 texture = SubResource( 35 )
 expand = true
 
 [node name="Button2" type="Button" parent="Tabs/Export"]
-margin_top = 86.0
-margin_right = 172.0
-margin_bottom = 106.0
+margin_top = 114.0
+margin_right = 166.0
+margin_bottom = 134.0
 text = "Save Normal Map"
 
 [node name="GridContainer2" type="GridContainer" parent="Tabs/Export"]
-margin_top = 110.0
-margin_right = 172.0
-margin_bottom = 130.0
+margin_top = 138.0
+margin_right = 166.0
+margin_bottom = 158.0
 columns = 2
 
 [node name="Label" type="Label" parent="Tabs/Export/GridContainer2"]
@@ -1537,88 +1544,82 @@ text = "Alpha Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Export/GridContainer2"]
 margin_left = 95.0
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
 
 [node name="CheckBox" type="CheckBox" parent="Tabs/Export"]
-margin_top = 134.0
-margin_right = 172.0
-margin_bottom = 158.0
+margin_top = 162.0
+margin_right = 166.0
+margin_bottom = 186.0
 text = "Save DX-Style Normal"
 
 [node name="Spacer3" type="TextureRect" parent="Tabs/Export"]
 modulate = Color( 1, 1, 1, 0.501961 )
-margin_top = 162.0
-margin_right = 172.0
-margin_bottom = 165.0
+margin_top = 190.0
+margin_right = 166.0
+margin_bottom = 193.0
 rect_min_size = Vector2( 0, 3 )
 texture = SubResource( 35 )
 expand = true
 
 [node name="Button3" type="Button" parent="Tabs/Export"]
-margin_top = 169.0
-margin_right = 172.0
-margin_bottom = 189.0
+margin_top = 197.0
+margin_right = 166.0
+margin_bottom = 217.0
 text = "Save PBR Map"
 
 [node name="GridContainer" type="GridContainer" parent="Tabs/Export"]
-margin_top = 193.0
-margin_right = 172.0
+margin_top = 221.0
+margin_right = 166.0
 margin_bottom = 289.0
 columns = 2
 
 [node name="Label" type="Label" parent="Tabs/Export/GridContainer"]
 margin_top = 3.0
-margin_right = 139.0
+margin_right = 94.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 text = "Red Channel"
 
 [node name="OptionButton" type="OptionButton" parent="Tabs/Export/GridContainer"]
-margin_left = 143.0
-margin_right = 172.0
+margin_left = 98.0
+margin_right = 166.0
 margin_bottom = 20.0
 size_flags_horizontal = 3
 
 [node name="Label2" type="Label" parent="Tabs/Export/GridContainer"]
 margin_top = 27.0
-margin_right = 139.0
+margin_right = 94.0
 margin_bottom = 41.0
 size_flags_horizontal = 3
 text = "Green Channel"
 
 [node name="OptionButton2" type="OptionButton" parent="Tabs/Export/GridContainer"]
-margin_left = 143.0
+margin_left = 98.0
 margin_top = 24.0
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 44.0
 size_flags_horizontal = 3
 
 [node name="Label3" type="Label" parent="Tabs/Export/GridContainer"]
 margin_top = 51.0
-margin_right = 139.0
+margin_right = 94.0
 margin_bottom = 65.0
 size_flags_horizontal = 3
 text = "Blue Channel"
 
 [node name="OptionButton3" type="OptionButton" parent="Tabs/Export/GridContainer"]
-margin_left = 143.0
+margin_left = 98.0
 margin_top = 48.0
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 68.0
 size_flags_horizontal = 3
-
-[node name="CheckBox" type="CheckBox" parent="Tabs/Export/GridContainer"]
-margin_top = 72.0
-margin_right = 139.0
-margin_bottom = 96.0
-text = "Invert Roughness"
 
 [node name="Spacer4" type="TextureRect" parent="Tabs/Export"]
 modulate = Color( 1, 1, 1, 0.501961 )
 margin_top = 293.0
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 296.0
 rect_min_size = Vector2( 0, 3 )
 texture = SubResource( 35 )
@@ -1627,9 +1628,16 @@ expand = true
 [node name="Save" type="Button" parent="Tabs/Export"]
 show_behind_parent = true
 margin_top = 300.0
-margin_right = 172.0
+margin_right = 166.0
 margin_bottom = 320.0
 text = "Save Setup As JSON"
+
+[node name="Load" type="Button" parent="Tabs/Export"]
+show_behind_parent = true
+margin_top = 324.0
+margin_right = 166.0
+margin_bottom = 344.0
+text = "Load Setup From JSON"
 
 [node name="Panel" type="PanelContainer" parent="."]
 visible = false
@@ -1888,6 +1896,8 @@ mesh = SubResource( 17 )
 [node name="WorldEnvironment" type="WorldEnvironment" parent="HelperOctaveDepth"]
 environment = SubResource( 31 )
 
+[node name="NativeDialogOpenFile" type="Node" parent="."]
+script = ExtResource( 5 )
+
 [node name="NativeDialogSaveFile" type="Node" parent="."]
 script = ExtResource( 2 )
-title = "a"

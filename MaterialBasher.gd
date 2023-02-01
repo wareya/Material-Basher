@@ -47,7 +47,6 @@ func config_reset_to_default():
     $Tabs/Config/HSlider3.value = 25
     #$Tabs/Config/CheckButton.pressed = false
 
-
 onready var _option_connections = {
     $"Tabs/Ambience"   : "sky_option_picked",
     $"Tabs/Normal Map" : "normal_option_picked",
@@ -89,31 +88,103 @@ func visit_controls_setup(node : Node):
         visit_controls_setup(child)
 
 func visit_controls_save(node : Node, save_data : Dictionary):
-    var path = node.get_path()
-    if node is OptionButton:
-        save_data[path] = node.selected
-    elif node is Button and node.get_class() == "Button":
-        save_data[path] = node.pressed
-    elif node is Range:
-        save_data[path] = node.value
-    elif node is CheckBox:
-        save_data[path] = node.pressed
+    if node.owner == null:
+        return
+    if $Tabs.is_a_parent_of(node):
+        var path : String = node.get_path()
+        path = path.split("Tabs/", true, 1)[1]
+        if node is OptionButton:
+            save_data[path] = node.selected
+        elif node is Button and node.get_class() == "Button":
+            save_data[path] = node.pressed
+        elif node is Range:
+            save_data[path] = node.value
+        elif node is CheckBox:
+            save_data[path] = node.pressed
+        elif node is ColorPicker:
+            var c = (node as ColorPicker).color
+            save_data[path] = [c.r, c.g, c.b, c.a]
     
     for child in node.get_children():
         visit_controls_save(child, save_data)
+    return save_data
+
+func apply_controls_save(save_data : Dictionary):
+    remove_all_colored_sliders()
+    for key in save_data:
+        var data = save_data[key]
+        
+        if key.begins_with("MAPPING_METAL"):
+            var color  = Color(data[0], data[1], data[2])
+            var value = data[3]
+            add_colored_slider(color, "metal", value)
+            continue
+        if key.begins_with("MAPPING_ROUGHNESS"):
+            var color  = Color(data[0], data[1], data[2])
+            var value = data[3]
+            add_colored_slider(color, "roughness", value)
+            continue
+        
+        key = "/root/Scene/Tabs/" + key
+        var node = get_node(key)
+        if !node:
+            continue
+        
+        if node.owner == null:
+            continue
+        
+        var path = node.get_path()
+        if node is OptionButton:
+            node.selected = data
+        elif node is Button and node.get_class() == "Button":
+            node.pressed = data
+        elif node is Range:
+            node.value = data
+        elif node is CheckBox:
+            node.pressed = data
+        elif node is ColorPicker:
+            var c = Color(data[0], data[1], data[2], data[3])
+            node.color = c
+            (node as ColorPicker).emit_signal("color_changed", c)
+    
+#var  = {}
+#var roughness_sliders = {}
 
 func save_controls():
-    var save = {}
-    visit_controls_save($Tabs, save)
+    var save = visit_controls_save($Tabs, {})
+    
+    var i = 1
+    for box in metal_sliders.keys():
+        var color  = metal_sliders[box][0]
+        var slider = metal_sliders[box][1]
+        var key = "MAPPING_METAL_%d" % [i]
+        save[key] = [color.r, color.g, color.b, slider.value]
+        i += 1
+    
+    i = 1
+    for box in roughness_sliders.keys():
+        var color  = roughness_sliders[box][0]
+        var slider = roughness_sliders[box][1]
+        var key = "MAPPING_ROUGHNESS_%d" % [i]
+        save[key] = [color.r, color.g, color.b, slider.value]
+        i += 1
     
     write_dict_as_json(save, "material_basher_settings.json")
-    
+
+func load_controls():
+    var promise : GDScriptFunctionState = load_dict_from_json("material_basher_settings.json")
+    var save = yield(promise, "completed")
+    if save is Dictionary:
+        apply_controls_save(save)
+
 func write_dict_as_json(data : Dictionary, default_fname : String):
     var fo : Control = get_focus_owner()
     if fo:
         fo.release_focus()
     
-    $NativeDialogSaveFile.filters = PoolStringArray(["*.json; JSON File"])
+    var json = JSON.print(data, " ")
+    
+    $NativeDialogSaveFile.filters = PoolStringArray(["*.json ; JSON File"])
     $NativeDialogSaveFile.initial_path = default_fname
     $NativeDialogSaveFile.title = "Save Settings"
     $NativeDialogSaveFile.show()
@@ -125,19 +196,45 @@ func write_dict_as_json(data : Dictionary, default_fname : String):
     if !fname.ends_with(".json"):
         fname += ".json"
     
-    var json = JSON.print(data)
+    var file = File.new()
+    file.open(fname, File.WRITE)
+    file.store_string(json)
+    file.close()
+
+func load_dict_from_json(default_fname : String):
+    var fo : Control = get_focus_owner()
+    if fo:
+        fo.release_focus()
     
-    print(json)
+    $NativeDialogOpenFile.filters = PoolStringArray(["*.json ; JSON File"])
+    $NativeDialogOpenFile.initial_path = default_fname
+    $NativeDialogOpenFile.title = "Load Settings"
+    $NativeDialogOpenFile.show()
     
-    #var file = File.new()
-    #file.open(fname, File.WRITE)
-    #file.store_string(json)
-    #file.close()
+    var fname = yield($NativeDialogOpenFile, "files_selected")
+    if fname.size() == 0 or fname[0] == "":
+        return
+    fname = fname[0]
+    
+    if !fname.ends_with(".json"):
+        fname += ".json"
+    
+    var file = File.new()
+    file.open(fname, File.READ)
+    var json = file.get_as_text()
+    file.close()
+    
+    var parse = JSON.parse(json)
+    if parse.error == OK and parse.result is Dictionary:
+        return parse.result
+    else:
+        return null
 
 func _ready():
     # TODO: normal lighting removal
     # TODO: gradient removal
     # TODO: save/load parameters to json
+    # TODO: load specific property images, not just albedo
     
     # DONE:
     # TODO: settings for diffuse/specular model etc
@@ -242,6 +339,9 @@ func _ready():
     $Tabs/Config/Button2.connect("pressed", self, "config_reset_to_default")
     
     $Tabs/Config/OptionButton.connect("item_selected", self, "set_diffuse_mode")
+    
+    $Tabs/Export/Save.connect("pressed", self, "save_controls")
+    $Tabs/Export/Load.connect("pressed", self, "load_controls")
 
 func set_diffuse_mode(which : int):
     mat_3d.params_diffuse_mode = which
@@ -256,16 +356,9 @@ func apply_source_to_alpha(image : Image, source_type : int):
     for y in size.y:
         for x in size.x:
             var a = other.get_pixel(x, y).r
-            if other == roughness_image and $Tabs/Export/GridContainer/CheckBox.pressed:
-                a = 1.0 - a
-            if other == depth_image:
-                var setting = $Tabs/Export/GridContainer3/OptionButton.selected
-                if setting == 1:
-                    a = 1.0 - a
-                elif setting == 2:
-                    a = 0.5 - a*0.5
-                elif setting == 3:
-                    a = 0.5 + a*0.5
+            
+            a = process_possibly_altered_component(a, other)
+            
             var c = image.get_pixel(x, y)
             c.a = a
             image.set_pixel(x, y, c)
@@ -320,7 +413,7 @@ func save_normal():
     if save_image and alpha_source >= 0:
         if save_image == normal_image:
             save_image = save_image.duplicate()
-        print("alpoha...")
+        #print("alpha...")
         apply_source_to_alpha(save_image, alpha_source)
     
     save_image(save_image, fname, "Normal", "Normal cannot be saved until an albedo has been loaded.")
@@ -334,6 +427,19 @@ func pbr_pick_image(selection):
         return ao_image
     elif selection == 3:
         return depth_image
+
+func process_possibly_altered_component(c : float, source : Image):
+    if source == roughness_image and $Tabs/Export/GridContainer3/CheckBox.pressed:
+        c = 1.0 - c
+    if source == depth_image:
+        var setting = $Tabs/Export/GridContainer3/OptionButton.selected
+        if setting == 1:
+            c = 1.0 - c
+        elif setting == 2:
+            c = 0.5 - c*0.5
+        elif setting == 3:
+            c = 0.5 + c*0.5
+    return c
 
 func save_pbr():
     var fname_parts = loaded_fname.split(".")
@@ -368,9 +474,7 @@ func save_pbr():
             var color = Color.white
             for source in [red, green, blue]:
                 var c = source.get_pixel(x, y).r
-                if source == roughness_image and $Tabs/Export/GridContainer/CheckBox.pressed:
-                    c = 1.0 - c
-                
+                c = process_possibly_altered_component(c, source)
                 if source == red:
                     color.r = c
                 elif source == green:
@@ -1317,9 +1421,16 @@ func start_picking_color(type : String, which : int):
     color_picking = type
     color_which = which
 
-var color_sliders = {}
+var metal_sliders = {}
+var roughness_sliders = {}
 
-func add_colored_slider(color : Color, type : String):
+func remove_all_colored_sliders():
+    for slider in metal_sliders.keys():
+        delete_color(slider)
+    for slider in roughness_sliders.keys():
+        delete_color(slider)
+
+func add_colored_slider(color : Color, type : String, value):
     var box = HBoxContainer.new()
     var icon = ColorRect.new()
     var label = Label.new()
@@ -1345,13 +1456,13 @@ func add_colored_slider(color : Color, type : String):
     if type == "metal":
         slider.connect("value_changed", self, "metallicity_update")
         slider.add_to_group("MetalSliders")
-        button.connect("pressed", self, "delete_color", [box, "metal"])
+        button.connect("pressed", self, "delete_color", [box])
+        metal_sliders[box] = [color, slider]
     elif type == "roughness":
         slider.connect("value_changed", self, "roughness_update")
         slider.add_to_group("RoughnessSliders")
-        button.connect("pressed", self, "delete_color", [box, "roughness"])
-    
-    color_sliders[slider] = color
+        button.connect("pressed", self, "delete_color", [box])
+        roughness_sliders[box] = [color, slider]
     
     box.add_child(icon)
     box.add_child(label)
@@ -1360,12 +1471,11 @@ func add_colored_slider(color : Color, type : String):
     
     if type == "metal":
         $"Tabs/Metal Map".add_child(box)
-        metal_slider_changed(0.0)
+        metal_slider_changed(value)
     elif type == "roughness":
         $"Tabs/Roughness Map".add_child(box)
-        slider.value = 1.0
-        roughness_slider_changed(1.0)
-    pass
+        slider.value = value
+        roughness_slider_changed(value)
 
 func end_picking_color():
     var vp = get_viewport()
@@ -1376,7 +1486,7 @@ func end_picking_color():
     var color = screen.get_pixelv(mouse_pos)
     screen.unlock()
     
-    add_colored_slider(color, color_picking)
+    add_colored_slider(color, color_picking, 0.0 if color_picking == "metal" else 1.0)
     
     cancel_picking_color()
 
@@ -1386,9 +1496,17 @@ func metallicity_update(_unused):
 func roughness_update(_unused):
     roughness_slider_changed(0.0)
 
-func delete_color(which, type):
-    if which in color_sliders:
-        color_sliders.erase(which)
+func delete_color(which):
+    var type = ""
+    if which in metal_sliders:
+        type = "metal"
+        metal_sliders.erase(which)
+    elif which in roughness_sliders:
+        type = "roughness"
+        roughness_sliders.erase(which)
+    if type == "":
+        return
+    
     which.queue_free()
     if type == "metal":
         $"Tabs/Metal Map".remove_child(which)
