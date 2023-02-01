@@ -146,9 +146,6 @@ func apply_controls_save(save_data : Dictionary):
             var c = Color(data[0], data[1], data[2], data[3])
             node.color = c
             (node as ColorPicker).emit_signal("color_changed", c)
-    
-#var  = {}
-#var roughness_sliders = {}
 
 func save_controls():
     var save = visit_controls_save($Tabs, {})
